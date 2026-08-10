@@ -5,7 +5,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
-public class RelictDimension {
+public class RelictDimensionGenerator {
 
     public static void bootstrapDimensionType(BootstrapContext<DimensionType> context) {
     }

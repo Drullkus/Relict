@@ -24,15 +24,15 @@ import java.util.concurrent.CompletableFuture;
 public class RelictDatagen {
 
     private static final RegistrySetBuilder REGISTRY_SET_BUILDER = new RegistrySetBuilder()
-            .add(Registries.BIOME, RelictBiomes::bootstrapBiomes)
-            .add(Registries.CONFIGURED_FEATURE, RelictFeatures::bootstrapConfiguredFeatures)
-            .add(Registries.DENSITY_FUNCTION, RelictDensityFunctions::bootstrapDensityFunctions)
-            .add(Registries.DIMENSION_TYPE, RelictDimension::bootstrapDimensionType)
-            .add(Registries.LEVEL_STEM, RelictDimension::bootstrapLevelStem)
-            .add(Registries.NOISE_SETTINGS, RelictDimension::bootstrapNoiseSettings)
-            .add(Registries.PLACED_FEATURE, RelictFeatures::bootstrapPlacedFeatures)
-            .add(Registries.STRUCTURE, RelictStructures::bootstrapStructures)
-            .add(Registries.STRUCTURE_SET, RelictStructures::bootstrapStructureSet)
+            .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
+            .add(Registries.CONFIGURED_FEATURE, RelictFeatureGenerator::bootstrapConfiguredFeatures)
+            .add(Registries.DENSITY_FUNCTION, RelictDensityFunctionGenerator::bootstrapDensityFunctions)
+            .add(Registries.DIMENSION_TYPE, RelictDimensionGenerator::bootstrapDimensionType)
+            .add(Registries.LEVEL_STEM, RelictDimensionGenerator::bootstrapLevelStem)
+            .add(Registries.NOISE_SETTINGS, RelictDimensionGenerator::bootstrapNoiseSettings)
+            .add(Registries.PLACED_FEATURE, RelictFeatureGenerator::bootstrapPlacedFeatures)
+            .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
+            .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet)
             ;
 
     @SubscribeEvent

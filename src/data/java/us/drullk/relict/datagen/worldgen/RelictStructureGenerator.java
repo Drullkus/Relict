@@ -4,7 +4,7 @@ import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 
-public class RelictStructures {
+public class RelictStructureGenerator {
 
     public static void bootstrapStructures(BootstrapContext<Structure> context) {
     }

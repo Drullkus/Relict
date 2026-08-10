@@ -1,5 +1,6 @@
 package us.drullk.relict;
 
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -23,6 +24,10 @@ public class Relict {
 
         // FIXME uncomment once config entries are added
         //  modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+    }
+
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 
 }
