@@ -1,4 +1,4 @@
-package us.drullk.fossilplanet.config;
+package us.drullk.relict.config;
 
 import java.util.List;
 

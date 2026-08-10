@@ -1,0 +1,13 @@
+{
+  "itemGroup.relict": "Example Mod Tab",
+  "block.relict.example_block": "Example Block",
+  "item.relict.example_item": "Example Item",
+
+  "relict.configuration.title": "Relict Configs",
+  "relict.configuration.section.relict.common.toml": "Relict Configs",
+  "relict.configuration.section.relict.common.toml.title": "Relict Mod Configs",
+  "relict.configuration.items": "Item List",
+  "relict.configuration.logDirtBlock": "Log Dirt Block",
+  "relict.configuration.magicNumberIntroduction": "Magic Number Text",
+  "relict.configuration.magicNumber": "Magic Number"
+}

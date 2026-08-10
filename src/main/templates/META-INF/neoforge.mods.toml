@@ -40,7 +40,7 @@ authors="Drullkus"
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Example mod description.
+Explore past epochs of Mars and uncover artifacts that remade the planet.
 '''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
