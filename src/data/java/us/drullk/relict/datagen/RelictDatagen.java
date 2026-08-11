@@ -23,25 +23,26 @@ import java.util.concurrent.CompletableFuture;
 @EventBusSubscriber(modid = Relict.MODID)
 public class RelictDatagen {
 
-    private static final RegistrySetBuilder REGISTRY_SET_BUILDER = new RegistrySetBuilder()
-            .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
-            .add(Registries.CONFIGURED_FEATURE, RelictFeatureGenerator::bootstrapConfiguredFeatures)
-            .add(Registries.DENSITY_FUNCTION, RelictDensityFunctionGenerator::bootstrapDensityFunctions)
-            .add(Registries.DIMENSION_TYPE, RelictDimensionGenerator::bootstrapDimensionType)
-            .add(Registries.LEVEL_STEM, RelictDimensionGenerator::bootstrapLevelStem)
-            .add(Registries.NOISE_SETTINGS, RelictDimensionGenerator::bootstrapNoiseSettings)
-            .add(Registries.PLACED_FEATURE, RelictFeatureGenerator::bootstrapPlacedFeatures)
-            .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
-            .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet)
-            ;
-
     @SubscribeEvent
     public static void generateData(GatherDataEvent.Server event) {
         DataGenerator generator = event.getGenerator();
         PackOutput output = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
-        DatapackBuiltinEntriesProvider builtinDatapack = event.addProvider(new DatapackBuiltinEntriesProvider(output, lookupProvider, REGISTRY_SET_BUILDER, Set.of(Relict.MODID)));
+        RelictDimensionGenerator dimensionGenerator = new RelictDimensionGenerator(-128, 384, -1);
+
+        RegistrySetBuilder datapackRegistryEntries = new RegistrySetBuilder()
+                .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
+                .add(Registries.CONFIGURED_FEATURE, RelictFeatureGenerator::bootstrapConfiguredFeatures)
+                .add(Registries.DENSITY_FUNCTION, RelictDensityFunctionGenerator::bootstrapDensityFunctions)
+                .add(Registries.DIMENSION_TYPE, dimensionGenerator::bootstrapDimensionType)
+                .add(Registries.LEVEL_STEM, dimensionGenerator::bootstrapLevelStem)
+                .add(Registries.NOISE_SETTINGS, dimensionGenerator::bootstrapNoiseSettings)
+                .add(Registries.PLACED_FEATURE, RelictFeatureGenerator::bootstrapPlacedFeatures)
+                .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
+                .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet);
+
+        DatapackBuiltinEntriesProvider builtinDatapack = event.addProvider(new DatapackBuiltinEntriesProvider(output, lookupProvider, datapackRegistryEntries, Set.of(Relict.MODID)));
         CompletableFuture<HolderLookup.Provider> builtinDatapackProvider = builtinDatapack.getRegistryProvider();
 
         event.addProvider(new RelictBiomeTags(output, builtinDatapackProvider));
