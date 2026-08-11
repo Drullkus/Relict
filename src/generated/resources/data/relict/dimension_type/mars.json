@@ -15,7 +15,7 @@
     "minecraft:visual/sky_color": "#d8a07a"
   },
   "coordinate_scale": 1.0,
-  "default_clock": "minecraft:overworld",
+  "default_clock": "relict:mars",
   "has_ceiling": false,
   "has_ender_dragon_fight": false,
   "has_skylight": true,
@@ -29,6 +29,5 @@
     "max_inclusive": 7,
     "min_inclusive": 0
   },
-  "skybox": "none",
-  "timelines": "#minecraft:in_overworld"
+  "timelines": "#relict:in_mars"
 }

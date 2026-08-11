@@ -15,6 +15,7 @@ import us.drullk.relict.datagen.tags.RelictBiomeTags;
 import us.drullk.relict.datagen.tags.RelictBlockTags;
 import us.drullk.relict.datagen.tags.RelictDamageTypeTags;
 import us.drullk.relict.datagen.tags.RelictItemTags;
+import us.drullk.relict.datagen.tags.RelictTimelineTags;
 import us.drullk.relict.datagen.worldgen.*;
 
 import java.util.Set;
@@ -30,6 +31,7 @@ public class RelictDatagen {
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
         RelictDimensionGenerator dimensionGenerator = new RelictDimensionGenerator(-128, 384, -1);
+        RelictTimelineGenerator timelineGenerator = new RelictTimelineGenerator(22);
 
         RegistrySetBuilder datapackRegistryEntries = new RegistrySetBuilder()
                 .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
@@ -40,7 +42,9 @@ public class RelictDatagen {
                 .add(Registries.NOISE_SETTINGS, dimensionGenerator::bootstrapNoiseSettings)
                 .add(Registries.PLACED_FEATURE, RelictFeatureGenerator::bootstrapPlacedFeatures)
                 .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
-                .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet);
+                .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet)
+                .add(Registries.TIMELINE, timelineGenerator::bootstrapTimelines)
+                .add(Registries.WORLD_CLOCK, timelineGenerator::bootstrapWorldClocks);
 
         DatapackBuiltinEntriesProvider builtinDatapack = event.addProvider(new DatapackBuiltinEntriesProvider(output, lookupProvider, datapackRegistryEntries, Set.of(Relict.MODID)));
         CompletableFuture<HolderLookup.Provider> builtinDatapackProvider = builtinDatapack.getRegistryProvider();
@@ -49,6 +53,7 @@ public class RelictDatagen {
         event.addProvider(new RelictBlockTags(output, builtinDatapackProvider));
         event.addProvider(new RelictDamageTypeTags(output, builtinDatapackProvider));
         event.addProvider(new RelictItemTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictTimelineTags(output, builtinDatapackProvider));
 
         event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
         event.addProvider(new RelictLootTables(output, builtinDatapackProvider));

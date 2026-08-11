@@ -5,14 +5,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TimelineTags;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.clock.WorldClock;
-import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -72,8 +70,8 @@ public class RelictDimensionGenerator {
                 DimensionType.Skybox.OVERWORLD,
                 CardinalLighting.Type.DEFAULT,
                 attributes,
-                timelines.getOrThrow(TimelineTags.IN_OVERWORLD),
-                Optional.of(clocks.getOrThrow(WorldClocks.OVERWORLD))
+                timelines.getOrThrow(RelictDimension.MARS_TIMELINES),
+                Optional.of(clocks.getOrThrow(RelictDimension.MARS_CLOCK))
         ));
     }
 
