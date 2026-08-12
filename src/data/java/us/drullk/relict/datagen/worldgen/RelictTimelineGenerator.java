@@ -4,6 +4,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.util.EasingType;
+import net.minecraft.util.Keyframe;
+import net.minecraft.util.KeyframeTrack;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.attribute.modifier.BooleanModifier;
 import net.minecraft.world.attribute.modifier.ColorModifier;
@@ -13,6 +15,8 @@ import net.minecraft.world.clock.WorldClock;
 import net.minecraft.world.timeline.Timeline;
 import net.minecraft.world.timeline.Timelines;
 import us.drullk.relict.init.worldgen.RelictDimension;
+
+import java.util.List;
 
 
 public class RelictTimelineGenerator {
@@ -34,15 +38,21 @@ public class RelictTimelineGenerator {
     private static final int NOON = 6000;
 
     private final int solTicks;
+    private final OrbitTransitSolver orbitTransitSolver;
 
     public RelictTimelineGenerator(int cycleMinutes) {
         this.solTicks = cycleMinutes * 1200;
+        this.orbitTransitSolver = new OrbitTransitSolver(this.solTicks);
     }
 
     public void bootstrapTimelines(BootstrapContext<Timeline> context) {
         Holder<WorldClock> marsClock = context.lookup(Registries.WORLD_CLOCK).getOrThrow(RelictDimension.MARS_CLOCK);
         EasingType skyAngleEase = EasingType.symmetricCubicBezier(0.362F, 0.241F);
-        float nightSkyLight = Timelines.NIGHT_SKY_LIGHT_LEVEL / Timelines.DAY_SKY_LIGHT_LEVEL;
+        final float nightSkyLight = Timelines.NIGHT_SKY_LIGHT_LEVEL / Timelines.DAY_SKY_LIGHT_LEVEL;
+
+        KeyframeTrack<Float> sunAngle = new KeyframeTrack<>(List.of(
+                new Keyframe<>(this.solTick(NOON), 360.0F),
+                new Keyframe<>(this.solTick(NOON), 0.0F)), skyAngleEase);
 
         context.register(RelictDimension.MARS_SOL, Timeline.builder(marsClock)
                 .setPeriodTicks(this.solTicks)
@@ -53,9 +63,7 @@ public class RelictTimelineGenerator {
                 .addTimeMarker(ClockTimeMarkers.MIDNIGHT, this.solTick(18000), true)
                 .addTimeMarker(ClockTimeMarkers.WAKE_UP_FROM_SLEEP, 0)
 
-                .addTrack(EnvironmentAttributes.SUN_ANGLE, track -> track.setEasing(skyAngleEase)
-                        .addKeyframe(this.solTick(NOON), 360.0F)
-                        .addKeyframe(this.solTick(NOON), 0.0F))
+                .addTrack(EnvironmentAttributes.SUN_ANGLE, track -> OrbitTransitSolver.replay(sunAngle, track))
                 .addTrack(EnvironmentAttributes.MOON_ANGLE, track -> track.setEasing(skyAngleEase)
                         .addKeyframe(this.solTick(NOON), 540.0F)
                         .addKeyframe(this.solTick(NOON), 180.0F))
@@ -102,6 +110,8 @@ public class RelictTimelineGenerator {
                         .addKeyframe(this.solTick(MONSTER_NIGHT_START), false)
                         .addKeyframe(this.solTick(MONSTER_NIGHT_END), true))
                 .build());
+
+        this.orbitTransitSolver.solveTransits(context, marsClock, sunAngle);
     }
 
     public void bootstrapWorldClocks(BootstrapContext<WorldClock> context) {

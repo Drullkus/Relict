@@ -1,6 +1,9 @@
 {
   "values": [
     "#minecraft:universal",
-    "relict:mars_sol"
+    "relict:mars_sol",
+    "relict:phobos_orbit",
+    "relict:deimos_orbit",
+    "relict:phobos_transit"
   ]
 }

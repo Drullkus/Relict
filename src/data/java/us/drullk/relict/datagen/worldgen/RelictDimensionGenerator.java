@@ -24,6 +24,8 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouter;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.timeline.Timeline;
+import net.neoforged.neoforge.common.world.NeoForgeEnvironmentAttributes;
+import us.drullk.relict.Relict;
 import us.drullk.relict.init.worldgen.RelictDimension;
 
 import java.util.List;
@@ -50,9 +52,11 @@ public class RelictDimensionGenerator {
                 .set(EnvironmentAttributes.FOG_COLOR, ARGB.opaque(0xC1602F))
                 .set(EnvironmentAttributes.SKY_COLOR, ARGB.opaque(0xD8A07A))
                 .set(EnvironmentAttributes.CLOUD_COLOR, ARGB.white(0.35F))
-                .set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ARGB.opaque(0xFFD6BE))
+                .set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ARGB.opaque(0x0D0B0A))
+                .set(EnvironmentAttributes.SKY_LIGHT_COLOR, ARGB.opaque(0xFFD6BE))
                 .set(EnvironmentAttributes.BED_RULE, BedRule.CAN_SLEEP_WHEN_DARK)
                 .set(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, false)
+                .set(NeoForgeEnvironmentAttributes.CUSTOM_SKYBOX, Relict.id("mars"))
                 .build();
 
         context.register(RelictDimension.MARS_TYPE, new DimensionType(

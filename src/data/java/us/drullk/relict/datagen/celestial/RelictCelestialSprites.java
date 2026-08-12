@@ -71,10 +71,12 @@ public class RelictCelestialSprites implements DataProvider {
             report(moon, model, config, result);
 
             Path assets = this.output.getOutputFolder(PackOutput.Target.RESOURCE_PACK).resolve(Relict.MODID);
+            Path sprites = assets.resolve(SPRITE_DIR).resolve(config.spriteDir());
             for (int frame = 0; frame < result.frames().size(); frame++) {
-                Path path = assets.resolve(SPRITE_DIR).resolve(config.spriteDir()).resolve("phase_%02d.png".formatted(frame));
-                writes.add(writePng(cache, path, result.frames().get(frame)));
+                writes.add(writePng(cache, sprites.resolve("phase_%02d.png".formatted(frame)), result.frames().get(frame)));
             }
+
+            writes.add(writePng(cache, sprites.resolve("occlusion.png"), result.occlusion()));
 
             writePreviewSheet(moon, result.frames());
         }

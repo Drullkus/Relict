@@ -33,6 +33,8 @@ public final class MoonRasterizer {
 
     /**
      * @param frames         one sprite per phase, full first
+     * @param occlusion      coverage mask sharing the frames' canvas and placement, opaque over the body
+     *                       and clear everywhere else
      * @param levels         the luminance window used, whether configured or measured
      * @param levelsMeasured whether {@code levels} was measured rather than read from the config
      * @param peakValue      brightest lit value produced, gain included; 1 means the gradient's top stop is
@@ -42,6 +44,7 @@ public final class MoonRasterizer {
      */
     public record Result(
             List<BufferedImage> frames,
+            BufferedImage occlusion,
             MoonSpriteConfig.Levels levels,
             boolean levelsMeasured,
             float peakValue,
@@ -73,7 +76,35 @@ public final class MoonRasterizer {
             frames.add(compose(surface, albedo, halo, drawn, silhouette, config, frame, frameCount, peak));
         }
 
-        return new Result(frames, levels, measured, peak[0], findDuplicates(frames));
+        return new Result(frames, composeOcclusion(drawn, config), levels, measured, peak[0], findDuplicates(frames));
+    }
+
+    /**
+     * The moon's outline as an alpha mask, drawn ahead of the lit sprite to blot out whatever is behind it.
+     * <p>
+     * Celestial bodies blend additively, which can only ever brighten: a moon drawn that way lets stars
+     * shine through it and washes out against a daylit sky, and could never eclipse anything. Blotting
+     * first with this and then adding the lit sprite on top fixes all three, and costs one sprite per moon
+     * rather than one per phase because the moons are tidally locked and their outline never changes.
+     * <p>
+     * Only alpha is read — the renderer multiplies the colour to black — but the mask is written white so
+     * that opening the file shows the shape rather than a black square.
+     */
+    private static BufferedImage composeOcclusion(boolean[] drawn, MoonSpriteConfig config) {
+        int body = config.body();
+        int canvas = config.canvas();
+        int offset = (canvas - body) / 2;
+        BufferedImage image = new BufferedImage(canvas, canvas, BufferedImage.TYPE_INT_ARGB);
+
+        for (int pixelY = 0; pixelY < body; pixelY++) {
+            for (int pixelX = 0; pixelX < body; pixelX++) {
+                if (drawn[pixelY * body + pixelX]) {
+                    image.setRGB(offset + pixelX, offset + pixelY, 0xFFFFFFFF);
+                }
+            }
+        }
+
+        return image;
     }
 
     /**

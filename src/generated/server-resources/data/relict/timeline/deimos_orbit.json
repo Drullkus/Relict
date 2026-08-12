@@ -1,0 +1,126 @@
+{
+  "clock": "relict:mars",
+  "period_ticks": 132000,
+  "tracks": {
+    "relict:visual/deimos_angle": {
+      "keyframes": [
+        {
+          "ticks": 0,
+          "value": 360.0
+        },
+        {
+          "ticks": 0,
+          "value": 0.0
+        }
+      ]
+    },
+    "relict:visual/deimos_inclination": {
+      "keyframes": [
+        {
+          "ticks": 0,
+          "value": -25.0
+        }
+      ]
+    },
+    "relict:visual/deimos_scale": {
+      "keyframes": [
+        {
+          "ticks": 0,
+          "value": 1.0
+        },
+        {
+          "ticks": 5500,
+          "value": 0.99507725
+        },
+        {
+          "ticks": 11000,
+          "value": 0.9807648
+        },
+        {
+          "ticks": 16500,
+          "value": 0.9583689
+        },
+        {
+          "ticks": 22000,
+          "value": 0.92987263
+        },
+        {
+          "ticks": 27500,
+          "value": 0.89768046
+        },
+        {
+          "ticks": 33000,
+          "value": 0.86432856
+        },
+        {
+          "ticks": 38500,
+          "value": 0.8322158
+        },
+        {
+          "ticks": 44000,
+          "value": 0.8034045
+        },
+        {
+          "ticks": 49500,
+          "value": 0.779516
+        },
+        {
+          "ticks": 55000,
+          "value": 0.7617156
+        },
+        {
+          "ticks": 60500,
+          "value": 0.7507596
+        },
+        {
+          "ticks": 66000,
+          "value": 0.7470638
+        },
+        {
+          "ticks": 71500,
+          "value": 0.7507596
+        },
+        {
+          "ticks": 77000,
+          "value": 0.7617156
+        },
+        {
+          "ticks": 82500,
+          "value": 0.779516
+        },
+        {
+          "ticks": 88000,
+          "value": 0.8034045
+        },
+        {
+          "ticks": 93500,
+          "value": 0.8322158
+        },
+        {
+          "ticks": 99000,
+          "value": 0.86432856
+        },
+        {
+          "ticks": 104500,
+          "value": 0.89768046
+        },
+        {
+          "ticks": 110000,
+          "value": 0.92987263
+        },
+        {
+          "ticks": 115500,
+          "value": 0.9583689
+        },
+        {
+          "ticks": 121000,
+          "value": 0.9807648
+        },
+        {
+          "ticks": 126500,
+          "value": 0.99507725
+        }
+      ]
+    }
+  }
+}

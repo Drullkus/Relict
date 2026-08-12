@@ -10,6 +10,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
 import us.drullk.relict.init.RelictBlocks;
 import us.drullk.relict.init.RelictCreativeTabs;
+import us.drullk.relict.init.RelictEnvironmentAttributes;
 import us.drullk.relict.init.RelictItems;
 
 @Mod(Relict.MODID)
@@ -21,6 +22,7 @@ public class Relict {
         RelictBlocks.BLOCKS.register(modEventBus);
         RelictItems.ITEMS.register(modEventBus);
         RelictCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
+        RelictEnvironmentAttributes.register(modEventBus);
 
         // FIXME uncomment once config entries are added
         //  modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

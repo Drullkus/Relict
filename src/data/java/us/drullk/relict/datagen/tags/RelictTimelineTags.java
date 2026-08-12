@@ -21,7 +21,11 @@ public class RelictTimelineTags extends TagsProvider<Timeline> {
     protected void addTags(HolderLookup.Provider provider) {
         this.tag(RelictDimension.MARS_TIMELINES)
                 .addTag(TimelineTags.UNIVERSAL)
-                .add(RelictDimension.MARS_SOL);
+                .add(RelictDimension.MARS_SOL)
+                .add(RelictDimension.PHOBOS_ORBIT)
+                .add(RelictDimension.DEIMOS_ORBIT)
+                .add(RelictDimension.PHOBOS_TRANSIT)
+        ;
     }
 
 }

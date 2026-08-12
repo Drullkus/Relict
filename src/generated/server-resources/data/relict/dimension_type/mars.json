@@ -9,10 +9,12 @@
       }
     },
     "minecraft:gameplay/respawn_anchor_works": false,
-    "minecraft:visual/ambient_light_color": "#ffd6be",
+    "minecraft:visual/ambient_light_color": "#0d0b0a",
     "minecraft:visual/cloud_color": "#59ffffff",
     "minecraft:visual/fog_color": "#c1602f",
-    "minecraft:visual/sky_color": "#d8a07a"
+    "minecraft:visual/sky_color": "#d8a07a",
+    "minecraft:visual/sky_light_color": "#ffd6be",
+    "neoforge:custom_skybox": "relict:mars"
   },
   "coordinate_scale": 1.0,
   "default_clock": "relict:mars",

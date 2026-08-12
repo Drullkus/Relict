@@ -1,0 +1,15 @@
+{
+  "clock": "relict:mars",
+  "period_ticks": 26400,
+  "tracks": {
+    "minecraft:gameplay/sky_light_level": {
+      "keyframes": [
+        {
+          "ticks": 0,
+          "value": 1.0
+        }
+      ],
+      "modifier": "multiply"
+    }
+  }
+}
