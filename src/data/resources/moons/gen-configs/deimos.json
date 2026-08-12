@@ -1,0 +1,53 @@
+{
+  "model": "moons/deimos.glb",
+  "sprite_dir": "deimos",
+  "canvas": 32,
+  "body": 8,
+  "supersample": 16,
+  "orientation": {
+    "view": "-x",
+    "up": "+y",
+    "yaw": 0.0,
+    "pitch": 0.0,
+    "roll": 0.0
+  },
+  "lighting": {
+    "wrap": 0.6,
+    "phase_offset": 0.0,
+    "gain": 1.55
+  },
+  "rim_light": {
+    "strength": 0.18
+  },
+  "posterize": 5,
+  "gradient": {
+    "interpolation": "linear",
+    "stops": [
+      { "pos": 0.0, "color": "#000000" },
+      { "pos": 0.22, "color": "#20150e" },
+      { "pos": 0.5, "color": "#452f22" },
+      { "pos": 0.75, "color": "#6d543e" },
+      { "pos": 1.0, "color": "#9d7f63" }
+    ]
+  },
+  "palette": [
+    "#000000",
+    "#20150e",
+    "#312218",
+    "#452f22",
+    "#6d543e",
+    "#9d7f63"
+  ],
+  "halo": {
+    "inner_radius": 0.18,
+    "outer_radius": 0.7,
+    "ramp": {
+      "interpolation": "linear",
+      "stops": [
+        { "pos": 0.0, "color": "#1d1510" },
+        { "pos": 0.45, "color": "#0c0806" },
+        { "pos": 1.0, "color": "#000000" }
+      ]
+    }
+  }
+}

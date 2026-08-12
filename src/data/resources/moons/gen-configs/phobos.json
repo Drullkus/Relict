@@ -1,0 +1,54 @@
+{
+  "model": "moons/phobos.glb",
+  "sprite_dir": "phobos",
+  "canvas": 32,
+  "body": 8,
+  "supersample": 16,
+  "orientation": {
+    "view": "-z",
+    "up": "+y",
+    "yaw": 0.0,
+    "pitch": 0.0,
+    "roll": 0.0
+  },
+  "lighting": {
+    "wrap": 0.6,
+    "phase_offset": 0.0,
+    "gain": 1.4
+  },
+  "rim_light": {
+    "strength": 0.16
+  },
+  "posterize": 6,
+  "gradient": {
+    "interpolation": "linear",
+    "stops": [
+      { "pos": 0.0, "color": "#000000" },
+      { "pos": 0.2, "color": "#2a1c14" },
+      { "pos": 0.45, "color": "#573c2c" },
+      { "pos": 0.7, "color": "#87634a" },
+      { "pos": 1.0, "color": "#c9a888" }
+    ]
+  },
+  "palette": [
+    "#000000",
+    "#2a1c14",
+    "#3f2a1e",
+    "#573c2c",
+    "#87634a",
+    "#a8805f",
+    "#c9a888"
+  ],
+  "halo": {
+    "inner_radius": 0.22,
+    "outer_radius": 0.95,
+    "ramp": {
+      "interpolation": "linear",
+      "stops": [
+        { "pos": 0.0, "color": "#2b1f18" },
+        { "pos": 0.4, "color": "#150f0b" },
+        { "pos": 1.0, "color": "#000000" }
+      ]
+    }
+  }
+}

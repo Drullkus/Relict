@@ -25,4 +25,13 @@ public class RelictDimension {
 
     public static final TagKey<Timeline> MARS_TIMELINES = TagKey.create(Registries.TIMELINE, Relict.id("in_mars"));
 
+    // Mars moons
+    /**
+     * Phase frames each moon is drawn with: one number driving the sprites datagen writes, the frame the
+     * sky renderer picks, and the filmstrip the config tool shows. Keep them divisible by 4 so that full,
+     * both quarters, and new land exactly on a frame.
+     */
+    public static final int PHOBOS_PHASES = 16;
+    public static final int DEIMOS_PHASES = 8;
+
 }
