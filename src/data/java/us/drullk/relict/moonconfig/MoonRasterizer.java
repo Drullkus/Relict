@@ -139,10 +139,7 @@ public final class MoonRasterizer {
     }
 
     /**
-     * Body pixels with empty space among their eight neighbours, which is the outline the rim light draws.
-     * <p>
-     * Eight rather than four: with only orthogonal neighbours, a pixel tucked inside a diagonal step keeps
-     * its dark value and punches a hole in the outline.
+     * Body pixels with empty space among their four neighbours, which is the outline the rim light draws.
      */
     private static boolean[] silhouettePixels(boolean[] drawn, int body) {
         boolean[] silhouette = new boolean[drawn.length];
@@ -153,34 +150,37 @@ public final class MoonRasterizer {
                     continue;
                 }
 
-                for (int offsetY = -1; offsetY <= 1 && !silhouette[y * body + x]; offsetY++) {
-                    for (int offsetX = -1; offsetX <= 1; offsetX++) {
-                        int neighbourX = x + offsetX;
-                        int neighbourY = y + offsetY;
-                        // Outside the body box is space too, so a moon touching the edge still gets an outline.
-                        boolean neighbourDrawn = neighbourX >= 0 && neighbourX < body && neighbourY >= 0 && neighbourY < body
-                                && drawn[neighbourY * body + neighbourX];
-                        if (!neighbourDrawn) {
-                            silhouette[y * body + x] = true;
-                            break;
-                        }
-                    }
-                }
+                markSilhouettePixel(drawn, body, x, -1, y,  0, silhouette);
+                markSilhouettePixel(drawn, body, x,  1, y,  0, silhouette);
+                markSilhouettePixel(drawn, body, x,  0, y, -1, silhouette);
+                markSilhouettePixel(drawn, body, x,  0, y,  1, silhouette);
             }
         }
 
         return silhouette;
     }
 
+    private static void markSilhouettePixel(boolean[] drawn, int body, int x, int offsetX, int y, int offsetY, boolean[] silhouette) {
+        int neighbourX = x + offsetX;
+        int neighbourY = y + offsetY;
+        // Outside the body box is space too, so a moon touching the edge still gets an outline.
+        boolean neighbourDrawn = neighbourX >= 0 && neighbourX < body && neighbourY >= 0 && neighbourY < body
+                && drawn[neighbourY * body + neighbourX];
+        if (!neighbourDrawn) {
+            silhouette[y * body + x] = true;
+        }
+    }
+
     /**
      * Per-sample geometry of the visible hemisphere: view-space normals and raw albedo luminance. Light
      * plays no part here, so this is shared by every frame.
      * <p>
-     * No vertical normal component: the sun stays in the moons' orbital plane, which is their equator, so
-     * shading only ever needs the horizontal and viewer-facing components. Give the light an elevation and
-     * this has to come back.
+     * All three normal components are kept. The sun does stay in the moons' orbital plane, but that plane is
+     * not the sprite's horizontal: the quad is posed by the orbit, which lands the orbital normal along
+     * sprite-right and the direction of travel along sprite-down. So the terminator generally runs
+     * vertically in the sky and needs {@code lighting.phase_axis} to be swung onto it.
      */
-    private record Surface(int size, boolean[] hit, float[] normalX, float[] normalZ, float[] luminance) {
+    private record Surface(int size, boolean[] hit, float[] normalX, float[] normalY, float[] normalZ, float[] luminance) {
     }
 
     private static Surface rasterize(GlbModel model, MoonSpriteConfig config) {
@@ -239,6 +239,7 @@ public final class MoonRasterizer {
         float[] zBuffer = new float[size * size];
         Arrays.fill(zBuffer, Float.NEGATIVE_INFINITY);
         float[] outNormalX = new float[size * size];
+        float[] outNormalY = new float[size * size];
         float[] outNormalZ = new float[size * size];
         float[] luminance = new float[size * size];
         Texture texture = new Texture(model.albedo());
@@ -288,9 +289,9 @@ public final class MoonRasterizer {
                     float nx = weightA * normalX[a] + weightB * normalX[b] + weightC * normalX[c];
                     float ny = weightA * normalY[a] + weightB * normalY[b] + weightC * normalY[c];
                     float nz = weightA * normalZ[a] + weightB * normalZ[b] + weightC * normalZ[c];
-                    // ny takes part in the length even though it is not kept.
                     float inverse = 1.0F / Math.max(1.0E-6F, (float) Math.sqrt(nx * nx + ny * ny + nz * nz));
                     outNormalX[pixel] = nx * inverse;
+                    outNormalY[pixel] = ny * inverse;
                     outNormalZ[pixel] = nz * inverse;
                     luminance[pixel] = texture.luminance(
                             weightA * model.u(a) + weightB * model.u(b) + weightC * model.u(c),
@@ -299,7 +300,7 @@ public final class MoonRasterizer {
             }
         }
 
-        return new Surface(size, hit, outNormalX, outNormalZ, luminance);
+        return new Surface(size, hit, outNormalX, outNormalY, outNormalZ, luminance);
     }
 
     /** Centres the sprite on the model's projected bounding box rather than its vertex average. */
@@ -385,9 +386,14 @@ public final class MoonRasterizer {
             float[] peak
     ) {
         double angle = Math.toRadians(config.lighting().phaseOffset() + 360.0 * frame / frameCount);
-        // The sun stays near the moons' orbital plane, which is the equator; +z faces the viewer, so an
-        // angle of zero lights the disc head-on and 180 degrees is new.
-        float lightX = (float) Math.sin(angle);
+        // +z faces the viewer, so an angle of zero lights the disc head-on and 180 degrees is new. In
+        // between, the light swings off-axis; phase_axis decides in which direction, and so which way the
+        // terminator runs. Zero and 180 degrees of angle are pure +z and -z, leaving those two frames — full
+        // and new, the one the rim light keys on — the same whatever the axis.
+        double axis = Math.toRadians(config.lighting().phaseAxis());
+        float offAxis = (float) Math.sin(angle);
+        float lightX = offAxis * (float) Math.cos(axis);
+        float lightY = offAxis * (float) Math.sin(axis);
         float lightZ = (float) Math.cos(angle);
         float wrap = config.lighting().wrap();
 
@@ -420,13 +426,15 @@ public final class MoonRasterizer {
                             continue;
                         }
 
-                        float lambert = (surface.normalX[sample] * lightX + surface.normalZ[sample] * lightZ + wrap) / (1.0F + wrap);
+                        float lambert = (surface.normalX[sample] * lightX + surface.normalY[sample] * lightY
+                                + surface.normalZ[sample] * lightZ + wrap) / (1.0F + wrap);
                         total += albedo[sample] * Math.clamp(lambert, 0.0F, 1.0F);
                         hits++;
                     }
                 }
 
-                float rim = silhouette[pixelY * body + pixelX] ? config.rimLight().strength() : 0.0F;
+                boolean isNewMoon = frame == (frameCount >> 1);
+                float rim = isNewMoon && silhouette[pixelY * body + pixelX] ? config.rimLight().strength() : 0.0F;
                 float lit = total / hits * config.lighting().gain() + rim;
                 peak[0] = Math.max(peak[0], lit);
                 float value = config.posterizeValue(Math.clamp(lit, 0.0F, 1.0F));

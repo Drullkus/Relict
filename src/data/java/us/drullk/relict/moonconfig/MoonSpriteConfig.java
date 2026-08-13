@@ -176,17 +176,30 @@ public record MoonSpriteConfig(
     /**
      * @param wrap        pushes light around the terminator; 0 is a hard Lambert edge
      * @param phaseOffset degrees added to every frame's light angle, where 0 lights the moon head-on
+     * @param phaseAxis   which way the terminator sweeps, in degrees counterclockwise from sprite-right, so
+     *                    0 draws a vertical terminator crossing left to right and 90 a horizontal one lit
+     *                    from the top. 180 mirrors the sweep, swapping waxing for waning.
+     *                    <p>
+     *                    Needed because a sprite's axes are not the sky's. The moon quad is posed by its
+     *                    orbit, which leaves sprite-right along the orbital normal and sprite-down along the
+     *                    direction of travel — and the sun, sitting in the orbit, is therefore displaced
+     *                    from the moon <em>vertically</em> in the sprite. Both moons want 90.
+     *                    <p>
+     *                    Only the sun's in-plane offset is modelled. Its height above the moon's orbital
+     *                    plane would tilt the terminator off this axis over the cycle, and nothing computes
+     *                    that; it would have to come from the renderer as a second, per-frame angle.
      * @param gain        scales lit values before posterizing. Albedo times Lambert peaks well below 1, so
      *                    without gain the bright end of the gradient is unreachable and the moon renders
      *                    muddy. The generator logs the peak it saw; {@code 1 / peak} fills the ramp.
      */
-    public record Lighting(float wrap, float phaseOffset, float gain) {
+    public record Lighting(float wrap, float phaseOffset, float phaseAxis, float gain) {
 
-        public static final Lighting DEFAULT = new Lighting(0.0F, 0.0F, 1.0F);
+        public static final Lighting DEFAULT = new Lighting(0.0F, 0.0F, 0.0F, 1.0F);
 
         public static final Codec<Lighting> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.floatRange(0.0F, 1.0F).optionalFieldOf("wrap", 0.0F).forGetter(Lighting::wrap),
                 Codec.FLOAT.optionalFieldOf("phase_offset", 0.0F).forGetter(Lighting::phaseOffset),
+                Codec.FLOAT.optionalFieldOf("phase_axis", 0.0F).forGetter(Lighting::phaseAxis),
                 Codec.floatRange(0.01F, 16.0F).optionalFieldOf("gain", 1.0F).forGetter(Lighting::gain)
         ).apply(i, Lighting::new));
 

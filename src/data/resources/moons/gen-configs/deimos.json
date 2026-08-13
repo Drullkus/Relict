@@ -14,6 +14,7 @@
   "lighting": {
     "wrap": 0.6,
     "phase_offset": 0.0,
+    "phase_axis": 90.0,
     "gain": 1.55
   },
   "rim_light": {

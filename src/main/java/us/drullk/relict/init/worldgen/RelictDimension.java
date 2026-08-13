@@ -36,7 +36,7 @@ public class RelictDimension {
      * both quarters, and new land exactly on a frame.
      */
     public static final int PHOBOS_PHASES = 16;
-    public static final int DEIMOS_PHASES = 8;
+    public static final int DEIMOS_PHASES = 16;
 
     /**
      * Sky crossings per sol, signed against the sun. The sun's own sky angle advances once per sol, so a

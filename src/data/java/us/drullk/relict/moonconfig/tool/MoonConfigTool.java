@@ -240,11 +240,20 @@ public final class MoonConfigTool {
 
         this.controls.add(section("Lighting"));
         this.controls.add(row("Terminator wrap", slider(this.config.lighting().wrap(), 0.0F, 1.0F, value -> this.update(
-                withLighting(this.config, new MoonSpriteConfig.Lighting(value, this.config.lighting().phaseOffset(), this.config.lighting().gain()))))));
+                withLighting(this.config, new MoonSpriteConfig.Lighting(value, this.config.lighting().phaseOffset(),
+                        this.config.lighting().phaseAxis(), this.config.lighting().gain()))))));
         this.controls.add(row("Gain", slider(this.config.lighting().gain(), 0.1F, 4.0F, value -> this.update(
-                withLighting(this.config, new MoonSpriteConfig.Lighting(this.config.lighting().wrap(), this.config.lighting().phaseOffset(), value))))));
+                withLighting(this.config, new MoonSpriteConfig.Lighting(this.config.lighting().wrap(), this.config.lighting().phaseOffset(),
+                        this.config.lighting().phaseAxis(), value))))));
         this.controls.add(row("Phase offset", degrees(this.config.lighting().phaseOffset(), value -> this.update(
-                withLighting(this.config, new MoonSpriteConfig.Lighting(this.config.lighting().wrap(), value, this.config.lighting().gain()))))));
+                withLighting(this.config, new MoonSpriteConfig.Lighting(this.config.lighting().wrap(), value,
+                        this.config.lighting().phaseAxis(), this.config.lighting().gain()))))));
+        JSpinner phaseAxis = degrees(this.config.lighting().phaseAxis(), value -> this.update(
+                withLighting(this.config, new MoonSpriteConfig.Lighting(this.config.lighting().wrap(), this.config.lighting().phaseOffset(),
+                        value, this.config.lighting().gain()))));
+        phaseAxis.setToolTipText("Which way the terminator sweeps, counterclockwise from sprite-right. "
+                + "90 is a horizontal terminator, which is what the sky wants; 180 swaps waxing for waning.");
+        this.controls.add(row("Phase axis", phaseAxis));
 
         this.controls.add(section("Rim light (silhouette outline)"));
         this.controls.add(row("Strength", slider(this.config.rimLight().strength(), 0.0F, 0.6F, value -> this.update(
