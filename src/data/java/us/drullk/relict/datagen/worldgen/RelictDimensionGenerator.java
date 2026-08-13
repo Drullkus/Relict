@@ -13,19 +13,16 @@ import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.clock.WorldClock;
 import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.NoiseRouter;
-import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.timeline.Timeline;
 import net.neoforged.neoforge.common.world.NeoForgeEnvironmentAttributes;
 import us.drullk.relict.Relict;
+import us.drullk.relict.init.worldgen.RelictBiomes;
 import us.drullk.relict.init.worldgen.RelictDimension;
 
 import java.util.List;
@@ -84,7 +81,7 @@ public class RelictDimensionGenerator {
         HolderGetter<DimensionType> dimensionTypes = context.lookup(Registries.DIMENSION_TYPE);
         HolderGetter<NoiseGeneratorSettings> noiseSettings = context.lookup(Registries.NOISE_SETTINGS);
 
-        FixedBiomeSource biomeSource = new FixedBiomeSource(biomes.getOrThrow(Biomes.BADLANDS));
+        FixedBiomeSource biomeSource = new FixedBiomeSource(biomes.getOrThrow(RelictBiomes.WRINKLE_PLAINS));
         NoiseBasedChunkGenerator generator = new NoiseBasedChunkGenerator(biomeSource, noiseSettings.getOrThrow(RelictDimension.MARS_NOISE_SETTINGS));
         context.register(RelictDimension.MARS_LEVELSTEM, new LevelStem(dimensionTypes.getOrThrow(RelictDimension.MARS_TYPE), generator));
     }
@@ -94,10 +91,10 @@ public class RelictDimensionGenerator {
 
         context.register(RelictDimension.MARS_NOISE_SETTINGS, new NoiseGeneratorSettings(
                 NoiseSettings.create(this.minY, this.height, 1, 2),
-                Blocks.STONE.defaultBlockState(),
-                Blocks.WATER.defaultBlockState(),
+                Blocks.SMOOTH_BASALT.defaultBlockState(),
+                Blocks.AIR.defaultBlockState(),
                 noiseRouter,
-                SurfaceRuleData.overworld(context.lookup(Registries.BIOME)),
+                this.composeSurface(context),
                 List.of(),
                 this.seaLevel,
                 false,
@@ -105,6 +102,10 @@ public class RelictDimensionGenerator {
                 true,
                 false
         ));
+    }
+
+    private SurfaceRules.RuleSource composeSurface(BootstrapContext<NoiseGeneratorSettings> context) {
+        return SurfaceRuleData.overworld(context.lookup(Registries.BIOME));
     }
 
 }
