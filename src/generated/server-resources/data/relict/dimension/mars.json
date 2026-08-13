@@ -4,7 +4,7 @@
     "type": "minecraft:noise",
     "biome_source": {
       "type": "minecraft:fixed",
-      "biome": "minecraft:badlands"
+      "biome": "relict:wrinkle_plains"
     },
     "settings": "relict:mars"
   }

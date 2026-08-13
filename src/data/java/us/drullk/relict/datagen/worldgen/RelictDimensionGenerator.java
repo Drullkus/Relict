@@ -3,7 +3,6 @@ package us.drullk.relict.datagen.worldgen;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
-import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -34,10 +33,13 @@ public class RelictDimensionGenerator {
     private final int height;
     private final int seaLevel;
 
+    private final RelictSurfaceRules relictSurfaceRules;
+
     public RelictDimensionGenerator(int minY, int height, int seaLevel) {
         this.minY = minY;
         this.height = height;
         this.seaLevel = seaLevel;
+        this.relictSurfaceRules = new RelictSurfaceRules();
     }
 
     public void bootstrapDimensionType(BootstrapContext<DimensionType> context) {
@@ -46,7 +48,7 @@ public class RelictDimensionGenerator {
         HolderGetter<WorldClock> clocks = context.lookup(Registries.WORLD_CLOCK);
 
         EnvironmentAttributeMap attributes = EnvironmentAttributeMap.builder()
-                .set(EnvironmentAttributes.FOG_COLOR, ARGB.opaque(0xC1602F))
+                .set(EnvironmentAttributes.FOG_COLOR, ARGB.opaque(0xC08A63))
                 .set(EnvironmentAttributes.SKY_COLOR, ARGB.opaque(0xD8A07A))
                 .set(EnvironmentAttributes.CLOUD_COLOR, ARGB.white(0.35F))
                 .set(EnvironmentAttributes.AMBIENT_LIGHT_COLOR, ARGB.opaque(0x0D0B0A))
@@ -94,7 +96,7 @@ public class RelictDimensionGenerator {
                 Blocks.SMOOTH_BASALT.defaultBlockState(),
                 Blocks.AIR.defaultBlockState(),
                 noiseRouter,
-                this.composeSurface(context),
+                this.relictSurfaceRules.composeSurface(context),
                 List.of(),
                 this.seaLevel,
                 false,
@@ -102,10 +104,6 @@ public class RelictDimensionGenerator {
                 true,
                 false
         ));
-    }
-
-    private SurfaceRules.RuleSource composeSurface(BootstrapContext<NoiseGeneratorSettings> context) {
-        return SurfaceRuleData.overworld(context.lookup(Registries.BIOME));
     }
 
 }

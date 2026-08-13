@@ -240,6 +240,66 @@
           "value": 0.0
         }
       ]
+    },
+    "minecraft:visual/sunrise_sunset_color": {
+      "keyframes": [
+        {
+          "ticks": 110,
+          "value": "#478faad4"
+        },
+        {
+          "ticks": 1540,
+          "value": "#00b9cbe0"
+        },
+        {
+          "ticks": 11660,
+          "value": "#00b9cbe0"
+        },
+        {
+          "ticks": 13090,
+          "value": "#478faad4"
+        },
+        {
+          "ticks": 13970,
+          "value": "#cc5e7cb8"
+        },
+        {
+          "ticks": 14300,
+          "value": "#eb4e6ba8"
+        },
+        {
+          "ticks": 15180,
+          "value": "#9938486a"
+        },
+        {
+          "ticks": 16940,
+          "value": "#1a1f273b"
+        },
+        {
+          "ticks": 17820,
+          "value": "#00171c2b"
+        },
+        {
+          "ticks": 21780,
+          "value": "#00171c2b"
+        },
+        {
+          "ticks": 22660,
+          "value": "#1a1f273b"
+        },
+        {
+          "ticks": 24420,
+          "value": "#9938486a"
+        },
+        {
+          "ticks": 25300,
+          "value": "#eb4e6ba8"
+        },
+        {
+          "ticks": 25630,
+          "value": "#cc5e7cb8"
+        }
+      ]
     }
   }
 }
