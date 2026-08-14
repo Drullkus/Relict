@@ -20,7 +20,8 @@ public class RelictModels extends ModelProvider {
 
         itemModels.generateFlatItem(RelictItems.RANGING_CAISSON.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(RelictItems.RESTLESS_STRIDERS.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(RelictItems.GROUNDING_TREADS.get(), ModelTemplates.FLAT_ITEM);
+
+        itemModels.generateDynamicTrimmableItem(RelictItems.GROUNDING_TREADS.get(), itemModels.createFlatItemModel(RelictItems.GROUNDING_TREADS.get(), ModelTemplates.FLAT_ITEM), ItemModelGenerators.TRIM_PREFIX_BOOTS);
 
         itemModels.generateDynamicTrimmableItem(RelictItems.SPENT_VIZARD.get(), itemModels.createFlatItemModel(RelictItems.SPENT_VIZARD.get(), ModelTemplates.FLAT_ITEM), ItemModelGenerators.TRIM_PREFIX_HELMET);
     }

@@ -1,0 +1,7 @@
+{
+  "remove": [
+    "relict:ranging_caisson",
+    "relict:restless_striders"
+  ],
+  "values": []
+}

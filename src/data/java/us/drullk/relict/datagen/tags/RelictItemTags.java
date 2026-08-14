@@ -25,6 +25,10 @@ public class RelictItemTags extends ItemTagsProvider {
         this.tag(ItemTags.CHEST_ARMOR).add(RelictItems.RANGING_CAISSON.getKey());
         this.tag(ItemTags.LEG_ARMOR).add(RelictItems.RESTLESS_STRIDERS.getKey());
         this.tag(ItemTags.FOOT_ARMOR).add(RelictItems.GROUNDING_TREADS.getKey());
+
+        this.tag(ItemTags.TRIMMABLE_ARMOR)
+                .remove(RelictItems.RANGING_CAISSON.getKey())
+                .remove(RelictItems.RESTLESS_STRIDERS.getKey());
     }
 
 }
