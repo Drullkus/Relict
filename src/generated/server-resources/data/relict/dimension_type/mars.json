@@ -16,7 +16,7 @@
     "minecraft:visual/sky_light_color": "#ffd6be",
     "neoforge:custom_skybox": "relict:mars"
   },
-  "coordinate_scale": 1.0,
+  "coordinate_scale": 0.5,
   "default_clock": "relict:mars",
   "has_ceiling": false,
   "has_ender_dragon_fight": false,
@@ -28,7 +28,7 @@
   "monster_spawn_block_light_limit": 0,
   "monster_spawn_light_level": {
     "type": "minecraft:uniform",
-    "max_inclusive": 7,
+    "max_inclusive": 0,
     "min_inclusive": 0
   },
   "timelines": "#relict:in_mars"
