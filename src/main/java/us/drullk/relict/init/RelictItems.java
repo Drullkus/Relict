@@ -2,6 +2,7 @@ package us.drullk.relict.init;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.Equippable;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -25,8 +27,8 @@ public class RelictItems {
             .withModifierAdded(RelictAttributes.MARS_LIFE_SUPPORT, RelictAttributes.enable(RelictAttributes.MARS_LIFE_SUPPORT.getId().withPrefix("vizard_")), EquipmentSlotGroup.HEAD)
             .withModifierAdded(RelictAttributes.NAUSEA_IMMUNITY, RelictAttributes.enable(RelictAttributes.NAUSEA_IMMUNITY.getId().withPrefix("vizard_")), EquipmentSlotGroup.HEAD)
             .withModifierAdded(Attributes.OXYGEN_BONUS, add(Relict.id("vizard_oxygen_bonus"), 4.0), EquipmentSlotGroup.HEAD)
-    ));
-    public static final DeferredItem<Item> SPENT_VIZARD = ITEMS.registerItem("spent_vizard", Item::new, properties -> properties.stacksTo(1).attributes(RelictArmorMaterials.SERVICE.createAttributes(ArmorType.HELMET)).component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(RelictArmorMaterials.SERVICE.equipSound()).setAsset(RelictArmorMaterials.SERVICE_ASSET).build()));
+    ).component(DataComponents.EQUIPPABLE, vizardEquippable(RelictArmorMaterials.VITAL_VIZARD_ASSET)));
+    public static final DeferredItem<Item> SPENT_VIZARD = ITEMS.registerItem("spent_vizard", Item::new, properties -> properties.stacksTo(1).attributes(RelictArmorMaterials.SERVICE.createAttributes(ArmorType.HELMET)).component(DataComponents.EQUIPPABLE, vizardEquippable(RelictArmorMaterials.SPENT_VIZARD_ASSET)));
     public static final DeferredItem<Item> RANGING_CAISSON = ITEMS.registerItem("ranging_caisson", Item::new, properties -> serviceArmor(properties, ArmorType.CHESTPLATE, UnaryOperator.identity()).component(RelictDataComponents.STORED_CHARGE.get(), StoredCharges.EMPTY));
     public static final DeferredItem<Item> RESTLESS_STRIDERS = ITEMS.registerItem("restless_striders", Item::new, properties -> serviceArmor(properties, ArmorType.LEGGINGS, modifiers -> modifiers
             .withModifierAdded(Attributes.MOVEMENT_SPEED, new AttributeModifier(Relict.id("striders_movement_speed"), 0.2, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.LEGS)
@@ -40,6 +42,10 @@ public class RelictItems {
 
     private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
         return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));
+    }
+
+    private static Equippable vizardEquippable(ResourceKey<EquipmentAsset> asset) {
+        return Equippable.builder(EquipmentSlot.HEAD).setEquipSound(RelictArmorMaterials.SERVICE.equipSound()).setAsset(asset).build();
     }
 
     private static AttributeModifier add(Identifier id, double amount) {

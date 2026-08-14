@@ -16,6 +16,9 @@ public class RelictArmorMaterials {
 
     public static final ResourceKey<EquipmentAsset> SERVICE_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, Relict.id("service"));
 
+    public static final ResourceKey<EquipmentAsset> VITAL_VIZARD_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, Relict.id("vital_vizard"));
+    public static final ResourceKey<EquipmentAsset> SPENT_VIZARD_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, Relict.id("spent_vizard"));
+
     public static final ArmorMaterial SERVICE = new ArmorMaterial(
             7,
             Util.make(new EnumMap<>(ArmorType.class), defenseMap -> {

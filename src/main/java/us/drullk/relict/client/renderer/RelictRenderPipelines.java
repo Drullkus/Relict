@@ -3,6 +3,7 @@ package us.drullk.relict.client.renderer;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.BindGroupLayouts;
@@ -66,9 +67,20 @@ public class RelictRenderPipelines {
             .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .build();
 
+    public static final RenderPipeline VIZARD_ATMOSPHERE = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
+            .withLocation(Relict.id("pipeline/vizard_atmosphere"))
+            .withVertexShader(Relict.id("core/vizard_atmosphere"))
+            .withFragmentShader(Relict.id("core/vizard_atmosphere"))
+            .withVertexBinding(0, DefaultVertexFormat.ENTITY)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
+            .withDepthStencilState(DepthStencilState.DEFAULT)
+            .withCull(false)
+            .build();
+
     public static void onRegisterPipelines(RegisterRenderPipelinesEvent event) {
         event.registerPipeline(CELESTIAL_OCCLUDER);
         event.registerPipeline(CELESTIAL_COMPOSITE);
+        event.registerPipeline(VIZARD_ATMOSPHERE);
     }
 
 }
