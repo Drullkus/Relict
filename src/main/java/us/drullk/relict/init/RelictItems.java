@@ -1,17 +1,49 @@
 package us.drullk.relict.init;
 
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.Equippable;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import us.drullk.relict.Relict;
+import us.drullk.relict.item.StoredCharges;
+
+import java.util.function.UnaryOperator;
 
 public class RelictItems {
 
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Relict.MODID);
 
-    // public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder().alwaysEdible().nutrition(1).saturationModifier(2f).build()));
-    // public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", RelictBlocks.EXAMPLE_BLOCK);
+    public static final DeferredItem<Item> VITAL_VIZARD = ITEMS.registerItem("vital_vizard", Item::new, properties -> serviceArmor(properties, ArmorType.HELMET, modifiers -> modifiers
+            .withModifierAdded(RelictAttributes.MARS_LIFE_SUPPORT, RelictAttributes.enable(RelictAttributes.MARS_LIFE_SUPPORT.getId().withPrefix("vizard_")), EquipmentSlotGroup.HEAD)
+            .withModifierAdded(RelictAttributes.NAUSEA_IMMUNITY, RelictAttributes.enable(RelictAttributes.NAUSEA_IMMUNITY.getId().withPrefix("vizard_")), EquipmentSlotGroup.HEAD)
+            .withModifierAdded(Attributes.OXYGEN_BONUS, add(Relict.id("vizard_oxygen_bonus"), 4.0), EquipmentSlotGroup.HEAD)
+    ));
+    public static final DeferredItem<Item> SPENT_VIZARD = ITEMS.registerItem("spent_vizard", Item::new, properties -> properties.stacksTo(1).attributes(RelictArmorMaterials.SERVICE.createAttributes(ArmorType.HELMET)).component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(RelictArmorMaterials.SERVICE.equipSound()).setAsset(RelictArmorMaterials.SERVICE_ASSET).build()));
+    public static final DeferredItem<Item> RANGING_CAISSON = ITEMS.registerItem("ranging_caisson", Item::new, properties -> serviceArmor(properties, ArmorType.CHESTPLATE, UnaryOperator.identity()).component(RelictDataComponents.STORED_CHARGE.get(), StoredCharges.EMPTY));
+    public static final DeferredItem<Item> RESTLESS_STRIDERS = ITEMS.registerItem("restless_striders", Item::new, properties -> serviceArmor(properties, ArmorType.LEGGINGS, modifiers -> modifiers
+            .withModifierAdded(Attributes.MOVEMENT_SPEED, new AttributeModifier(Relict.id("striders_movement_speed"), 0.2, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.LEGS)
+            .withModifierAdded(Attributes.STEP_HEIGHT, new AttributeModifier(Relict.id("striders_step_height"), 0.5, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.LEGS)
+            .withModifierAdded(Attributes.WATER_MOVEMENT_EFFICIENCY, new AttributeModifier(Relict.id("striders_water_movement"), 1.0, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.LEGS)
+    ));
+    public static final DeferredItem<Item> GROUNDING_TREADS = ITEMS.registerItem("grounding_treads", Item::new, properties -> serviceArmor(properties, ArmorType.BOOTS, modifiers -> modifiers
+            .withModifierAdded(Attributes.SAFE_FALL_DISTANCE, add(Relict.id("treads_safe_fall_distance"), 10.0), EquipmentSlotGroup.FEET)
+            .withModifierAdded(RelictAttributes.ELECTRIC_DAMAGE, add(RelictAttributes.ELECTRIC_DAMAGE.getId().withPrefix("treads_"), -0.1), EquipmentSlotGroup.FEET)
+    ));
+
+    private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
+        return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));
+    }
+
+    private static AttributeModifier add(Identifier id, double amount) {
+        return new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_VALUE);
+    }
 
 }

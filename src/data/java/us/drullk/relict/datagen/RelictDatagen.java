@@ -15,6 +15,7 @@ import us.drullk.relict.datagen.loottables.RelictLootTables;
 import us.drullk.relict.datagen.tags.RelictBiomeTags;
 import us.drullk.relict.datagen.tags.RelictBlockTags;
 import us.drullk.relict.datagen.tags.RelictDamageTypeTags;
+import us.drullk.relict.datagen.tags.RelictDimensionTypeTags;
 import us.drullk.relict.datagen.tags.RelictItemTags;
 import us.drullk.relict.datagen.tags.RelictTimelineTags;
 import us.drullk.relict.datagen.worldgen.*;
@@ -37,6 +38,7 @@ public class RelictDatagen {
         RegistrySetBuilder datapackRegistryEntries = new RegistrySetBuilder()
                 .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
                 .add(Registries.CONFIGURED_FEATURE, RelictFeatureGenerator::bootstrapConfiguredFeatures)
+                .add(Registries.DAMAGE_TYPE, RelictDamageTypeGenerator::bootstrapDamageTypes)
                 .add(Registries.DENSITY_FUNCTION, RelictDensityFunctionGenerator::bootstrapDensityFunctions)
                 .add(Registries.DIMENSION_TYPE, dimensionGenerator::bootstrapDimensionType)
                 .add(Registries.LEVEL_STEM, dimensionGenerator::bootstrapLevelStem)
@@ -53,6 +55,7 @@ public class RelictDatagen {
         event.addProvider(new RelictBiomeTags(output, builtinDatapackProvider));
         event.addProvider(new RelictBlockTags(output, builtinDatapackProvider));
         event.addProvider(new RelictDamageTypeTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictDimensionTypeTags(output, builtinDatapackProvider));
         event.addProvider(new RelictItemTags(output, builtinDatapackProvider));
         event.addProvider(new RelictTimelineTags(output, builtinDatapackProvider));
 
@@ -62,7 +65,11 @@ public class RelictDatagen {
 
     @SubscribeEvent
     public static void generateClientData(GatherDataEvent.Client event) {
-        event.addProvider(new RelictCelestialSprites(event.getGenerator().getPackOutput()));
+        PackOutput output = event.getGenerator().getPackOutput();
+
+        event.addProvider(new RelictCelestialSprites(output));
+        event.addProvider(new RelictEquipmentAssets(output));
+        event.addProvider(new RelictModels(output));
     }
 
 }

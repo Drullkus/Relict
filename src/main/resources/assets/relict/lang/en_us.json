@@ -3,6 +3,19 @@
   "block.relict.example_block": "Example Block",
   "item.relict.example_item": "Example Item",
 
+  "item.relict.vital_vizard": "Vital Vizard",
+  "item.relict.spent_vizard": "Spent Vizard",
+  "item.relict.ranging_caisson": "Ranging Caisson",
+  "item.relict.restless_striders": "Restless Striders",
+  "item.relict.grounding_treads": "Grounding Treads",
+  "item.relict.stored_charges.charge": "Charge: %s / %s",
+
+  "attribute.name.relict.mars_life_support": "Mars Life Support",
+  "attribute.name.relict.nausea_immunity": "Nausea Immunity",
+  "attribute.name.relict.electric_damage": "Electric Damage",
+
+  "death.attack.relict.mars_unbreathable": "%1$s tried to breathe Mars",
+
   "relict.configuration.title": "Relict Configs",
   "relict.configuration.section.relict.common.toml": "Relict Configs",
   "relict.configuration.section.relict.common.toml.title": "Relict Mod Configs",

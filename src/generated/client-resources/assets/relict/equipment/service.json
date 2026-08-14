@@ -1,0 +1,19 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "relict:service"
+      }
+    ],
+    "humanoid_baby": [
+      {
+        "texture": "relict:service"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "relict:service"
+      }
+    ]
+  }
+}
