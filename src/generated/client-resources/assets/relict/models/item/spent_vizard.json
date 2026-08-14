@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "relict:item/vital_vizard"
+    "layer0": "relict:item/spent_vizard"
   }
 }

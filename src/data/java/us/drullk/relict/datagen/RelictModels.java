@@ -16,12 +16,13 @@ public class RelictModels extends ModelProvider {
 
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        itemModels.generateFlatItem(RelictItems.VITAL_VIZARD.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateDynamicTrimmableItem(RelictItems.VITAL_VIZARD.get(), itemModels.createFlatItemModel(RelictItems.VITAL_VIZARD.get(), ModelTemplates.FLAT_ITEM), ItemModelGenerators.TRIM_PREFIX_HELMET);
+
         itemModels.generateFlatItem(RelictItems.RANGING_CAISSON.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(RelictItems.RESTLESS_STRIDERS.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(RelictItems.GROUNDING_TREADS.get(), ModelTemplates.FLAT_ITEM);
 
-        itemModels.generateFlatItem(RelictItems.SPENT_VIZARD.get(), RelictItems.VITAL_VIZARD.get(), ModelTemplates.FLAT_ITEM); // FIXME Create broken sprite
+        itemModels.generateDynamicTrimmableItem(RelictItems.SPENT_VIZARD.get(), itemModels.createFlatItemModel(RelictItems.SPENT_VIZARD.get(), ModelTemplates.FLAT_ITEM), ItemModelGenerators.TRIM_PREFIX_HELMET);
     }
 
 }
