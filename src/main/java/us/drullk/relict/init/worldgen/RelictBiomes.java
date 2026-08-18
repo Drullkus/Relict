@@ -18,4 +18,9 @@ public class RelictBiomes {
     public static final ResourceKey<Biome> FRETTED_MESAS = ResourceKey.create(Registries.BIOME, Relict.id("fretted_mesas"));
     public static final ResourceKey<Biome> YARDANGS = ResourceKey.create(Registries.BIOME, Relict.id("yardangs"));
 
+    public static final ResourceKey<Biome> BASALT_CAVES = ResourceKey.create(Registries.BIOME, Relict.id("basalt_caves"));
+    public static final ResourceKey<Biome> CALCITE_CAVES = ResourceKey.create(Registries.BIOME, Relict.id("calcite_caves"));
+    public static final ResourceKey<Biome> ICE_CAVES = ResourceKey.create(Registries.BIOME, Relict.id("ice_caves"));
+    public static final ResourceKey<Biome> SULFUR_CAVES = ResourceKey.create(Registries.BIOME, Relict.id("sulfur_caves"));
+
 }
