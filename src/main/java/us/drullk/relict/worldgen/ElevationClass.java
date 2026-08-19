@@ -6,7 +6,13 @@ import net.minecraft.util.StringRepresentable;
 public enum ElevationClass implements StringRepresentable {
     LOW("low", -1.0),
     MID("mid", 0.0),
-    HIGH("high", 1.0);
+    HIGH("high", 1.0),
+    NEUTRAL("neutral", 0.0) {
+        @Override
+        public double affinity(final double epoch) {
+            return 1.0;
+        }
+    };
 
     public static final Codec<ElevationClass> CODEC = StringRepresentable.fromEnum(ElevationClass::values);
 

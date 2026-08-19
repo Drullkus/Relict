@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:simple_random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": "relict:megabreccia_cobbled",
+        "placement": []
+      },
+      {
+        "feature": "relict:megabreccia_tuff",
+        "placement": []
+      }
+    ]
+  }
+}

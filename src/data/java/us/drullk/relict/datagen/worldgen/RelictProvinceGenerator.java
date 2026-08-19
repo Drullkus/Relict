@@ -6,7 +6,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictProvinces;
@@ -40,16 +39,19 @@ public class RelictProvinceGenerator {
 
         context.register(RelictProvinces.WRINKLE_PLAINS, new Province(biomes.getOrThrow(RelictBiomes.WRINKLE_PLAINS),
                 ElevationClass.MID, 0.0F, RIDGE_AMPLITUDE, PLAIN_ROUGHNESS));
-
-        // Placeholders FIXME remove
-        context.register(RelictProvinces.BADLANDS, new Province(biomes.getOrThrow(Biomes.BADLANDS),
-                ElevationClass.HIGH, 0.18F, 0.0F, PLAIN_ROUGHNESS));
-        context.register(RelictProvinces.DESERT, new Province(biomes.getOrThrow(Biomes.DESERT),
+        context.register(RelictProvinces.RUSTED_DUNES, new Province(biomes.getOrThrow(RelictBiomes.RUSTED_DUNES),
                 ElevationClass.LOW, -0.15F, 0.0F, PLAIN_ROUGHNESS));
-        context.register(RelictProvinces.DRIPSTONE_CAVES, new Province(biomes.getOrThrow(Biomes.DRIPSTONE_CAVES),
+        context.register(RelictProvinces.SHATTERED_HIGHLANDS, new Province(biomes.getOrThrow(RelictBiomes.SHATTERED_HIGHLANDS),
+                ElevationClass.HIGH, 0.18F, 0.0F, PLAIN_ROUGHNESS));
+
+        context.register(RelictProvinces.BASALT_CAVES, new Province(biomes.getOrThrow(RelictBiomes.BASALT_CAVES),
+                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F));
+        context.register(RelictProvinces.SULFUR_CAVES, new Province(biomes.getOrThrow(RelictBiomes.SULFUR_CAVES),
                 ElevationClass.MID, 0.0F, 0.0F, 0.0F));
-        context.register(RelictProvinces.LUSH_CAVES, new Province(biomes.getOrThrow(Biomes.LUSH_CAVES),
-                ElevationClass.MID, 0.0F, 0.0F, 0.0F));
+        context.register(RelictProvinces.ICE_CAVES, new Province(biomes.getOrThrow(RelictBiomes.ICE_CAVES),
+                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F));
+        context.register(RelictProvinces.CALCITE_CAVES, new Province(biomes.getOrThrow(RelictBiomes.CALCITE_CAVES),
+                ElevationClass.HIGH, 0.0F, 0.0F, 0.0F));
     }
 
     public static void bootstrapVoronoiSources(BootstrapContext<VoronoiSource> context) {
@@ -57,13 +59,15 @@ public class RelictProvinceGenerator {
 
         WeightedList<Holder<Province>> surface = WeightedList.<Holder<Province>>builder()
                 .add(provinces.getOrThrow(RelictProvinces.WRINKLE_PLAINS), 1)
-                .add(provinces.getOrThrow(RelictProvinces.BADLANDS), 1)
-                .add(provinces.getOrThrow(RelictProvinces.DESERT), 1)
+                .add(provinces.getOrThrow(RelictProvinces.SHATTERED_HIGHLANDS), 1)
+                .add(provinces.getOrThrow(RelictProvinces.RUSTED_DUNES), 1)
                 .build();
 
         WeightedList<Holder<Province>> underground = WeightedList.<Holder<Province>>builder()
-                .add(provinces.getOrThrow(RelictProvinces.DRIPSTONE_CAVES), 1)
-                .add(provinces.getOrThrow(RelictProvinces.LUSH_CAVES), 1)
+                .add(provinces.getOrThrow(RelictProvinces.BASALT_CAVES), 9)
+                .add(provinces.getOrThrow(RelictProvinces.SULFUR_CAVES), 3)
+                .add(provinces.getOrThrow(RelictProvinces.ICE_CAVES), 3)
+                .add(provinces.getOrThrow(RelictProvinces.CALCITE_CAVES), 3)
                 .build();
 
         context.register(RelictVoronoiSources.MARS, new VoronoiSource(CELL_SIZE, JITTER, BLEND_WIDTH, EPOCH_SPACING, EPOCH_RELIEF, surface));

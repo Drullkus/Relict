@@ -1,0 +1,74 @@
+package us.drullk.relict.datagen.worldgen;
+
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.placement.PlacementUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.valueproviders.ClampedNormalInt;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.placement.*;
+import us.drullk.relict.init.worldgen.RelictConfiguredFeatures;
+import us.drullk.relict.init.worldgen.RelictPlacedFeatures;
+
+import java.util.List;
+
+public class RelictPlacedFeatureGenerator {
+
+    private static final PlacementModifier DEEP_BAND = HeightRangePlacement.uniform(VerticalAnchor.absolute(-54), VerticalAnchor.absolute(0));
+
+    public static void bootstrapPlacedFeatures(BootstrapContext<PlacedFeature> context) {
+        HolderGetter<ConfiguredFeature<?, ?>> features = context.lookup(Registries.CONFIGURED_FEATURE);
+
+        register(context, RelictPlacedFeatures.SULFUR_GEODE, features.getOrThrow(RelictConfiguredFeatures.SULFUR_GEODE), RarityFilter.onAverageOnceEvery(48), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+
+        basaltCavesPlacedFeatures(context, features);
+        calciteCavesPlacedFeatures(context, features);
+        sulfurCavesPlacedFeatures(context, features);
+        iceCavesPlacedFeatures(context, features);
+    }
+
+    private static void basaltCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
+        register(context, RelictPlacedFeatures.BASALT_COLUMNS, features.getOrThrow(RelictConfiguredFeatures.BASALT_COLUMNS), CountPlacement.of(UniformInt.of(4, 10)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.BLACKSTONE_BLOBS, features.getOrThrow(RelictConfiguredFeatures.BLACKSTONE_BLOBS), CountPlacement.of(UniformInt.of(6, 12)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.GRAVEL_FLOOR, features.getOrThrow(RelictConfiguredFeatures.GRAVEL_FLOOR), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(-1)), BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.MAGMA_PATCH, features.getOrThrow(RelictConfiguredFeatures.MAGMA_PATCH), CountPlacement.of(UniformInt.of(2, 5)), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.SPRING_LAVA, features.getOrThrow(RelictConfiguredFeatures.SPRING_LAVA), CountPlacement.of(UniformInt.of(1, 3)), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.MEGABRECCIA, features.getOrThrow(RelictConfiguredFeatures.MEGABRECCIA), RarityFilter.onAverageOnceEvery(24), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+    }
+
+    private static void calciteCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
+        register(context, RelictPlacedFeatures.CALCITE_BLOBS, features.getOrThrow(RelictConfiguredFeatures.CALCITE_BLOBS), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.CALCITE_SPELEOTHEM_CLUSTER, features.getOrThrow(RelictConfiguredFeatures.CALCITE_SPELEOTHEM_CLUSTER), CountPlacement.of(UniformInt.of(24, 48)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.CALCITE_SPELEOTHEM, features.getOrThrow(RelictConfiguredFeatures.CALCITE_SPELEOTHEM), CountPlacement.of(UniformInt.of(96, 128)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, CountPlacement.of(UniformInt.of(1, 5)), RandomOffsetPlacement.of(ClampedNormalInt.of(0.0F, 3.0F, -10, 10), ClampedNormalInt.of(0.0F, 0.6F, -2, 2)), BiomeFilter.biome());
+    }
+
+    private static void sulfurCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
+        register(context, RelictPlacedFeatures.SULFUR_BLOBS, features.getOrThrow(RelictConfiguredFeatures.SULFUR_BLOBS), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.CINNABAR_BLOBS, features.getOrThrow(RelictConfiguredFeatures.CINNABAR_BLOBS), CountPlacement.of(UniformInt.of(3, 6)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.TUFF_SCATTER, features.getOrThrow(RelictConfiguredFeatures.TUFF_SCATTER), CountPlacement.of(UniformInt.of(2, 4)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.SULFUR_SPIKE_CLUSTER, features.getOrThrow(RelictConfiguredFeatures.SULFUR_SPIKE_CLUSTER), CountPlacement.of(UniformInt.of(24, 48)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.SULFUR_SPIKE, features.getOrThrow(RelictConfiguredFeatures.SULFUR_SPIKE), CountPlacement.of(UniformInt.of(96, 128)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, CountPlacement.of(UniformInt.of(1, 5)), RandomOffsetPlacement.of(ClampedNormalInt.of(0.0F, 3.0F, -10, 10), ClampedNormalInt.of(0.0F, 0.6F, -2, 2)), BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.SULFUR_POOL, features.getOrThrow(RelictConfiguredFeatures.SULFUR_POOL), RarityFilter.onAverageOnceEvery(24), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.SULFUR_GEYSER, features.getOrThrow(RelictConfiguredFeatures.SULFUR_GEYSER), CountPlacement.of(UniformInt.of(2, 5)), InSquarePlacement.spread(), DEEP_BAND, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.matchesBlocks(Blocks.MAGMA_BLOCK), BlockPredicate.ONLY_IN_AIR_PREDICATE, 6), RandomOffsetPlacement.vertical(ConstantInt.of(1)), BiomeFilter.biome());
+    }
+
+    private static void iceCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
+        register(context, RelictPlacedFeatures.PACKED_ICE_LENS, features.getOrThrow(RelictConfiguredFeatures.PACKED_ICE_LENS), CountPlacement.of(UniformInt.of(3, 6)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.ICE_MARGIN, features.getOrThrow(RelictConfiguredFeatures.ICE_MARGIN), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.BLUE_ICE_CORE, features.getOrThrow(RelictConfiguredFeatures.BLUE_ICE_CORE), RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.FROST_FLOOR, features.getOrThrow(RelictConfiguredFeatures.FROST_FLOOR), CountPlacement.of(UniformInt.of(16, 32)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(1)), BiomeFilter.biome());
+    }
+
+    private static void register(BootstrapContext<PlacedFeature> context, ResourceKey<PlacedFeature> key, Holder<ConfiguredFeature<?, ?>> feature, PlacementModifier... modifiers) {
+        context.register(key, new PlacedFeature(feature, List.of(modifiers)));
+    }
+
+}

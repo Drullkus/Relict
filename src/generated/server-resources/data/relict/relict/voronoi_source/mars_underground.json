@@ -4,12 +4,20 @@
   "epoch_spacing": 8192,
   "provinces": [
     {
-      "province": "relict:dripstone_caves",
-      "weight": 1
+      "province": "relict:basalt_caves",
+      "weight": 9
     },
     {
-      "province": "relict:lush_caves",
-      "weight": 1
+      "province": "relict:sulfur_caves",
+      "weight": 3
+    },
+    {
+      "province": "relict:ice_caves",
+      "weight": 3
+    },
+    {
+      "province": "relict:calcite_caves",
+      "weight": 3
     }
   ]
 }

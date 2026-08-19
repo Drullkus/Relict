@@ -7,12 +7,13 @@ import us.drullk.relict.worldgen.Province;
 public class RelictProvinces {
 
     public static final ResourceKey<Province> WRINKLE_PLAINS = create("wrinkle_plains");
+    public static final ResourceKey<Province> RUSTED_DUNES = create("rusted_dunes");
+    public static final ResourceKey<Province> SHATTERED_HIGHLANDS = create("shattered_highlands");
 
-    // Placeholders FIXME remove
-    public static final ResourceKey<Province> BADLANDS = create("badlands");
-    public static final ResourceKey<Province> DESERT = create("desert");
-    public static final ResourceKey<Province> DRIPSTONE_CAVES = create("dripstone_caves");
-    public static final ResourceKey<Province> LUSH_CAVES = create("lush_caves");
+    public static final ResourceKey<Province> BASALT_CAVES = create("basalt_caves");
+    public static final ResourceKey<Province> SULFUR_CAVES = create("sulfur_caves");
+    public static final ResourceKey<Province> ICE_CAVES = create("ice_caves");
+    public static final ResourceKey<Province> CALCITE_CAVES = create("calcite_caves");
 
     private static ResourceKey<Province> create(String name) {
         return ResourceKey.create(RelictCustomRegistries.PROVINCE_REGISTRY, Relict.id(name));

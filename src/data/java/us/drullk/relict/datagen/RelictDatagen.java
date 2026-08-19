@@ -38,14 +38,14 @@ public class RelictDatagen {
 
         RegistrySetBuilder datapackRegistryEntries = new RegistrySetBuilder()
                 .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
-                .add(Registries.CONFIGURED_FEATURE, RelictFeatureGenerator::bootstrapConfiguredFeatures)
+                .add(Registries.CONFIGURED_FEATURE, RelictConfiguredFeatureGenerator::bootstrapConfiguredFeatures)
                 .add(Registries.DAMAGE_TYPE, RelictDamageTypeGenerator::bootstrapDamageTypes)
                 .add(Registries.DENSITY_FUNCTION, RelictDensityFunctionGenerator::bootstrapDensityFunctions)
                 .add(Registries.DIMENSION_TYPE, dimensionGenerator::bootstrapDimensionType)
                 .add(Registries.LEVEL_STEM, dimensionGenerator::bootstrapLevelStem)
                 .add(Registries.NOISE, RelictProvinceGenerator::bootstrapNoises)
                 .add(Registries.NOISE_SETTINGS, dimensionGenerator::bootstrapNoiseSettings)
-                .add(Registries.PLACED_FEATURE, RelictFeatureGenerator::bootstrapPlacedFeatures)
+                .add(Registries.PLACED_FEATURE, RelictPlacedFeatureGenerator::bootstrapPlacedFeatures)
                 .add(RelictCustomRegistries.PROVINCE_REGISTRY, RelictProvinceGenerator::bootstrapProvinces)
                 .add(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY, RelictProvinceGenerator::bootstrapVoronoiSources)
                 .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
@@ -65,6 +65,8 @@ public class RelictDatagen {
 
         event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
         event.addProvider(new RelictLootTables(output, builtinDatapackProvider));
+
+        event.addProvider(new VoronoiFieldSampler(output, builtinDatapackProvider));
     }
 
     @SubscribeEvent

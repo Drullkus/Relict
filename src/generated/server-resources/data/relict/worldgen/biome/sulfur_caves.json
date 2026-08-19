@@ -1,0 +1,44 @@
+{
+  "carvers": [
+    "minecraft:cave",
+    "minecraft:cave_extra_underground",
+    "minecraft:canyon"
+  ],
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#3f76e4"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "relict:sulfur_blobs",
+      "relict:cinnabar_blobs",
+      "relict:tuff_scatter",
+      "relict:sulfur_spike_cluster",
+      "relict:sulfur_spike",
+      "relict:sulfur_geode",
+      "relict:magma_patch",
+      "relict:sulfur_geyser",
+      "relict:sulfur_pool"
+    ]
+  ],
+  "has_precipitation": false,
+  "spawn_costs": {},
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "temperature": -0.7
+}
