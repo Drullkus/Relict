@@ -21,6 +21,7 @@ public class RelictPlacedFeatures {
     public static final ResourceKey<PlacedFeature> CALCITE_BLOBS = create("calcite_blobs");
     public static final ResourceKey<PlacedFeature> CALCITE_SPELEOTHEM_CLUSTER = create("calcite_speleothem_cluster");
     public static final ResourceKey<PlacedFeature> CALCITE_SPELEOTHEM = create("calcite_speleothem");
+    public static final ResourceKey<PlacedFeature> CALCITE_LARGE_DRIPSTONE = create("calcite_large_dripstone");
 
     // sulfur_caves
     public static final ResourceKey<PlacedFeature> SULFUR_BLOBS = create("sulfur_blobs");
@@ -36,6 +37,14 @@ public class RelictPlacedFeatures {
     public static final ResourceKey<PlacedFeature> ICE_MARGIN = create("ice_margin");
     public static final ResourceKey<PlacedFeature> BLUE_ICE_CORE = create("blue_ice_core");
     public static final ResourceKey<PlacedFeature> FROST_FLOOR = create("frost_floor");
+
+    // igneous pockets, all four underground biomes
+    public static final ResourceKey<PlacedFeature> ANDESITE_POCKET_UPPER = create("andesite_pocket_upper");
+    public static final ResourceKey<PlacedFeature> ANDESITE_POCKET_LOWER = create("andesite_pocket_lower");
+    public static final ResourceKey<PlacedFeature> GRANITE_POCKET_UPPER = create("granite_pocket_upper");
+    public static final ResourceKey<PlacedFeature> GRANITE_POCKET_LOWER = create("granite_pocket_lower");
+    public static final ResourceKey<PlacedFeature> DIORITE_POCKET_UPPER = create("diorite_pocket_upper");
+    public static final ResourceKey<PlacedFeature> DIORITE_POCKET_LOWER = create("diorite_pocket_lower");
 
     private static ResourceKey<PlacedFeature> create(String name) {
         return ResourceKey.create(Registries.PLACED_FEATURE, Relict.id(name));

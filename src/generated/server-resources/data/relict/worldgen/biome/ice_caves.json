@@ -28,7 +28,13 @@
       "relict:packed_ice_lens",
       "relict:ice_margin",
       "relict:blue_ice_core",
-      "relict:frost_floor"
+      "relict:frost_floor",
+      "relict:andesite_pocket_upper",
+      "relict:andesite_pocket_lower",
+      "relict:granite_pocket_upper",
+      "relict:granite_pocket_lower",
+      "relict:diorite_pocket_upper",
+      "relict:diorite_pocket_lower"
     ]
   ],
   "has_precipitation": false,

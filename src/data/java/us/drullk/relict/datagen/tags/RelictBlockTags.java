@@ -18,6 +18,8 @@ public class RelictBlockTags extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         this.tag(RelictTags.SPELEOTHEM_REPLACEABLE).add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key());
+        this.tag(RelictTags.DRIPSTONE_REPLACEABLE).add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key(), Blocks.CALCITE.builtInRegistryHolder().key());
+        this.tag(RelictTags.BASE_STONE_MARS).add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key());
     }
 
 }

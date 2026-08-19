@@ -9,6 +9,7 @@ import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.valueproviders.ClampedInt;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformFloat;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.CompositeFeatur
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.GeodeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.LargeDripstoneConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClusterConfiguration;
@@ -41,6 +43,7 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.RandomOffsetPlacement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.minecraft.world.level.material.Fluids;
 import us.drullk.relict.RelictTags;
 import us.drullk.relict.init.worldgen.RelictConfiguredFeatures;
@@ -50,6 +53,9 @@ import java.util.List;
 public class RelictConfiguredFeatureGenerator {
 
     private static final RuleTest SMOOTH_BASALT = new BlockMatchTest(Blocks.SMOOTH_BASALT);
+    private static final RuleTest BASE_STONE_MARS = new TagMatchTest(RelictTags.BASE_STONE_MARS);
+
+    private static final int IGNEOUS_POCKET_SIZE = 64;
 
     private static final float SPELEOTHEM_TALLER_CHANCE = 0.2F;
     private static final float SPELEOTHEM_DIRECTIONAL_SPREAD = 0.7F;
@@ -60,6 +66,7 @@ public class RelictConfiguredFeatureGenerator {
         HolderGetter<Block> blocks = context.lookup(Registries.BLOCK);
         HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures = context.lookup(Registries.CONFIGURED_FEATURE);
         HolderSet<Block> speleothemReplaceable = blocks.getOrThrow(RelictTags.SPELEOTHEM_REPLACEABLE);
+        HolderSet<Block> dripstoneReplaceable = blocks.getOrThrow(RelictTags.DRIPSTONE_REPLACEABLE);
 
         register(context, RelictConfiguredFeatures.SULFUR_GEODE, Feature.GEODE, new GeodeConfiguration(
                 new GeodeBlockSettings(
@@ -79,9 +86,17 @@ public class RelictConfiguredFeatureGenerator {
         ));
 
         basaltCavesConfiguredFeatures(context, configuredFeatures, speleothemReplaceable);
-        calciteCavesConfiguredFeatures(context, configuredFeatures, speleothemReplaceable);
+        calciteCavesConfiguredFeatures(context, configuredFeatures, dripstoneReplaceable);
         sulfurCavesConfiguredFeatures(context, configuredFeatures, speleothemReplaceable);
         iceCavesConfiguredFeatures(context, configuredFeatures, speleothemReplaceable);
+        igneousPockets(context);
+    }
+
+    /** Overworld-style andesite/granite/diorite pockets (report §6), shared across all four underground biomes. */
+    private static void igneousPockets(BootstrapContext<ConfiguredFeature<?, ?>> context) {
+        register(context, RelictConfiguredFeatures.ANDESITE_POCKET, Feature.ORE, new OreConfiguration(BASE_STONE_MARS, Blocks.ANDESITE.defaultBlockState(), IGNEOUS_POCKET_SIZE));
+        register(context, RelictConfiguredFeatures.GRANITE_POCKET, Feature.ORE, new OreConfiguration(BASE_STONE_MARS, Blocks.GRANITE.defaultBlockState(), IGNEOUS_POCKET_SIZE));
+        register(context, RelictConfiguredFeatures.DIORITE_POCKET, Feature.ORE, new OreConfiguration(BASE_STONE_MARS, Blocks.DIORITE.defaultBlockState(), IGNEOUS_POCKET_SIZE));
     }
 
     private static void basaltCavesConfiguredFeatures(BootstrapContext<ConfiguredFeature<?, ?>> context, HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures, HolderSet<Block> speleothemReplaceable) {
@@ -96,15 +111,17 @@ public class RelictConfiguredFeatureGenerator {
         register(context, RelictConfiguredFeatures.SPRING_LAVA, Feature.SPRING, new SpringConfiguration(Fluids.LAVA.defaultFluidState(), true, 4, 1, HolderSet.direct(Block::builtInRegistryHolder, Blocks.SMOOTH_BASALT, Blocks.BASALT, Blocks.BLACKSTONE)));
     }
 
-    private static void calciteCavesConfiguredFeatures(BootstrapContext<ConfiguredFeature<?, ?>> context, HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures, HolderSet<Block> speleothemReplaceable) {
+    private static void calciteCavesConfiguredFeatures(BootstrapContext<ConfiguredFeature<?, ?>> context, HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures, HolderSet<Block> dripstoneReplaceable) {
         register(context, RelictConfiguredFeatures.MEGABRECCIA_COBBLED, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.COBBLED_DEEPSLATE.defaultBlockState(), 10));
         register(context, RelictConfiguredFeatures.MEGABRECCIA_TUFF, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.TUFF.defaultBlockState(), 10));
         register(context, RelictConfiguredFeatures.MEGABRECCIA, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(PlacementUtils.inlinePlaced(configuredFeatures.getOrThrow(RelictConfiguredFeatures.MEGABRECCIA_COBBLED)), PlacementUtils.inlinePlaced(configuredFeatures.getOrThrow(RelictConfiguredFeatures.MEGABRECCIA_TUFF)))));
 
         register(context, RelictConfiguredFeatures.CALCITE_BLOBS, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.CALCITE.defaultBlockState(), 20));
 
-        register(context, RelictConfiguredFeatures.CALCITE_SPELEOTHEM_CLUSTER, Feature.SPELEOTHEM_CLUSTER, new SpeleothemClusterConfiguration(Blocks.CALCITE.defaultBlockState(), Blocks.POINTED_DRIPSTONE.defaultBlockState(), speleothemReplaceable, 12, UniformInt.of(1, 4), UniformInt.of(2, 8), 1, 3, UniformInt.of(2, 4), UniformFloat.of(0.3F, 0.7F), ConstantFloat.ZERO, 0.1F, 3, 8));
-        register(context, RelictConfiguredFeatures.CALCITE_SPELEOTHEM, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(speleothemDirection(Direction.DOWN, Blocks.CALCITE.defaultBlockState(), Blocks.POINTED_DRIPSTONE.defaultBlockState(), speleothemReplaceable), speleothemDirection(Direction.UP, Blocks.CALCITE.defaultBlockState(), Blocks.POINTED_DRIPSTONE.defaultBlockState(), speleothemReplaceable))));
+        register(context, RelictConfiguredFeatures.CALCITE_SPELEOTHEM_CLUSTER, Feature.SPELEOTHEM_CLUSTER, new SpeleothemClusterConfiguration(Blocks.DRIPSTONE_BLOCK.defaultBlockState(), Blocks.POINTED_DRIPSTONE.defaultBlockState(), dripstoneReplaceable, 12, UniformInt.of(1, 4), UniformInt.of(2, 8), 1, 3, UniformInt.of(2, 4), UniformFloat.of(0.3F, 0.7F), ConstantFloat.ZERO, 0.1F, 3, 8));
+        register(context, RelictConfiguredFeatures.CALCITE_SPELEOTHEM, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(speleothemDirection(Direction.DOWN, Blocks.DRIPSTONE_BLOCK.defaultBlockState(), Blocks.POINTED_DRIPSTONE.defaultBlockState(), dripstoneReplaceable), speleothemDirection(Direction.UP, Blocks.DRIPSTONE_BLOCK.defaultBlockState(), Blocks.POINTED_DRIPSTONE.defaultBlockState(), dripstoneReplaceable))));
+
+        register(context, RelictConfiguredFeatures.CALCITE_LARGE_DRIPSTONE, Feature.LARGE_DRIPSTONE, new LargeDripstoneConfiguration(dripstoneReplaceable, 30, ClampedInt.of(UniformInt.of(3, 19), 3, 16), UniformFloat.of(0.4F, 2.0F), 0.33F, UniformFloat.of(0.3F, 0.9F), UniformFloat.of(0.4F, 1.0F), UniformFloat.of(0.0F, 0.3F), 4, 0.6F));
     }
 
     private static void sulfurCavesConfiguredFeatures(BootstrapContext<ConfiguredFeature<?, ?>> context, HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures, HolderSet<Block> speleothemReplaceable) {

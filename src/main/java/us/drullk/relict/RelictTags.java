@@ -17,4 +17,10 @@ public class RelictTags {
 
     public static final TagKey<Block> SPELEOTHEM_REPLACEABLE = TagKey.create(Registries.BLOCK, Relict.id("speleothem_replaceable"));
 
+    /** Vanilla's {@code dripstone_replaceable} equivalent: what dripstone patches and speleothems may grow into. */
+    public static final TagKey<Block> DRIPSTONE_REPLACEABLE = TagKey.create(Registries.BLOCK, Relict.id("dripstone_replaceable"));
+
+    /** Vanilla's {@code base_stone_overworld} equivalent: the Mars underground's base rock for ore-style features. */
+    public static final TagKey<Block> BASE_STONE_MARS = TagKey.create(Registries.BLOCK, Relict.id("base_stone_mars"));
+
 }

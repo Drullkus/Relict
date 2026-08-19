@@ -15,14 +15,25 @@ import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.*;
+import net.minecraft.world.level.material.Fluids;
 import us.drullk.relict.init.worldgen.RelictConfiguredFeatures;
 import us.drullk.relict.init.worldgen.RelictPlacedFeatures;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class RelictPlacedFeatureGenerator {
 
     private static final PlacementModifier DEEP_BAND = HeightRangePlacement.uniform(VerticalAnchor.absolute(-54), VerticalAnchor.absolute(0));
+
+    private static final PlacementModifier SHALLOW_BAND = HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(80));
+
+    private static final PlacementModifier NOT_NEAR_LAVA = BlockPredicateFilter.forPredicate(BlockPredicate.allOf(
+            Stream.of(Direction.values())
+                    .map(direction -> BlockPredicate.not(BlockPredicate.anyOf(
+                            BlockPredicate.matchesFluids(direction.getUnitVec3i(), Fluids.LAVA, Fluids.FLOWING_LAVA),
+                            BlockPredicate.matchesBlocks(direction.getUnitVec3i(), Blocks.MAGMA_BLOCK))))
+                    .toList()));
 
     public static void bootstrapPlacedFeatures(BootstrapContext<PlacedFeature> context) {
         HolderGetter<ConfiguredFeature<?, ?>> features = context.lookup(Registries.CONFIGURED_FEATURE);
@@ -33,6 +44,16 @@ public class RelictPlacedFeatureGenerator {
         calciteCavesPlacedFeatures(context, features);
         sulfurCavesPlacedFeatures(context, features);
         iceCavesPlacedFeatures(context, features);
+        igneousPocketsPlacedFeatures(context, features);
+    }
+
+    private static void igneousPocketsPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
+        register(context, RelictPlacedFeatures.ANDESITE_POCKET_UPPER, features.getOrThrow(RelictConfiguredFeatures.ANDESITE_POCKET), RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), SHALLOW_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.ANDESITE_POCKET_LOWER, features.getOrThrow(RelictConfiguredFeatures.ANDESITE_POCKET), CountPlacement.of(2), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.GRANITE_POCKET_UPPER, features.getOrThrow(RelictConfiguredFeatures.GRANITE_POCKET), RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), SHALLOW_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.GRANITE_POCKET_LOWER, features.getOrThrow(RelictConfiguredFeatures.GRANITE_POCKET), CountPlacement.of(2), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.DIORITE_POCKET_UPPER, features.getOrThrow(RelictConfiguredFeatures.DIORITE_POCKET), RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), SHALLOW_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.DIORITE_POCKET_LOWER, features.getOrThrow(RelictConfiguredFeatures.DIORITE_POCKET), CountPlacement.of(2), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
     }
 
     private static void basaltCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
@@ -48,6 +69,7 @@ public class RelictPlacedFeatureGenerator {
         register(context, RelictPlacedFeatures.CALCITE_BLOBS, features.getOrThrow(RelictConfiguredFeatures.CALCITE_BLOBS), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.CALCITE_SPELEOTHEM_CLUSTER, features.getOrThrow(RelictConfiguredFeatures.CALCITE_SPELEOTHEM_CLUSTER), CountPlacement.of(UniformInt.of(24, 48)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.CALCITE_SPELEOTHEM, features.getOrThrow(RelictConfiguredFeatures.CALCITE_SPELEOTHEM), CountPlacement.of(UniformInt.of(96, 128)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, CountPlacement.of(UniformInt.of(1, 5)), RandomOffsetPlacement.of(ClampedNormalInt.of(0.0F, 3.0F, -10, 10), ClampedNormalInt.of(0.0F, 0.6F, -2, 2)), BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.CALCITE_LARGE_DRIPSTONE, features.getOrThrow(RelictConfiguredFeatures.CALCITE_LARGE_DRIPSTONE), CountPlacement.of(UniformInt.of(10, 24)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
     }
 
     private static void sulfurCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
@@ -61,10 +83,10 @@ public class RelictPlacedFeatureGenerator {
     }
 
     private static void iceCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
-        register(context, RelictPlacedFeatures.PACKED_ICE_LENS, features.getOrThrow(RelictConfiguredFeatures.PACKED_ICE_LENS), CountPlacement.of(UniformInt.of(3, 6)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
-        register(context, RelictPlacedFeatures.ICE_MARGIN, features.getOrThrow(RelictConfiguredFeatures.ICE_MARGIN), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
-        register(context, RelictPlacedFeatures.BLUE_ICE_CORE, features.getOrThrow(RelictConfiguredFeatures.BLUE_ICE_CORE), RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
-        register(context, RelictPlacedFeatures.FROST_FLOOR, features.getOrThrow(RelictConfiguredFeatures.FROST_FLOOR), CountPlacement.of(UniformInt.of(16, 32)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(1)), BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.PACKED_ICE_LENS, features.getOrThrow(RelictConfiguredFeatures.PACKED_ICE_LENS), CountPlacement.of(UniformInt.of(3, 6)), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.ICE_MARGIN, features.getOrThrow(RelictConfiguredFeatures.ICE_MARGIN), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.BLUE_ICE_CORE, features.getOrThrow(RelictConfiguredFeatures.BLUE_ICE_CORE), RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.FROST_FLOOR, features.getOrThrow(RelictConfiguredFeatures.FROST_FLOOR), CountPlacement.of(UniformInt.of(16, 32)), InSquarePlacement.spread(), SHALLOW_BAND, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(1)), NOT_NEAR_LAVA, BiomeFilter.biome());
     }
 
     private static void register(BootstrapContext<PlacedFeature> context, ResourceKey<PlacedFeature> key, Holder<ConfiguredFeature<?, ?>> feature, PlacementModifier... modifiers) {

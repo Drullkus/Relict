@@ -23,6 +23,7 @@ public class RelictConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> CALCITE_BLOBS = create("calcite_blobs");
     public static final ResourceKey<ConfiguredFeature<?, ?>> CALCITE_SPELEOTHEM_CLUSTER = create("calcite_speleothem_cluster");
     public static final ResourceKey<ConfiguredFeature<?, ?>> CALCITE_SPELEOTHEM = create("calcite_speleothem");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> CALCITE_LARGE_DRIPSTONE = create("calcite_large_dripstone");
 
     // sulfur_caves
     public static final ResourceKey<ConfiguredFeature<?, ?>> SULFUR_BLOBS = create("sulfur_blobs");
@@ -38,6 +39,11 @@ public class RelictConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> ICE_MARGIN = create("ice_margin");
     public static final ResourceKey<ConfiguredFeature<?, ?>> BLUE_ICE_CORE = create("blue_ice_core");
     public static final ResourceKey<ConfiguredFeature<?, ?>> FROST_FLOOR = create("frost_floor");
+
+    // igneous pockets, all four underground biomes
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ANDESITE_POCKET = create("andesite_pocket");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> GRANITE_POCKET = create("granite_pocket");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> DIORITE_POCKET = create("diorite_pocket");
 
     private static ResourceKey<ConfiguredFeature<?, ?>> create(String name) {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, Relict.id(name));

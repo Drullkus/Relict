@@ -7,7 +7,7 @@
           "type": "minecraft:speleothem",
           "config": {
             "base_block": {
-              "Name": "minecraft:calcite"
+              "Name": "minecraft:dripstone_block"
             },
             "pointed_block": {
               "Name": "minecraft:pointed_dripstone",
@@ -17,7 +17,7 @@
                 "waterlogged": "false"
               }
             },
-            "replaceable_blocks": "#relict:speleothem_replaceable"
+            "replaceable_blocks": "#relict:dripstone_replaceable"
           }
         },
         "placement": [
@@ -54,7 +54,7 @@
           "type": "minecraft:speleothem",
           "config": {
             "base_block": {
-              "Name": "minecraft:calcite"
+              "Name": "minecraft:dripstone_block"
             },
             "pointed_block": {
               "Name": "minecraft:pointed_dripstone",
@@ -64,7 +64,7 @@
                 "waterlogged": "false"
               }
             },
-            "replaceable_blocks": "#relict:speleothem_replaceable"
+            "replaceable_blocks": "#relict:dripstone_replaceable"
           }
         },
         "placement": [

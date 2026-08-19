@@ -24,7 +24,6 @@ public class RelictSurfaceRules {
     private static final SurfaceRules.RuleSource CALCITE = state(Blocks.CALCITE);
     private static final SurfaceRules.RuleSource DRIPSTONE_BLOCK = state(Blocks.DRIPSTONE_BLOCK);
     private static final SurfaceRules.RuleSource PACKED_ICE = state(Blocks.PACKED_ICE);
-    private static final SurfaceRules.RuleSource ICE = state(Blocks.ICE);
     private static final SurfaceRules.RuleSource BLUE_ICE = state(Blocks.BLUE_ICE);
 
     private static final int BEDROCK_FLOOR_DEPTH = 5;
@@ -65,12 +64,11 @@ public class RelictSurfaceRules {
         );
     }
 
-    /** Bulk packed ice, ice margins, and rare blue-ice cores, reusing vanilla's frozen-peaks noise fields. */
+    /** Bulk packed ice and rare blue-ice cores, reusing vanilla's frozen-peaks noise fields. */
     private static SurfaceRules.RuleSource iceCaveBands() {
         return SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.noiseCondition3d(Noises.ICE, 0.55), BLUE_ICE),
-                SurfaceRules.ifTrue(SurfaceRules.noiseCondition3d(Noises.PACKED_ICE, -0.15, 0.5), PACKED_ICE),
-                SurfaceRules.ifTrue(SurfaceRules.noiseCondition3d(Noises.ICE, -0.1, 0.3), ICE)
+                SurfaceRules.ifTrue(SurfaceRules.noiseCondition3d(Noises.PACKED_ICE, -0.15, 0.5), PACKED_ICE)
         );
     }
 
