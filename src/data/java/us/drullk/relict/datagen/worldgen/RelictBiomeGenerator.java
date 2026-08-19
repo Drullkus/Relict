@@ -4,6 +4,9 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.Carvers;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.attribute.modifier.FloatModifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -18,6 +21,10 @@ public class RelictBiomeGenerator {
 
     private static final int WATER_COLOR = 0x3F76E4;
     private static final float TEMPERATURE = -0.7F;
+
+    private static final int CAVE_FOG_COLOR = 0x26_1C_14;
+    private static final float CAVE_FOG_START_DISTANCE = 0.0F;
+    private static final float CAVE_FOG_END_SCALAR = 0.5F;
 
     public static void bootstrapBiomes(BootstrapContext<Biome> context) {
         HolderGetter<PlacedFeature> placedFeatures = context.lookup(Registries.PLACED_FEATURE);
@@ -90,6 +97,9 @@ public class RelictBiomeGenerator {
                 .hasPrecipitation(false)
                 .temperature(TEMPERATURE)
                 .downfall(0.0F)
+                .setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.opaque(CAVE_FOG_COLOR))
+                .setAttribute(EnvironmentAttributes.FOG_START_DISTANCE, CAVE_FOG_START_DISTANCE)
+                .modifyAttribute(EnvironmentAttributes.FOG_END_DISTANCE, FloatModifier.MULTIPLY, CAVE_FOG_END_SCALAR)
                 .specialEffects(new BiomeSpecialEffects.Builder().waterColor(WATER_COLOR).build())
                 .mobSpawnSettings(MobSpawnSettings.EMPTY)
                 .generationSettings(generation)

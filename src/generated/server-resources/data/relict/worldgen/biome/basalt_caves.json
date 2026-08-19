@@ -1,4 +1,12 @@
 {
+  "attributes": {
+    "minecraft:visual/fog_color": "#261c14",
+    "minecraft:visual/fog_end_distance": {
+      "argument": 0.5,
+      "modifier": "multiply"
+    },
+    "minecraft:visual/fog_start_distance": 0.0
+  },
   "carvers": [
     "minecraft:cave",
     "minecraft:cave_extra_underground",
