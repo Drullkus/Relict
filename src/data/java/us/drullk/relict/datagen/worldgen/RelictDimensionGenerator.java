@@ -84,7 +84,7 @@ public class RelictDimensionGenerator {
         HolderGetter<NoiseGeneratorSettings> noiseSettings = context.lookup(Registries.NOISE_SETTINGS);
         HolderGetter<VoronoiSource> voronoiSources = context.lookup(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY);
 
-        VoronoiBiomeSource biomeSource = new VoronoiBiomeSource(voronoiSources.getOrThrow(RelictVoronoiSources.MARS), Optional.of(voronoiSources.getOrThrow(RelictVoronoiSources.MARS_UNDERGROUND)), this.seaLevel - 32 - 8);
+        VoronoiBiomeSource biomeSource = new VoronoiBiomeSource(voronoiSources.getOrThrow(RelictVoronoiSources.MARS), Optional.of(voronoiSources.getOrThrow(RelictVoronoiSources.MARS_UNDERGROUND)), this.seaLevel - 32 - 16);
         NoiseBasedChunkGenerator generator = new NoiseBasedChunkGenerator(biomeSource, noiseSettings.getOrThrow(RelictDimension.MARS_NOISE_SETTINGS));
         context.register(RelictDimension.MARS_LEVELSTEM, new LevelStem(dimensionTypes.getOrThrow(RelictDimension.MARS_TYPE), generator));
     }
