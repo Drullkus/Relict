@@ -15,6 +15,8 @@ import us.drullk.relict.init.RelictCreativeTabs;
 import us.drullk.relict.init.RelictDataComponents;
 import us.drullk.relict.init.RelictEnvironmentAttributes;
 import us.drullk.relict.init.RelictItems;
+import us.drullk.relict.init.custom.RelictCustomRegistries;
+import us.drullk.relict.init.worldgen.RelictWorldgenTypes;
 
 @Mod(Relict.MODID)
 public class Relict {
@@ -28,6 +30,9 @@ public class Relict {
         RelictAttributes.register(modEventBus);
         RelictDataComponents.register(modEventBus);
         RelictEnvironmentAttributes.register(modEventBus);
+        RelictWorldgenTypes.register(modEventBus);
+
+        modEventBus.addListener(new RelictCustomRegistries()::register);
 
         RelictEvents events = new RelictEvents();
         NeoForge.EVENT_BUS.addListener(events::levelTick);

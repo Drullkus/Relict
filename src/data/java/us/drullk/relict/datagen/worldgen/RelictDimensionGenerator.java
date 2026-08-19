@@ -11,8 +11,6 @@ import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.clock.WorldClock;
 import net.minecraft.world.level.CardinalLighting;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -21,8 +19,11 @@ import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.timeline.Timeline;
 import net.neoforged.neoforge.common.world.NeoForgeEnvironmentAttributes;
 import us.drullk.relict.Relict;
-import us.drullk.relict.init.worldgen.RelictBiomes;
+import us.drullk.relict.init.custom.RelictCustomRegistries;
+import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
+import us.drullk.relict.worldgen.VoronoiBiomeSource;
+import us.drullk.relict.worldgen.VoronoiSource;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,17 +80,21 @@ public class RelictDimensionGenerator {
     }
 
     public void bootstrapLevelStem(BootstrapContext<LevelStem> context) {
-        HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
         HolderGetter<DimensionType> dimensionTypes = context.lookup(Registries.DIMENSION_TYPE);
         HolderGetter<NoiseGeneratorSettings> noiseSettings = context.lookup(Registries.NOISE_SETTINGS);
+        HolderGetter<VoronoiSource> voronoiSources = context.lookup(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY);
 
-        FixedBiomeSource biomeSource = new FixedBiomeSource(biomes.getOrThrow(RelictBiomes.WRINKLE_PLAINS));
+        VoronoiBiomeSource biomeSource = new VoronoiBiomeSource(voronoiSources.getOrThrow(RelictVoronoiSources.MARS), Optional.of(voronoiSources.getOrThrow(RelictVoronoiSources.MARS_UNDERGROUND)), this.seaLevel - 32 - 8);
         NoiseBasedChunkGenerator generator = new NoiseBasedChunkGenerator(biomeSource, noiseSettings.getOrThrow(RelictDimension.MARS_NOISE_SETTINGS));
         context.register(RelictDimension.MARS_LEVELSTEM, new LevelStem(dimensionTypes.getOrThrow(RelictDimension.MARS_TYPE), generator));
     }
 
     public void bootstrapNoiseSettings(BootstrapContext<NoiseGeneratorSettings> context) {
-        NoiseRouter noiseRouter = NoiseGeneratorSettings.overworld(context, false, false).noiseRouter();
+        HolderGetter<DensityFunction> densityFunctions = context.lookup(Registries.DENSITY_FUNCTION);
+
+        DensityFunction surfaceHeight = new DensityFunctions.HolderHolder(densityFunctions.getOrThrow(RelictDensityFunctionGenerator.VORONOI_SURFACE_HEIGHT));
+        DensityFunction relief = new DensityFunctions.HolderHolder(densityFunctions.getOrThrow(RelictDensityFunctionGenerator.RELIEF));
+        NoiseRouter noiseRouter = RelictNoiseRouter.route(densityFunctions, context.lookup(Registries.NOISE), surfaceHeight, relief, this.seaLevel, this.minY, this.height);
 
         context.register(RelictDimension.MARS_NOISE_SETTINGS, new NoiseGeneratorSettings(
                 NoiseSettings.create(this.minY, this.height, 1, 2),
@@ -100,7 +105,7 @@ public class RelictDimensionGenerator {
                 List.of(),
                 this.seaLevel,
                 false,
-                true,
+                false,
                 true,
                 false
         ));

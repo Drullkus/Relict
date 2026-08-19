@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "minecraft:add",
+    "argument1": {
+      "type": "minecraft:mul",
+      "argument1": {
+        "type": "relict:voronoi_parameter",
+        "parameter": "ridge_amplitude",
+        "voronoi_source": "relict:mars"
+      },
+      "argument2": "relict:terrain/ridge_shape"
+    },
+    "argument2": {
+      "type": "minecraft:mul",
+      "argument1": {
+        "type": "relict:voronoi_parameter",
+        "parameter": "plain_roughness",
+        "voronoi_source": "relict:mars"
+      },
+      "argument2": {
+        "type": "minecraft:noise",
+        "noise": "relict:plain",
+        "xz_scale": 0.08888888888888889,
+        "y_scale": 0.0
+      }
+    }
+  }
+}

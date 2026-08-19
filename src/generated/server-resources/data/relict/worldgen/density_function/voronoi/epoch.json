@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "relict:voronoi_parameter",
+    "parameter": "epoch",
+    "voronoi_source": "relict:mars"
+  }
+}

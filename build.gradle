@@ -126,6 +126,10 @@ neoForge {
 
             programArguments.addAll datagenArguments
             programArguments.addAll '--output', serverDatagenOutput.getAbsolutePath()
+
+            // The terrain reports the samplers write are not datapack files, so they do not go under
+            // --output. Absolute, because datagen's working directory is run/.
+            systemProperty 'relict.terrainReportDir', file('prototypes/out').getAbsolutePath()
         }
 
         // Assets (textures, models, atlases) are generated here rather than in serverData, so that

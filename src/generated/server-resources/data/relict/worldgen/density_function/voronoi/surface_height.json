@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "relict:voronoi_parameter",
+    "parameter": "surface_height",
+    "voronoi_source": "relict:mars"
+  }
+}

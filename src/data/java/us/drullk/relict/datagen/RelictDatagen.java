@@ -19,6 +19,7 @@ import us.drullk.relict.datagen.tags.RelictDimensionTypeTags;
 import us.drullk.relict.datagen.tags.RelictItemTags;
 import us.drullk.relict.datagen.tags.RelictTimelineTags;
 import us.drullk.relict.datagen.worldgen.*;
+import us.drullk.relict.init.custom.RelictCustomRegistries;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -32,7 +33,7 @@ public class RelictDatagen {
         PackOutput output = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
-        RelictDimensionGenerator dimensionGenerator = new RelictDimensionGenerator(-128, 384, -1);
+        RelictDimensionGenerator dimensionGenerator = new RelictDimensionGenerator(-64, 384, 128);
         RelictTimelineGenerator timelineGenerator = new RelictTimelineGenerator(22);
 
         RegistrySetBuilder datapackRegistryEntries = new RegistrySetBuilder()
@@ -42,8 +43,11 @@ public class RelictDatagen {
                 .add(Registries.DENSITY_FUNCTION, RelictDensityFunctionGenerator::bootstrapDensityFunctions)
                 .add(Registries.DIMENSION_TYPE, dimensionGenerator::bootstrapDimensionType)
                 .add(Registries.LEVEL_STEM, dimensionGenerator::bootstrapLevelStem)
+                .add(Registries.NOISE, RelictProvinceGenerator::bootstrapNoises)
                 .add(Registries.NOISE_SETTINGS, dimensionGenerator::bootstrapNoiseSettings)
                 .add(Registries.PLACED_FEATURE, RelictFeatureGenerator::bootstrapPlacedFeatures)
+                .add(RelictCustomRegistries.PROVINCE_REGISTRY, RelictProvinceGenerator::bootstrapProvinces)
+                .add(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY, RelictProvinceGenerator::bootstrapVoronoiSources)
                 .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
                 .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet)
                 .add(Registries.TIMELINE, timelineGenerator::bootstrapTimelines)

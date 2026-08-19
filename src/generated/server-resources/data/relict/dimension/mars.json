@@ -3,8 +3,10 @@
   "generator": {
     "type": "minecraft:noise",
     "biome_source": {
-      "type": "minecraft:fixed",
-      "biome": "relict:wrinkle_plains"
+      "type": "relict:voronoi",
+      "underground_below": 88,
+      "underground_source": "relict:mars_underground",
+      "voronoi_source": "relict:mars"
     },
     "settings": "relict:mars"
   }
