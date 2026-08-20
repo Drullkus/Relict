@@ -39,8 +39,10 @@ public class RelictConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> ICE_MARGIN = create("ice_margin");
     public static final ResourceKey<ConfiguredFeature<?, ?>> BLUE_ICE_CORE = create("blue_ice_core");
     public static final ResourceKey<ConfiguredFeature<?, ?>> FROST_FLOOR = create("frost_floor");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ICE_LENS_RIM = create("ice_lens_rim");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ICE_WALL_POCKET = create("ice_wall_pocket");
 
-    // igneous pockets, all four underground biomes
+    // igneous pockets, spread over the underground biomes by rock
     public static final ResourceKey<ConfiguredFeature<?, ?>> ANDESITE_POCKET = create("andesite_pocket");
     public static final ResourceKey<ConfiguredFeature<?, ?>> GRANITE_POCKET = create("granite_pocket");
     public static final ResourceKey<ConfiguredFeature<?, ?>> DIORITE_POCKET = create("diorite_pocket");

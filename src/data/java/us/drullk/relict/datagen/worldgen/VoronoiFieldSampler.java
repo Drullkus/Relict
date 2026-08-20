@@ -126,6 +126,13 @@ public final class VoronoiFieldSampler implements DataProvider {
     private static final int UNDERGROUND_CELL_RADIUS = 60;
     private static final int UNDERGROUND_TELEPORT_Y = 40;
 
+    private static final int CAVE_CENSUS_GRID = 24;
+    private static final int CAVE_CENSUS_STEP = 16;
+    private static final int CAVE_BAND_MIN = -54;
+    private static final int CAVE_BAND_MAX = 80;
+
+    private static final int FULL_COLUMN_SPAN = 384;
+
     private final CompletableFuture<HolderLookup.Provider> registries;
 
     public VoronoiFieldSampler(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
@@ -1101,7 +1108,73 @@ public final class VoronoiFieldSampler implements DataProvider {
                     entry.getKey(), cell[0], cell[1], worldX, UNDERGROUND_TELEPORT_Y, worldZ));
         }
 
+        caveFloorCensus(report, registries);
+
         return report;
+    }
+
+    private static void caveFloorCensus(StringBuilder report, HolderLookup.Provider registries) {
+        NoiseGeneratorSettings settings = registries.lookupOrThrow(Registries.NOISE_SETTINGS)
+                .getOrThrow(RelictDimension.MARS_NOISE_SETTINGS).value();
+        LevelStem levelStem = registries.lookupOrThrow(Registries.LEVEL_STEM)
+                .getOrThrow(RelictDimension.MARS_LEVELSTEM).value();
+
+        if (!(levelStem.generator() instanceof NoiseBasedChunkGenerator generator)) {
+            report.append("\ncave floor census, skipped: the Mars level stem generator is not noise-based\n");
+            return;
+        }
+
+        RandomState state = RandomState.create(settings, registries.lookupOrThrow(Registries.NOISE), SEED);
+        LevelHeightAccessor height = LevelHeightAccessor.create(settings.noiseSettings().minY(), settings.noiseSettings().height());
+
+        long banded = 0;
+        long air = 0;
+        long floors = 0;
+        int columns = 0;
+        int richestFloors = 0;
+        int[] richest = null;
+
+        int half = CAVE_CENSUS_GRID * CAVE_CENSUS_STEP / 2;
+        for (int ix = 0; ix < CAVE_CENSUS_GRID; ix++) {
+            for (int iz = 0; iz < CAVE_CENSUS_GRID; iz++) {
+                int x = ix * CAVE_CENSUS_STEP - half;
+                int z = iz * CAVE_CENSUS_STEP - half;
+                NoiseColumn blocks = generator.getBaseColumn(x, z, height, state);
+                columns++;
+                int columnFloors = 0;
+
+                for (int y = CAVE_BAND_MIN; y <= CAVE_BAND_MAX; y++) {
+                    banded++;
+                    if (blocks.getBlock(y).isAir()) {
+                        air++;
+                        if (!blocks.getBlock(y - 1).isAir()) {
+                            columnFloors++;
+                        }
+                    }
+                }
+
+                floors += columnFloors;
+                if (columnFloors > richestFloors) {
+                    richestFloors = columnFloors;
+                    richest = new int[] {x, z};
+                }
+            }
+        }
+
+        double airShare = (double) air / banded;
+        double floorShare = (double) floors / (columns * (double) FULL_COLUMN_SPAN);
+
+        report.append(String.format("%ncave floor census over %d columns, band y %d..%d%n",
+                columns, CAVE_BAND_MIN, CAVE_BAND_MAX));
+        report.append(String.format("    cave air in the band            %.2f%% of %d blocks%n", 100.0 * airShare, banded));
+        report.append(String.format("    cave floors per column          %.2f%n", (double) floors / columns));
+        report.append(String.format("    one attempt survives, band + environment_scan   %.2f%%%n", 100.0 * airShare));
+        report.append(String.format("    one attempt survives, whole-column height_range %.2f%%%n", 100.0 * floorShare));
+
+        if (richest != null) {
+            report.append(String.format("    richest column %d floors  /execute in relict:mars run tp @s %d %d %d%n",
+                    richestFloors, richest[0], UNDERGROUND_TELEPORT_Y, richest[1]));
+        }
     }
 
     // ---------------------------------------------------------------------------------------- plumbing

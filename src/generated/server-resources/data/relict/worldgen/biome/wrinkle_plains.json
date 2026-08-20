@@ -1,8 +1,8 @@
 {
   "carvers": [
-    "minecraft:cave",
-    "minecraft:cave_extra_underground",
-    "minecraft:canyon"
+    "relict:cave",
+    "relict:cave_extra_underground",
+    "relict:canyon"
   ],
   "downfall": 0.0,
   "effects": {

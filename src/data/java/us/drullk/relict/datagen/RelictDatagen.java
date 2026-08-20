@@ -38,6 +38,7 @@ public class RelictDatagen {
 
         RegistrySetBuilder datapackRegistryEntries = new RegistrySetBuilder()
                 .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
+                .add(Registries.CONFIGURED_CARVER, RelictCarverGenerator::bootstrapCarvers)
                 .add(Registries.CONFIGURED_FEATURE, RelictConfiguredFeatureGenerator::bootstrapConfiguredFeatures)
                 .add(Registries.DAMAGE_TYPE, RelictDamageTypeGenerator::bootstrapDamageTypes)
                 .add(Registries.DENSITY_FUNCTION, RelictDensityFunctionGenerator::bootstrapDensityFunctions)

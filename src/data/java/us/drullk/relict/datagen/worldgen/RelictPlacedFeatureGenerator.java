@@ -28,6 +28,13 @@ public class RelictPlacedFeatureGenerator {
 
     private static final PlacementModifier SHALLOW_BAND = HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(80));
 
+    private static final PlacementModifier CAVE_BAND = HeightRangePlacement.uniform(VerticalAnchor.absolute(-54), VerticalAnchor.absolute(80));
+
+    private static final PlacementModifier ON_CAVE_FLOOR = EnvironmentScanPlacement.scanningFor(
+            Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 32);
+
+    private static final UniformInt CAVE_SURFACE_ATTEMPTS = UniformInt.of(64, 128);
+
     private static final PlacementModifier NOT_NEAR_LAVA = BlockPredicateFilter.forPredicate(BlockPredicate.allOf(
             Stream.of(Direction.values())
                     .map(direction -> BlockPredicate.not(BlockPredicate.anyOf(
@@ -57,7 +64,7 @@ public class RelictPlacedFeatureGenerator {
     }
 
     private static void basaltCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
-        register(context, RelictPlacedFeatures.BASALT_COLUMNS, features.getOrThrow(RelictConfiguredFeatures.BASALT_COLUMNS), CountPlacement.of(UniformInt.of(4, 10)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.BASALT_COLUMNS, features.getOrThrow(RelictConfiguredFeatures.BASALT_COLUMNS), CountPlacement.of(CAVE_SURFACE_ATTEMPTS), InSquarePlacement.spread(), CAVE_BAND, ON_CAVE_FLOOR, RandomOffsetPlacement.vertical(ConstantInt.of(1)), BiomeFilter.biome());
         register(context, RelictPlacedFeatures.BLACKSTONE_BLOBS, features.getOrThrow(RelictConfiguredFeatures.BLACKSTONE_BLOBS), CountPlacement.of(UniformInt.of(6, 12)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.GRAVEL_FLOOR, features.getOrThrow(RelictConfiguredFeatures.GRAVEL_FLOOR), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(-1)), BiomeFilter.biome());
         register(context, RelictPlacedFeatures.MAGMA_PATCH, features.getOrThrow(RelictConfiguredFeatures.MAGMA_PATCH), CountPlacement.of(UniformInt.of(2, 5)), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
@@ -87,6 +94,8 @@ public class RelictPlacedFeatureGenerator {
         register(context, RelictPlacedFeatures.ICE_MARGIN, features.getOrThrow(RelictConfiguredFeatures.ICE_MARGIN), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.BLUE_ICE_CORE, features.getOrThrow(RelictConfiguredFeatures.BLUE_ICE_CORE), RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.FROST_FLOOR, features.getOrThrow(RelictConfiguredFeatures.FROST_FLOOR), CountPlacement.of(UniformInt.of(16, 32)), InSquarePlacement.spread(), SHALLOW_BAND, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(1)), NOT_NEAR_LAVA, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.ICE_LENS_RIM, features.getOrThrow(RelictConfiguredFeatures.ICE_LENS_RIM), CountPlacement.of(CAVE_SURFACE_ATTEMPTS), InSquarePlacement.spread(), SHALLOW_BAND, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.ICE_WALL_POCKET, features.getOrThrow(RelictConfiguredFeatures.ICE_WALL_POCKET), CountPlacement.of(UniformInt.of(12, 24)), InSquarePlacement.spread(), SHALLOW_BAND, BiomeFilter.biome());
     }
 
     private static void register(BootstrapContext<PlacedFeature> context, ResourceKey<PlacedFeature> key, Holder<ConfiguredFeature<?, ?>> feature, PlacementModifier... modifiers) {

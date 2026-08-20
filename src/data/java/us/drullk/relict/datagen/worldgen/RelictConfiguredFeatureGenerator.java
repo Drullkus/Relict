@@ -38,6 +38,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.SpeleothemClust
 import net.minecraft.world.level.levelgen.feature.configurations.SpeleothemConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
+import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
 import net.minecraft.world.level.levelgen.placement.EnvironmentScanPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.RandomOffsetPlacement;
@@ -53,9 +54,14 @@ import java.util.List;
 public class RelictConfiguredFeatureGenerator {
 
     private static final RuleTest SMOOTH_BASALT = new BlockMatchTest(Blocks.SMOOTH_BASALT);
+    private static final RuleTest PACKED_ICE = new BlockMatchTest(Blocks.PACKED_ICE);
     private static final RuleTest BASE_STONE_MARS = new TagMatchTest(RelictTags.BASE_STONE_MARS);
 
     private static final int IGNEOUS_POCKET_SIZE = 64;
+
+    private static final int ICE_LENS_RIM_SIZE = 12;
+    private static final int ICE_WALL_POCKET_SIZE = 4;
+    private static final int CAVE_SURFACE_SCAN = 12;
 
     private static final float SPELEOTHEM_TALLER_CHANCE = 0.2F;
     private static final float SPELEOTHEM_DIRECTIONAL_SPREAD = 0.7F;
@@ -142,6 +148,20 @@ public class RelictConfiguredFeatureGenerator {
         register(context, RelictConfiguredFeatures.ICE_MARGIN, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.ICE.defaultBlockState(), 10));
         register(context, RelictConfiguredFeatures.BLUE_ICE_CORE, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.BLUE_ICE.defaultBlockState(), 6));
         register(context, RelictConfiguredFeatures.FROST_FLOOR, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SNOW.defaultBlockState())));
+
+        register(context, RelictConfiguredFeatures.ICE_LENS_RIM, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(
+                caveSkinOfIce(Direction.DOWN, PACKED_ICE, Blocks.PACKED_ICE, ICE_LENS_RIM_SIZE),
+                caveSkinOfIce(Direction.UP, PACKED_ICE, Blocks.PACKED_ICE, ICE_LENS_RIM_SIZE))));
+
+        register(context, RelictConfiguredFeatures.ICE_WALL_POCKET, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(
+                caveSkinOfIce(Direction.DOWN, SMOOTH_BASALT, Blocks.SMOOTH_BASALT, ICE_WALL_POCKET_SIZE),
+                caveSkinOfIce(Direction.UP, SMOOTH_BASALT, Blocks.SMOOTH_BASALT, ICE_WALL_POCKET_SIZE))));
+    }
+
+    private static Holder<PlacedFeature> caveSkinOfIce(Direction scan, RuleTest host, Block hostBlock, int size) {
+        return PlacementUtils.inlinePlaced(Feature.ORE, new OreConfiguration(host, Blocks.ICE.defaultBlockState(), size),
+                EnvironmentScanPlacement.scanningFor(scan, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, CAVE_SURFACE_SCAN),
+                BlockPredicateFilter.forPredicate(BlockPredicate.matchesBlocks(hostBlock)));
     }
 
     private static Holder<PlacedFeature> speleothemDirection(Direction tip, BlockState base, BlockState pointed, HolderSet<Block> replaceable) {

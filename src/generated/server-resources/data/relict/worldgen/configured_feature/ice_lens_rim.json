@@ -1,0 +1,89 @@
+{
+  "type": "minecraft:simple_random_selector",
+  "config": {
+    "features": [
+      {
+        "feature": {
+          "type": "minecraft:ore",
+          "config": {
+            "discard_chance_on_air_exposure": 0.0,
+            "size": 12,
+            "targets": [
+              {
+                "state": {
+                  "Name": "minecraft:ice"
+                },
+                "target": {
+                  "block": "minecraft:packed_ice",
+                  "predicate_type": "minecraft:block_match"
+                }
+              }
+            ]
+          }
+        },
+        "placement": [
+          {
+            "type": "minecraft:environment_scan",
+            "allowed_search_condition": {
+              "type": "minecraft:matching_block_tag",
+              "tag": "minecraft:air"
+            },
+            "direction_of_search": "down",
+            "max_steps": 12,
+            "target_condition": {
+              "type": "minecraft:solid"
+            }
+          },
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:matching_blocks",
+              "blocks": "minecraft:packed_ice"
+            }
+          }
+        ]
+      },
+      {
+        "feature": {
+          "type": "minecraft:ore",
+          "config": {
+            "discard_chance_on_air_exposure": 0.0,
+            "size": 12,
+            "targets": [
+              {
+                "state": {
+                  "Name": "minecraft:ice"
+                },
+                "target": {
+                  "block": "minecraft:packed_ice",
+                  "predicate_type": "minecraft:block_match"
+                }
+              }
+            ]
+          }
+        },
+        "placement": [
+          {
+            "type": "minecraft:environment_scan",
+            "allowed_search_condition": {
+              "type": "minecraft:matching_block_tag",
+              "tag": "minecraft:air"
+            },
+            "direction_of_search": "up",
+            "max_steps": 12,
+            "target_condition": {
+              "type": "minecraft:solid"
+            }
+          },
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:matching_blocks",
+              "blocks": "minecraft:packed_ice"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
