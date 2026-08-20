@@ -10,6 +10,7 @@ import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictRidgeField;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;

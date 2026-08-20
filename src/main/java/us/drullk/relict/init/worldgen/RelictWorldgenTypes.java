@@ -7,6 +7,8 @@ import net.minecraft.world.level.levelgen.DensityFunction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import us.drullk.relict.Relict;
+import us.drullk.relict.worldgen.DuneWaveFunction;
+import us.drullk.relict.worldgen.MesaFieldFunction;
 import us.drullk.relict.worldgen.VoronoiBiomeSource;
 import us.drullk.relict.worldgen.VoronoiParameterFunction;
 
@@ -18,6 +20,8 @@ public class RelictWorldgenTypes {
     static {
         BIOME_SOURCES.register("voronoi", () -> VoronoiBiomeSource.CODEC);
         DENSITY_FUNCTION_TYPES.register("voronoi_parameter", () -> VoronoiParameterFunction.MAP_CODEC);
+        DENSITY_FUNCTION_TYPES.register("dune_wave", () -> DuneWaveFunction.MAP_CODEC);
+        DENSITY_FUNCTION_TYPES.register("mesa_field", () -> MesaFieldFunction.MAP_CODEC);
     }
 
     public static void register(IEventBus modEventBus) {

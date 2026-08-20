@@ -5,17 +5,21 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 
-public record Province(Holder<Biome> biome, ElevationClass elevationClass, float elevationOffset, float ridgeAmplitude, float plainRoughness) {
+public record Province(Holder<Biome> biome, ElevationClass elevationClass, float elevationOffset, float ridgeAmplitude, float plainRoughness, float duneAmplitude, float mesaAmplitude) {
 
     public static final float MAX_RIDGE_AMPLITUDE = 64.0F;
     public static final float MAX_PLAIN_ROUGHNESS = 16.0F;
+    public static final float MAX_DUNE_AMPLITUDE = 48.0F;
+    public static final float MAX_MESA_AMPLITUDE = 64.0F;
 
     public static final Codec<Province> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Biome.CODEC.fieldOf("biome").forGetter(Province::biome),
             ElevationClass.CODEC.optionalFieldOf("elevation_class", ElevationClass.MID).forGetter(Province::elevationClass),
             Codec.floatRange(-1.0F, 1.0F).optionalFieldOf("elevation_offset", 0.0F).forGetter(Province::elevationOffset),
             Codec.floatRange(0.0F, MAX_RIDGE_AMPLITUDE).optionalFieldOf("ridge_amplitude", 0.0F).forGetter(Province::ridgeAmplitude),
-            Codec.floatRange(0.0F, MAX_PLAIN_ROUGHNESS).optionalFieldOf("plain_roughness", 2.5F).forGetter(Province::plainRoughness)
+            Codec.floatRange(0.0F, MAX_PLAIN_ROUGHNESS).optionalFieldOf("plain_roughness", 2.5F).forGetter(Province::plainRoughness),
+            Codec.floatRange(0.0F, MAX_DUNE_AMPLITUDE).optionalFieldOf("dune_amplitude", 0.0F).forGetter(Province::duneAmplitude),
+            Codec.floatRange(0.0F, MAX_MESA_AMPLITUDE).optionalFieldOf("mesa_amplitude", 0.0F).forGetter(Province::mesaAmplitude)
     ).apply(instance, Province::new));
 
 }

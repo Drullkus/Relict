@@ -8,6 +8,9 @@ public class RelictProvinces {
 
     public static final ResourceKey<Province> WRINKLE_PLAINS = create("wrinkle_plains");
     public static final ResourceKey<Province> RUSTED_DUNES = create("rusted_dunes");
+    public static final ResourceKey<Province> FRETTED_MESAS = create("fretted_mesas");
+
+    /** Registered but unplaced: its Himalaya primitive is deferred, and no voronoi source references it. */
     public static final ResourceKey<Province> SHATTERED_HIGHLANDS = create("shattered_highlands");
 
     public static final ResourceKey<Province> BASALT_CAVES = create("basalt_caves");

@@ -321,20 +321,15 @@ public final class VoronoiSource {
     }
 
     private static long hash(final long seed, final int cellX, final int cellZ, final long salt) {
-        return mix(mix(mix(seed + salt) ^ cellX * 0x9E3779B97F4A7C15L) ^ cellZ * 0xC2B2AE3D27D4EB4FL);
+        return LatticeHash.hash(seed, cellX, cellZ, salt);
     }
 
-    private static long mix(long value) {
-        value ^= value >>> 33;
-        value *= 0xFF51AFD7ED558CCDL;
-        value ^= value >>> 33;
-        value *= 0xC4CEB9FE1A85EC53L;
-        value ^= value >>> 33;
-        return value;
+    private static long mix(final long value) {
+        return LatticeHash.mix(value);
     }
 
     private static double unitInterval(final long hash) {
-        return (hash >>> 11) * 0x1.0p-53;
+        return LatticeHash.unitInterval(hash);
     }
 
 }

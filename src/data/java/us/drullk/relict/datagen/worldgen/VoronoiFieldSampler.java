@@ -31,11 +31,16 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import us.drullk.relict.Relict;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictRidgeField;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
+import us.drullk.relict.init.worldgen.RelictNoises;
+import us.drullk.relict.worldgen.DuneWaveFunction;
 import us.drullk.relict.worldgen.ElevationClass;
+import us.drullk.relict.worldgen.NoiseSpread;
 import us.drullk.relict.worldgen.Province;
+import us.drullk.relict.worldgen.VariantSelector;
 import us.drullk.relict.worldgen.VoronoiSource;
 
 import java.io.BufferedOutputStream;
@@ -49,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -157,6 +163,45 @@ public final class VoronoiFieldSampler implements DataProvider {
     /** (m) F3-readout-agreement sample count, drawn from the same vertex list as (a) and (k). */
     private static final int DEBUG_READOUT_SAMPLES = 6;
 
+    /** (n) the grid the prototype's spread was measured on, so the two numbers mean the same thing. */
+    private static final double SPREAD_STEP = 0.0917;
+    private static final int SPREAD_SAMPLES = 400;
+
+    /**
+     * (o)/(p) morphology windows. Far enough apart that the variant selector lands in different places, so the
+     * bars are checked against a blended field rather than one point of the variant axis.
+     */
+    private static final int[][] MORPHOLOGY_WINDOWS = {{0, 0}, {40000, -25000}, {-31000, 47000}};
+
+    /** (o) the prototype's dune plate: 2400 blocks at 2 blocks per sample. */
+    private static final int DUNE_WINDOW = 2400;
+    private static final int DUNE_WINDOW_STEP = 2;
+
+    /** Slopes gentler than this are the isotropic plain, not a dune face; 0.06 is about 3.4 degrees. */
+    private static final double DUNE_SLOPE_BAND = 0.06;
+
+    private static final int CREST_TRANSECT_STRIDE = 40;
+    private static final double CREST_PROMINENCE = 2.0;
+
+    /** (p) the prototype's mesa slope plate: 1200 blocks at 1 block per sample. */
+    private static final int MESA_WINDOW = 1200;
+    private static final int MESA_WINDOW_STEP = 1;
+
+    /**
+     * The M2 cliff-coverage floor is the checklist's 1.5% relaxed to 1.0%: 0.14c recorded 1.4% for the butte
+     * end state and judged it a pass with note, because isolated buttes carry little cliff perimeter per area.
+     * The blended field spends real time near that end.
+     */
+    private static final double MESA_CLIFF_FLOOR = 0.010;
+
+    private static final int MODE_BINS = 140;
+    private static final double MODE_MIN_SEPARATION = 10.0;
+    private static final double MODE_BAND = 4.0;
+
+    /** (q) relief patch, well inside one cell so the blend law is not diluting the numbers. */
+    private static final int RELIEF_PATCH = 384;
+    private static final int RELIEF_PATCH_STEP = 2;
+
     private final CompletableFuture<HolderLookup.Provider> registries;
 
     public VoronoiFieldSampler(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
@@ -172,14 +217,22 @@ public final class VoronoiFieldSampler implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return this.registries.thenAccept(registries -> {
             Path directory = reportDirectory();
+            List<String> failures = new ArrayList<>();
 
-            StringBuilder surfaceReport = surfaceReport(registries);
+            StringBuilder surfaceReport = surfaceReport(registries, failures);
             writeReport(directory, "voronoi_report.txt", surfaceReport.toString());
             System.out.print(surfaceReport);
 
             StringBuilder undergroundReport = undergroundReport(registries);
             writeReport(directory, "voronoi_underground_report.txt", undergroundReport.toString());
             System.out.print(undergroundReport);
+
+            // The morphology bars are the 0.14c checklists, and a port that drifts off them is a landform that
+            // stopped being the landform it was designed as. Nothing about that shows in the emitted JSON, so
+            // the build is the only place it can be caught.
+            if (!failures.isEmpty()) {
+                throw new IllegalStateException("Surface morphology checks failed:\n  " + String.join("\n  ", failures));
+            }
         });
     }
 
@@ -203,7 +256,7 @@ public final class VoronoiFieldSampler implements DataProvider {
 
     // ------------------------------------------------------------------------------------- surface report
 
-    private static StringBuilder surfaceReport(HolderLookup.Provider registries) {
+    private static StringBuilder surfaceReport(HolderLookup.Provider registries, List<String> failures) {
         PositionalRandomFactory random = new XoroshiroRandomSource(SEED).forkPositional();
 
         VoronoiSource mars = registries.lookupOrThrow(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY)
@@ -242,8 +295,455 @@ public final class VoronoiFieldSampler implements DataProvider {
         marginVsWorstDrop(report, surfaceY, vertices);
         compositionInvariant(report, registries, surfaceY, random);
         debugReadoutAgreement(report, registries, vertices);
+        noiseSpread(report, registries, random, failures);
+        duneMorphology(report, registries, random, failures);
+        mesaMorphology(report, registries, random, failures);
+        provinceRelief(report, registries, mars, random);
+        surfaceTeleports(report, mars, surfaceY);
 
         return report;
+    }
+
+    // -------------------------------------------------------------------------- morphology check plumbing
+
+    private static void bar(StringBuilder report, List<String> failures, String label, double value,
+                            double lowest, double highest, String units) {
+        boolean passed = value >= lowest && value <= highest;
+        report.append(String.format("    %-34s %9.3f %-8s [%.3f .. %.3f]  %s%n",
+                label, value, units, lowest, highest, passed ? "PASS" : "FAIL"));
+
+        if (!passed) {
+            failures.add(String.format("%s = %.3f %s, outside [%.3f, %.3f]", label, value, units, lowest, highest));
+        }
+    }
+
+    /**
+     * The one measurement the ported primitives' amplitudes depend on, re-taken every run rather than trusted.
+     * The multi-octave figure is not derivable from the single-octave one: {@code NormalNoise} renormalizes
+     * the whole octave stack, so a three-octave field is nowhere near the single-octave value times the
+     * amplitude sum, and reading it backwards silently produces crest wander of the wrong size.
+     */
+    private static void noiseSpread(StringBuilder report, HolderLookup.Provider registries,
+                                    PositionalRandomFactory random, List<String> failures) {
+        report.append(String.format("%n(n) noise spread, against the constants NoiseSpread records%n"));
+
+        HolderLookup.RegistryLookup<NormalNoise.NoiseParameters> parameters = registries.lookupOrThrow(Registries.NOISE);
+        double single = spreadOf(parameters, random, RelictNoises.DUNE_CRENULATION);
+        double triple = spreadOf(parameters, random, RelictNoises.DUNE_WARP);
+
+        report.append(String.format("    single-octave measured %.4f, NoiseSpread.MINECRAFT      %.4f%n", single, NoiseSpread.MINECRAFT));
+        report.append(String.format("    three-octave measured  %.4f, NoiseSpread.MINECRAFT_FBM_3 %.4f%n", triple, NoiseSpread.MINECRAFT_FBM_3));
+        bar(report, failures, "single-octave sd / recorded", single / NoiseSpread.MINECRAFT, 0.95, 1.05, "");
+        bar(report, failures, "three-octave sd / recorded", triple / NoiseSpread.MINECRAFT_FBM_3, 0.95, 1.05, "");
+    }
+
+    /** Off-lattice, on the grid the prototype's own spread was measured on, since Perlin noise is zero on it. */
+    private static double spreadOf(HolderLookup.RegistryLookup<NormalNoise.NoiseParameters> parameters,
+                                   PositionalRandomFactory random, ResourceKey<NormalNoise.NoiseParameters> key) {
+        NormalNoise noise = NormalNoise.create(random.fromHashOf(key.identifier()), parameters.getOrThrow(key).value());
+
+        double total = 0.0;
+        double totalSquares = 0.0;
+        for (int i = 0; i < SPREAD_SAMPLES; i++) {
+            for (int j = 0; j < SPREAD_SAMPLES; j++) {
+                double value = noise.getValue(i * SPREAD_STEP + 0.031, 0.0, j * SPREAD_STEP + 0.017);
+                total += value;
+                totalSquares += value * value;
+            }
+        }
+
+        double count = (double) SPREAD_SAMPLES * SPREAD_SAMPLES;
+        return Math.sqrt(totalSquares / count - (total / count) * (total / count));
+    }
+
+    /**
+     * Both morphology checks measure the primitive on its own — its own province amplitude over the shared
+     * plain, with no voronoi gating — because that is what the 0.14c plates measured and the bars are quoted
+     * against. What a province actually builds once the blend law dilutes it is (p) below.
+     */
+    private static double[][] shapeGrid(DensityFunction shape, double amplitude, DensityFunction plain,
+                                        double plainRoughness, int originX, int originZ, int span, int step) {
+        int side = span / step;
+        double[][] grid = new double[side][side];
+
+        for (int iz = 0; iz < side; iz++) {
+            for (int ix = 0; ix < side; ix++) {
+                int x = originX + ix * step;
+                int z = originZ + iz * step;
+                grid[iz][ix] = SEA_LEVEL + amplitude * sample(shape, x, z) + plainRoughness * sample(plain, x, z);
+            }
+        }
+
+        return grid;
+    }
+
+    private static double[] sortedHeights(double[][] grid) {
+        double[] all = new double[grid.length * grid.length];
+        int at = 0;
+        for (double[] row : grid) {
+            for (double value : row) {
+                all[at++] = value;
+            }
+        }
+
+        Arrays.sort(all);
+        return all;
+    }
+
+    // ------------------------------------------------------------------------- (o) rusted dunes morphology
+
+    /**
+     * The 0.14c dune checklist D1-D5, as measured by {@code prototypes/tools/metrics_14c.py}, restated over
+     * the ported field. D6-D10 are visual lines and stay the producer's in-game pass.
+     */
+    private static void duneMorphology(StringBuilder report, HolderLookup.Provider registries,
+                                       PositionalRandomFactory random, List<String> failures) {
+        report.append(String.format("%n(o) rusted dunes morphology, 0.14c checklist D1-D5%n"));
+
+        HolderLookup.RegistryLookup<DensityFunction> functions = registries.lookupOrThrow(Registries.DENSITY_FUNCTION);
+        DensityFunction shape = seed(holder(functions, RelictDensityFunctionGenerator.DUNE_SHAPE), random);
+        DensityFunction plain = seed(RelictRidgeField.plain(registries.lookupOrThrow(Registries.NOISE)::getOrThrow), random);
+
+        // Named so the one field that decides how far apart two variants sit is visible in the report.
+        report.append(String.format("    variant selector spacing %.0f blocks, shared by both surface grammars%n",
+                VariantSelector.SPACING));
+
+        for (int[] origin : MORPHOLOGY_WINDOWS) {
+            double[][] grid = shapeGrid(shape, RelictProvinceGenerator.DUNE_AMPLITUDE, plain,
+                    RelictProvinceGenerator.DUNE_PLAIN_ROUGHNESS, origin[0], origin[1], DUNE_WINDOW, DUNE_WINDOW_STEP);
+
+            report.append(String.format("%n    window %d blocks at x=%d z=%d, %d blocks per sample%n",
+                    DUNE_WINDOW, origin[0], origin[1], DUNE_WINDOW_STEP));
+
+            double windX = Math.cos(DuneWaveFunction.WIND_AZIMUTH);
+            double windZ = Math.sin(DuneWaveFunction.WIND_AZIMUTH);
+            List<Double> ascending = new ArrayList<>();
+            List<Double> descending = new ArrayList<>();
+
+            for (int iz = 1; iz + 1 < grid.length; iz++) {
+                for (int ix = 1; ix + 1 < grid.length; ix++) {
+                    double alongX = (grid[iz][ix + 1] - grid[iz][ix - 1]) / (2.0 * DUNE_WINDOW_STEP);
+                    double alongZ = (grid[iz + 1][ix] - grid[iz - 1][ix]) / (2.0 * DUNE_WINDOW_STEP);
+                    double alongWind = alongX * windX + alongZ * windZ;
+
+                    if (alongWind > DUNE_SLOPE_BAND) {
+                        ascending.add(alongWind);
+                    } else if (alongWind < -DUNE_SLOPE_BAND) {
+                        descending.add(-alongWind);
+                    }
+                }
+            }
+
+            double[] up = ascending.stream().mapToDouble(Double::doubleValue).sorted().toArray();
+            double[] down = descending.stream().mapToDouble(Double::doubleValue).sorted().toArray();
+            double[] heights = sortedHeights(grid);
+
+            bar(report, failures, "D1 ascending fraction", (double) up.length / (up.length + down.length), 0.65, 0.88, "");
+            bar(report, failures, "D2 stoss mean slope", Math.toDegrees(Math.atan(Arrays.stream(up).average().orElse(0.0))), 8.0, 15.0, "deg");
+            bar(report, failures, "D3 slip p95 slope", Math.toDegrees(Math.atan(percentile(down, 0.95))), 28.0, 38.0, "deg");
+            bar(report, failures, "D4 median crest spacing", crestSpacing(grid, windX, windZ), 100.0, 300.0, "blocks");
+            bar(report, failures, "D5 relief p2..p98", percentile(heights, 0.98) - percentile(heights, 0.02), 0.0, 28.0, "blocks");
+            report.append(String.format("    %-34s %9.3f%n", "slip max slope (informational)",
+                    Math.toDegrees(Math.atan(down.length == 0 ? 0.0 : down[down.length - 1]))));
+        }
+    }
+
+    /**
+     * Peaks along wind-direction transects, prominence over a 7-sample window, exactly as the prototype's
+     * metric script counted them.
+     */
+    private static double crestSpacing(double[][] grid, double windX, double windZ) {
+        int side = grid.length;
+        List<Double> spacings = new ArrayList<>();
+
+        for (int start = 0; start < side; start += CREST_TRANSECT_STRIDE) {
+            List<Double> line = new ArrayList<>();
+            for (int i = 0; i < side; i++) {
+                int ix = (int) (i * windX);
+                int iz = start + (int) (i * windZ);
+                if (ix < 0 || ix >= side || iz < 0 || iz >= side) {
+                    break;
+                }
+
+                line.add(grid[iz][ix]);
+            }
+
+            if (line.size() < 50) {
+                continue;
+            }
+
+            int previous = Integer.MIN_VALUE;
+            for (int i = 3; i + 3 < line.size(); i++) {
+                double highest = -Double.MAX_VALUE;
+                double lowest = Double.MAX_VALUE;
+                for (int d = -3; d <= 3; d++) {
+                    highest = Math.max(highest, line.get(i + d));
+                    lowest = Math.min(lowest, line.get(i + d));
+                }
+
+                if (line.get(i) < highest || line.get(i) < lowest + CREST_PROMINENCE) {
+                    continue;
+                }
+
+                if (previous != Integer.MIN_VALUE && i - previous <= 8) {
+                    continue;
+                }
+
+                if (previous != Integer.MIN_VALUE) {
+                    spacings.add((i - previous) * (double) DUNE_WINDOW_STEP);
+                }
+
+                previous = i;
+            }
+        }
+
+        if (spacings.isEmpty()) {
+            return Double.NaN;
+        }
+
+        return percentile(spacings.stream().mapToDouble(Double::doubleValue).sorted().toArray(), 0.50);
+    }
+
+    // ------------------------------------------------------------------------ (p) fretted mesas morphology
+
+    /** The 0.14c mesa checklist M1, M2, M4, M5, M7. M3/M6/M8/M9 are visual and stay the in-game pass. */
+    private static void mesaMorphology(StringBuilder report, HolderLookup.Provider registries,
+                                       PositionalRandomFactory random, List<String> failures) {
+        report.append(String.format("%n(p) fretted mesas morphology, 0.14c checklist M1/M2/M4/M5/M7%n"));
+
+        HolderLookup.RegistryLookup<DensityFunction> functions = registries.lookupOrThrow(Registries.DENSITY_FUNCTION);
+        DensityFunction shape = seed(holder(functions, RelictDensityFunctionGenerator.MESA_SHAPE), random);
+        DensityFunction plain = seed(RelictRidgeField.plain(registries.lookupOrThrow(Registries.NOISE)::getOrThrow), random);
+
+        for (int[] origin : MORPHOLOGY_WINDOWS) {
+            double[][] grid = shapeGrid(shape, RelictProvinceGenerator.MESA_AMPLITUDE, plain,
+                    RelictProvinceGenerator.MESA_PLAIN_ROUGHNESS, origin[0], origin[1], MESA_WINDOW, MESA_WINDOW_STEP);
+
+            report.append(String.format("%n    window %d blocks at x=%d z=%d, %d blocks per sample%n",
+                    MESA_WINDOW, origin[0], origin[1], MESA_WINDOW_STEP));
+
+            int side = grid.length;
+            int counted = 0;
+            int flat = 0;
+            int trough = 0;
+            int talus = 0;
+            int cliff = 0;
+            double steepest = 0.0;
+            double[][] angles = new double[side][side];
+
+            for (int iz = 1; iz + 1 < side; iz++) {
+                for (int ix = 1; ix + 1 < side; ix++) {
+                    double alongX = (grid[iz][ix + 1] - grid[iz][ix - 1]) / (2.0 * MESA_WINDOW_STEP);
+                    double alongZ = (grid[iz + 1][ix] - grid[iz - 1][ix]) / (2.0 * MESA_WINDOW_STEP);
+                    double angle = Math.toDegrees(Math.atan(Math.hypot(alongX, alongZ)));
+                    angles[iz][ix] = angle;
+
+                    counted++;
+                    steepest = Math.max(steepest, angle);
+                    if (angle < 8.0) {
+                        flat++;
+                    } else if (angle < 12.0) {
+                        trough++;
+                    }
+
+                    if (angle >= 12.0 && angle < 35.0) {
+                        talus++;
+                    }
+
+                    if (angle > 45.0) {
+                        cliff++;
+                    }
+                }
+            }
+
+            double[] heights = sortedHeights(grid);
+            double[] modes = modes(heights);
+            double floorMode = modes[0];
+            double capMode = modes[1];
+
+            bar(report, failures, "M1 mode separation", capMode - floorMode, 20.0, 35.0, "blocks");
+            bar(report, failures, "M2 flat below 8 deg", (double) flat / counted, 0.55, 1.0, "");
+            bar(report, failures, "M2 cliff above 45 deg", (double) cliff / counted, MESA_CLIFF_FLOOR, 0.12, "");
+            bar(report, failures, "M2 talus 12..35 deg", (double) talus / counted, 0.005, 1.0, "");
+            bar(report, failures, "M4 max slope", steepest, 60.0, 90.0, "deg");
+            bar(report, failures, "M5 cap roughness sd", spreadNear(heights, capMode), 0.0, 2.0, "blocks");
+            bar(report, failures, "M5 floor roughness sd", spreadNear(heights, floorMode), 0.0, 3.0, "blocks");
+
+            report.append(String.format("    %-34s %9.3f%n", "M2 trough 8..12 deg (informational)", (double) trough / counted));
+            report.append(String.format("    %-34s %9.3f%n", "M7 cap-area fraction (informational)",
+                    plateauArea(grid, angles, capMode)));
+        }
+    }
+
+    /** The two dominant height modes: the fullest histogram bin, and the fullest one well away from it. */
+    private static double[] modes(double[] sortedHeights) {
+        double lowest = sortedHeights[0];
+        double highest = sortedHeights[sortedHeights.length - 1];
+        double width = (highest - lowest) / MODE_BINS;
+        int[] counts = new int[MODE_BINS];
+
+        for (double value : sortedHeights) {
+            counts[Math.min(MODE_BINS - 1, (int) ((value - lowest) / width))]++;
+        }
+
+        int first = 0;
+        for (int bin = 1; bin < MODE_BINS; bin++) {
+            if (counts[bin] > counts[first]) {
+                first = bin;
+            }
+        }
+
+        double firstCentre = lowest + (first + 0.5) * width;
+        int second = -1;
+        for (int bin = 0; bin < MODE_BINS; bin++) {
+            double centre = lowest + (bin + 0.5) * width;
+            if (Math.abs(centre - firstCentre) > MODE_MIN_SEPARATION && (second < 0 || counts[bin] > counts[second])) {
+                second = bin;
+            }
+        }
+
+        double secondCentre = second < 0 ? firstCentre : lowest + (second + 0.5) * width;
+        return new double[]{Math.min(firstCentre, secondCentre), Math.max(firstCentre, secondCentre)};
+    }
+
+    private static double spreadNear(double[] sortedHeights, double mode) {
+        double total = 0.0;
+        double totalSquares = 0.0;
+        int counted = 0;
+
+        for (double value : sortedHeights) {
+            if (Math.abs(value - mode) < MODE_BAND) {
+                total += value;
+                totalSquares += value * value;
+                counted++;
+            }
+        }
+
+        if (counted == 0) {
+            return Double.NaN;
+        }
+
+        return Math.sqrt(Math.max(0.0, totalSquares / counted - (total / counted) * (total / counted)));
+    }
+
+    private static double plateauArea(double[][] grid, double[][] angles, double capMode) {
+        int counted = 0;
+        int onCap = 0;
+
+        for (int iz = 1; iz + 1 < grid.length; iz++) {
+            for (int ix = 1; ix + 1 < grid.length; ix++) {
+                counted++;
+                if (Math.abs(grid[iz][ix] - capMode) < 3.0 && angles[iz][ix] < 8.0) {
+                    onCap++;
+                }
+            }
+        }
+
+        return (double) onCap / counted;
+    }
+
+    // ------------------------------------------------------------------------- (q) per-province relief
+
+    /**
+     * What each surface province actually builds, before and after this round's landform channels: the same
+     * columns sampled with the whole relief graph and then with only the dimension-wide plain, which is what
+     * every province except wrinkle_plains carried before. The window is a patch deep inside the cell each
+     * province sits furthest into, so the blend law is not diluting the numbers.
+     */
+    private static void provinceRelief(StringBuilder report, HolderLookup.Provider registries, VoronoiSource source,
+                                       PositionalRandomFactory random) {
+        report.append(String.format("%n(q) per-province relief over a %d-block patch deep inside one cell%n", RELIEF_PATCH));
+
+        HolderLookup.RegistryLookup<DensityFunction> functions = registries.lookupOrThrow(Registries.DENSITY_FUNCTION);
+        DensityFunction relief = seed(holder(functions, RelictDensityFunctionGenerator.RELIEF), random);
+        DensityFunction plain = seed(RelictRidgeField.plain(registries.lookupOrThrow(Registries.NOISE)::getOrThrow), random);
+
+        report.append(String.format("    %-22s %8s %8s %8s %8s %8s %8s %8s %8s%n",
+                "province", "p2", "p50", "p98", "p2..p98", "plain", "ridge amp", "dune amp", "mesa amp"));
+
+        for (Map.Entry<String, int[]> entry : deepestSurfaceCells(source).entrySet()) {
+            int centreX = entry.getValue()[0];
+            int centreZ = entry.getValue()[1];
+            List<Double> full = new ArrayList<>();
+            List<Double> plainOnly = new ArrayList<>();
+
+            for (int dz = -RELIEF_PATCH / 2; dz <= RELIEF_PATCH / 2; dz += RELIEF_PATCH_STEP) {
+                for (int dx = -RELIEF_PATCH / 2; dx <= RELIEF_PATCH / 2; dx += RELIEF_PATCH_STEP) {
+                    full.add(sample(relief, centreX + dx, centreZ + dz));
+                    plainOnly.add(source.blend(centreX + dx, centreZ + dz, (province, cellX, cellZ) -> province.plainRoughness())
+                            * sample(plain, centreX + dx, centreZ + dz));
+                }
+            }
+
+            double[] sorted = full.stream().mapToDouble(Double::doubleValue).sorted().toArray();
+            double[] bare = plainOnly.stream().mapToDouble(Double::doubleValue).sorted().toArray();
+            report.append(String.format("    %-22s %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f%n", entry.getKey(),
+                    percentile(sorted, 0.02), percentile(sorted, 0.50), percentile(sorted, 0.98),
+                    percentile(sorted, 0.98) - percentile(sorted, 0.02),
+                    percentile(bare, 0.98) - percentile(bare, 0.02),
+                    source.blend(centreX, centreZ, (province, cellX, cellZ) -> province.ridgeAmplitude()),
+                    source.blend(centreX, centreZ, (province, cellX, cellZ) -> province.duneAmplitude()),
+                    source.blend(centreX, centreZ, (province, cellX, cellZ) -> province.mesaAmplitude())));
+        }
+    }
+
+    /** Teleport spots for the producer's in-game pass: the cell each surface province sits deepest inside. */
+    private static void surfaceTeleports(StringBuilder report, VoronoiSource source, DensityFunction surfaceY) {
+        report.append(String.format("%n(r) surface teleport spots (cell centres, this seed)%n"));
+
+        deepestSurfaceCells(source).forEach((name, centre) -> report.append(String.format(
+                "    %-22s /execute in relict:mars run tp @s %d %d %d%n",
+                name, centre[0], Mth.ceil(sample(surfaceY, centre[0], centre[1])) + 2, centre[1])));
+
+        // Borders too: that is where the blend law dilutes two landforms into each other, and the one place a
+        // seam shows to a walking player rather than only to check (a).
+        report.append(String.format("%n    borders, at the midpoint of two adjacent cell centres%n"));
+        int cells = VERTEX_SCAN_RADIUS / source.cellSize();
+        Set<String> seen = new LinkedHashSet<>();
+
+        for (int cz = -cells; cz <= cells; cz++) {
+            for (int cx = -cells; cx <= cells; cx++) {
+                for (int[] step : new int[][]{{1, 0}, {0, 1}}) {
+                    String near = source.provinceAt(cx, cz).unwrapKey().orElseThrow().identifier().getPath();
+                    String far = source.provinceAt(cx + step[0], cz + step[1]).unwrapKey().orElseThrow().identifier().getPath();
+                    if (near.equals(far) || !seen.add(near + " -> " + far)) {
+                        continue;
+                    }
+
+                    int midX = (int) Math.round((source.centerX(cx, cz) + source.centerX(cx + step[0], cz + step[1])) / 2.0);
+                    int midZ = (int) Math.round((source.centerZ(cx, cz) + source.centerZ(cx + step[0], cz + step[1])) / 2.0);
+                    report.append(String.format("    %-22s /execute in relict:mars run tp @s %d %d %d%n",
+                            near + " -> " + far, midX, Mth.ceil(sample(surfaceY, midX, midZ)) + 2, midZ));
+                }
+            }
+        }
+    }
+
+    private static Map<String, int[]> deepestSurfaceCells(VoronoiSource source) {
+        Map<String, double[]> deepest = new LinkedHashMap<>();
+        int cells = VERTEX_SCAN_RADIUS / source.cellSize();
+
+        for (int cz = -cells; cz <= cells; cz++) {
+            for (int cx = -cells; cx <= cells; cx++) {
+                double centreX = source.centerX(cx, cz);
+                double centreZ = source.centerZ(cx, cz);
+                VoronoiSource.Cell cell = source.nearest((int) centreX, (int) centreZ);
+                if (cell.cellX() != cx || cell.cellZ() != cz) {
+                    continue;
+                }
+
+                String name = source.provinceAt(cx, cz).unwrapKey().orElseThrow().identifier().getPath();
+                double margin = cell.distanceToSecondCenter() - cell.distanceToCenter();
+                double[] best = deepest.get(name);
+                if (best == null || margin > best[0]) {
+                    deepest.put(name, new double[]{margin, centreX, centreZ});
+                }
+            }
+        }
+
+        Map<String, int[]> centres = new LinkedHashMap<>();
+        deepest.forEach((name, entry) -> centres.put(name, new int[]{(int) entry[1], (int) entry[2]}));
+        return centres;
     }
 
     // ------------------------------------------------------------------------------------ (a) continuity
@@ -553,8 +1053,8 @@ public final class VoronoiFieldSampler implements DataProvider {
         report.append(String.format("%n(d) max contrast, a test source of elevation_offset -1 against +1, epoch_relief 0%n"));
 
         HolderLookup.RegistryLookup<Biome> biomes = registries.lookupOrThrow(Registries.BIOME);
-        Holder<Province> low = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.LOW, -1.0F, 0.0F, 0.0F));
-        Holder<Province> high = Holder.direct(new Province(biomes.getOrThrow(Biomes.BADLANDS), ElevationClass.HIGH, 1.0F, 0.0F, 0.0F));
+        Holder<Province> low = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.LOW, -1.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+        Holder<Province> high = Holder.direct(new Province(biomes.getOrThrow(Biomes.BADLANDS), ElevationClass.HIGH, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F));
 
         VoronoiSource source = new VoronoiSource(RelictProvinceGenerator.CELL_SIZE, RelictProvinceGenerator.JITTER,
                 RelictProvinceGenerator.BLEND_WIDTH, RelictProvinceGenerator.EPOCH_SPACING, 0.0F,
@@ -754,7 +1254,7 @@ public final class VoronoiFieldSampler implements DataProvider {
     /** Two sources configured alike must not tessellate alike, which is what the registry-ID salt buys. */
     private static void identitySalt(StringBuilder report, HolderLookup.Provider registries) {
         HolderLookup.RegistryLookup<Biome> biomes = registries.lookupOrThrow(Registries.BIOME);
-        Holder<Province> only = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.MID, 0.0F, 0.0F, 0.0F));
+        Holder<Province> only = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.MID, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         WeightedList<Holder<Province>> provinces = WeightedList.<Holder<Province>>builder().add(only, 1).build();
 
         VoronoiSource first = new VoronoiSource(RelictProvinceGenerator.CELL_SIZE, RelictProvinceGenerator.JITTER,

@@ -9,6 +9,8 @@ import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import us.drullk.relict.Relict;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictRidgeField;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictMesaField;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.worldgen.ProvinceParameter;
@@ -22,6 +24,10 @@ public class RelictDensityFunctionGenerator {
     public static final ResourceKey<DensityFunction> VORONOI_EPOCH = create("voronoi/epoch");
 
     public static final ResourceKey<DensityFunction> RIDGE_SHAPE = create("terrain/ridge_shape");
+
+    public static final ResourceKey<DensityFunction> DUNE_SHAPE = create("terrain/dune_shape");
+
+    public static final ResourceKey<DensityFunction> MESA_SHAPE = create("terrain/mesa_shape");
 
     public static final ResourceKey<DensityFunction> RELIEF = create("terrain/relief");
 
@@ -38,15 +44,32 @@ public class RelictDensityFunctionGenerator {
         context.register(VORONOI_EPOCH, DensityFunctions.cache2d(parameter(mars, ProvinceParameter.EPOCH)));
 
         context.register(RIDGE_SHAPE, RelictRidgeField.shape(noises::getOrThrow));
+        context.register(DUNE_SHAPE, RelictMesaField.duneShape(noises::getOrThrow));
+        context.register(MESA_SHAPE, RelictMesaField.mesaShape(noises::getOrThrow));
 
+        // One landform channel per province signature, each gated by its own blended province scalar, plus the
+        // dimension-wide plain. RELIEF is the single composition point: the underground biome cut and the
+        // preliminary surface level both read it, so a height channel added anywhere else goes unseen.
         context.register(RELIEF, DensityFunctions.cache2d(DensityFunctions.add(
-                DensityFunctions.mul(
-                        parameter(mars, ProvinceParameter.RIDGE_AMPLITUDE),
-                        new DensityFunctions.HolderHolder(functions.getOrThrow(RIDGE_SHAPE))
+                DensityFunctions.add(
+                        DensityFunctions.mul(
+                                parameter(mars, ProvinceParameter.RIDGE_AMPLITUDE),
+                                new DensityFunctions.HolderHolder(functions.getOrThrow(RIDGE_SHAPE))
+                        ),
+                        DensityFunctions.mul(
+                                parameter(mars, ProvinceParameter.PLAIN_ROUGHNESS),
+                                RelictRidgeField.plain(noises::getOrThrow)
+                        )
                 ),
-                DensityFunctions.mul(
-                        parameter(mars, ProvinceParameter.PLAIN_ROUGHNESS),
-                        RelictRidgeField.plain(noises::getOrThrow)
+                DensityFunctions.add(
+                        DensityFunctions.mul(
+                                parameter(mars, ProvinceParameter.DUNE_AMPLITUDE),
+                                new DensityFunctions.HolderHolder(functions.getOrThrow(DUNE_SHAPE))
+                        ),
+                        DensityFunctions.mul(
+                                parameter(mars, ProvinceParameter.MESA_AMPLITUDE),
+                                new DensityFunctions.HolderHolder(functions.getOrThrow(MESA_SHAPE))
+                        )
                 )
         )));
     }

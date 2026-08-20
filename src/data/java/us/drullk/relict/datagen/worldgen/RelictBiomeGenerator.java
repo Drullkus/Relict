@@ -32,8 +32,16 @@ public class RelictBiomeGenerator {
 
         context.register(RelictBiomes.WRINKLE_PLAINS, surfaceBiome(caves(placedFeatures, carvers).build()));
         context.register(RelictBiomes.RUSTED_DUNES, surfaceBiome(caves(placedFeatures, carvers).build()));
+        context.register(RelictBiomes.FRETTED_MESAS, surfaceBiome(caves(placedFeatures, carvers).build()));
         context.register(RelictBiomes.SHATTERED_HIGHLANDS, surfaceBiome(caves(placedFeatures, carvers).build()));
 
+        basaltCaves(context, placedFeatures, carvers);
+        calciteCaves(context, placedFeatures, carvers);
+        iceCaves(context, placedFeatures, carvers);
+        sulfurCaves(context, placedFeatures, carvers);
+    }
+
+    private static void basaltCaves(BootstrapContext<Biome> context, HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> carvers) {
         var basalt = caves(placedFeatures, carvers)
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BASALT_COLUMNS))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BLACKSTONE_BLOBS))
@@ -47,7 +55,9 @@ public class RelictBiomeGenerator {
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.GRANITE_POCKET_UPPER))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.GRANITE_POCKET_LOWER));
         context.register(RelictBiomes.BASALT_CAVES, undergroundBiome(basalt.build()));
+    }
 
+    private static void calciteCaves(BootstrapContext<Biome> context, HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> carvers) {
         var calcite = caves(placedFeatures, carvers)
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.CALCITE_BLOBS))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.CALCITE_SPELEOTHEM_CLUSTER))
@@ -56,7 +66,24 @@ public class RelictBiomeGenerator {
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DIORITE_POCKET_UPPER))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DIORITE_POCKET_LOWER));
         context.register(RelictBiomes.CALCITE_CAVES, undergroundBiome(calcite.build()));
+    }
 
+    private static void iceCaves(BootstrapContext<Biome> context, HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> carvers) {
+        var ice = caves(placedFeatures, carvers)
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.PACKED_ICE_LENS))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ICE_MARGIN))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BLUE_ICE_CORE))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.FROST_FLOOR))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ICE_LENS_RIM))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ICE_WALL_POCKET))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ANDESITE_POCKET_UPPER))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ANDESITE_POCKET_LOWER))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DIORITE_POCKET_UPPER))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DIORITE_POCKET_LOWER));
+        context.register(RelictBiomes.ICE_CAVES, undergroundBiome(ice.build()));
+    }
+
+    private static void sulfurCaves(BootstrapContext<Biome> context, HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> carvers) {
         var sulfur = caves(placedFeatures, carvers)
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.SULFUR_BLOBS))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.CINNABAR_BLOBS))
@@ -70,19 +97,6 @@ public class RelictBiomeGenerator {
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.GRANITE_POCKET_UPPER))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.GRANITE_POCKET_LOWER));
         context.register(RelictBiomes.SULFUR_CAVES, undergroundBiome(sulfur.build()));
-
-        var ice = caves(placedFeatures, carvers)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.PACKED_ICE_LENS))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ICE_MARGIN))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BLUE_ICE_CORE))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.FROST_FLOOR))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ICE_LENS_RIM))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ICE_WALL_POCKET))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ANDESITE_POCKET_UPPER))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ANDESITE_POCKET_LOWER))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DIORITE_POCKET_UPPER))
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DIORITE_POCKET_LOWER));
-        context.register(RelictBiomes.ICE_CAVES, undergroundBiome(ice.build()));
     }
 
     private static BiomeGenerationSettings.Builder caves(HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> carvers) {

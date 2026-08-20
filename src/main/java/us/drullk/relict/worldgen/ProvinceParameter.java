@@ -49,6 +49,18 @@ public enum ProvinceParameter implements StringRepresentable {
         public double compute(final VoronoiSource source, final int blockX, final int blockZ) {
             return source.blend(blockX, blockZ, (province, cellX, cellZ) -> province.plainRoughness());
         }
+    },
+    DUNE_AMPLITUDE("dune_amplitude", 0.0, Province.MAX_DUNE_AMPLITUDE) {
+        @Override
+        public double compute(final VoronoiSource source, final int blockX, final int blockZ) {
+            return source.blend(blockX, blockZ, (province, cellX, cellZ) -> province.duneAmplitude());
+        }
+    },
+    MESA_AMPLITUDE("mesa_amplitude", 0.0, Province.MAX_MESA_AMPLITUDE) {
+        @Override
+        public double compute(final VoronoiSource source, final int blockX, final int blockZ) {
+            return source.blend(blockX, blockZ, (province, cellX, cellZ) -> province.mesaAmplitude());
+        }
     };
 
     public static final Codec<ProvinceParameter> CODEC = StringRepresentable.fromEnum(ProvinceParameter::values);

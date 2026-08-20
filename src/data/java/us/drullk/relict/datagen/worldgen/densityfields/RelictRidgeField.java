@@ -1,4 +1,4 @@
-package us.drullk.relict.datagen.worldgen;
+package us.drullk.relict.datagen.worldgen.densityfields;
 
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -7,6 +7,7 @@ import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import us.drullk.relict.init.worldgen.RelictNoises;
+import us.drullk.relict.worldgen.NoiseSpread;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -90,14 +91,8 @@ public final class RelictRidgeField {
 
     // ---- noise scale reconciliation -----------------------------------------------------------------
 
-    /**
-     * Standard deviation of the prototype's {@code gnoise}, measured over 160k samples off-lattice.
-     * Its nominal range is -1..1 but it is nowhere near uniform across that.
-     */
-    private static final double PROTOTYPE_NOISE_SD = 0.3104;
-    private static final double MINECRAFT_NOISE_SD = 0.3150;
-
-    private static final double NOISE_SD_RATIO = MINECRAFT_NOISE_SD / PROTOTYPE_NOISE_SD;
+    /** Both spreads and their ratio live in {@link NoiseSpread}, which every ported primitive reads. */
+    private static final double NOISE_SD_RATIO = NoiseSpread.RATIO;
 
     // ---- cross-section control points ---------------------------------------------------------------
 

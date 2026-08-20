@@ -1,0 +1,7 @@
+{
+  "type": "relict:dune_wave",
+  "crenulation": "relict:dune_crenulation",
+  "modulation": "relict:dune_modulation",
+  "selector": "relict:variant_selector",
+  "warp": "relict:dune_warp"
+}

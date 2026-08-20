@@ -7,6 +7,10 @@ import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictCommonFields;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictDuneField;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictRidgeField;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictMesaField;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictProvinces;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
@@ -28,9 +32,21 @@ public class RelictProvinceGenerator {
 
     private static final float RIDGE_AMPLITUDE = 26.0F;
 
-    private static final float PLAIN_ROUGHNESS = 3.0F;
+    static final float PLAIN_ROUGHNESS = 3.0F;
+
+    static final float DUNE_PLAIN_ROUGHNESS = 2.4F;
+    static final float MESA_PLAIN_ROUGHNESS = 2.6F;
+
+    static final float DUNE_AMPLITUDE = 24.0F;
+
+    static final float MESA_AMPLITUDE = 30.0F;
 
     public static void bootstrapNoises(BootstrapContext<NormalNoise.NoiseParameters> context) {
+        RelictCommonFields.NOISE_PARAMETERS.forEach(context::register);
+
+        // Province fields to create distinct landforms
+        RelictDuneField.NOISE_PARAMETERS.forEach(context::register);
+        RelictMesaField.NOISE_PARAMETERS.forEach(context::register);
         RelictRidgeField.NOISE_PARAMETERS.forEach(context::register);
     }
 
@@ -38,20 +54,24 @@ public class RelictProvinceGenerator {
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
 
         context.register(RelictProvinces.WRINKLE_PLAINS, new Province(biomes.getOrThrow(RelictBiomes.WRINKLE_PLAINS),
-                ElevationClass.MID, 0.0F, RIDGE_AMPLITUDE, PLAIN_ROUGHNESS));
+                ElevationClass.MID, 0.0F, RIDGE_AMPLITUDE, PLAIN_ROUGHNESS, 0.0F, 0.0F));
         context.register(RelictProvinces.RUSTED_DUNES, new Province(biomes.getOrThrow(RelictBiomes.RUSTED_DUNES),
-                ElevationClass.LOW, -0.15F, 0.0F, PLAIN_ROUGHNESS));
+                ElevationClass.LOW, -0.15F, 0.0F, DUNE_PLAIN_ROUGHNESS, DUNE_AMPLITUDE, 0.0F));
+        context.register(RelictProvinces.FRETTED_MESAS, new Province(biomes.getOrThrow(RelictBiomes.FRETTED_MESAS),
+                ElevationClass.HIGH, 0.18F, 0.0F, MESA_PLAIN_ROUGHNESS, 0.0F, MESA_AMPLITUDE));
+
+        // TODO implement as mountain range-shaped province
         context.register(RelictProvinces.SHATTERED_HIGHLANDS, new Province(biomes.getOrThrow(RelictBiomes.SHATTERED_HIGHLANDS),
-                ElevationClass.HIGH, 0.18F, 0.0F, PLAIN_ROUGHNESS));
+                ElevationClass.HIGH, 0.18F, 0.0F, PLAIN_ROUGHNESS, 0.0F, 0.0F));
 
         context.register(RelictProvinces.BASALT_CAVES, new Province(biomes.getOrThrow(RelictBiomes.BASALT_CAVES),
-                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F));
+                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         context.register(RelictProvinces.SULFUR_CAVES, new Province(biomes.getOrThrow(RelictBiomes.SULFUR_CAVES),
-                ElevationClass.MID, 0.0F, 0.0F, 0.0F));
+                ElevationClass.MID, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         context.register(RelictProvinces.ICE_CAVES, new Province(biomes.getOrThrow(RelictBiomes.ICE_CAVES),
-                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F));
+                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         context.register(RelictProvinces.CALCITE_CAVES, new Province(biomes.getOrThrow(RelictBiomes.CALCITE_CAVES),
-                ElevationClass.HIGH, 0.0F, 0.0F, 0.0F));
+                ElevationClass.HIGH, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
     }
 
     public static void bootstrapVoronoiSources(BootstrapContext<VoronoiSource> context) {
@@ -59,7 +79,7 @@ public class RelictProvinceGenerator {
 
         WeightedList<Holder<Province>> surface = WeightedList.<Holder<Province>>builder()
                 .add(provinces.getOrThrow(RelictProvinces.WRINKLE_PLAINS), 1)
-                .add(provinces.getOrThrow(RelictProvinces.SHATTERED_HIGHLANDS), 1)
+                .add(provinces.getOrThrow(RelictProvinces.FRETTED_MESAS), 1)
                 .add(provinces.getOrThrow(RelictProvinces.RUSTED_DUNES), 1)
                 .build();
 

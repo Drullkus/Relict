@@ -1,0 +1,9 @@
+{
+  "type": "relict:mesa_field",
+  "selector": "relict:variant_selector",
+  "serration_x": "relict:mesa_serration_x",
+  "serration_z": "relict:mesa_serration_z",
+  "undulation": "relict:mesa_undulation",
+  "warp_x": "relict:mesa_warp_x",
+  "warp_z": "relict:mesa_warp_z"
+}
