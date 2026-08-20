@@ -1,11 +1,14 @@
 package us.drullk.relict.datagen.worldgen;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -14,12 +17,15 @@ import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseRouter;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
@@ -45,7 +51,11 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * Evaluates the real voronoi graph during datagen and reports whether the blending law holds, and whether
@@ -128,10 +138,24 @@ public final class VoronoiFieldSampler implements DataProvider {
 
     private static final int CAVE_CENSUS_GRID = 24;
     private static final int CAVE_CENSUS_STEP = 16;
-    private static final int CAVE_BAND_MIN = -54;
-    private static final int CAVE_BAND_MAX = 80;
+
+    private static final int CAVE_BAND_DEPTH = 134;
 
     private static final int FULL_COLUMN_SPAN = 384;
+
+    /** (i) surface-biome-at-surface / underground-biome-below-cut scan window. */
+    private static final int INVARIANT_SCAN_RADIUS = 2048;
+    private static final int INVARIANT_SCAN_STEP = 37;
+
+    /** (i) how far below the cut a column is probed to prove it resolves to the underground field. */
+    private static final int UNDERGROUND_PROBE_DEPTH = 60;
+
+    /** (l) RELIEF composition-invariant scan window. */
+    private static final int COMPOSITION_CHECK_RADIUS = 1024;
+    private static final int COMPOSITION_CHECK_STEP = 97;
+
+    /** (m) F3-readout-agreement sample count, drawn from the same vertex list as (a) and (k). */
+    private static final int DEBUG_READOUT_SAMPLES = 6;
 
     private final CompletableFuture<HolderLookup.Provider> registries;
 
@@ -211,6 +235,13 @@ public final class VoronoiFieldSampler implements DataProvider {
         maps(report, reportDirectory(), mars, surfaceY);
         elevationLadder(report, mars);
         detachedSolids(report, registries, mars, surfaceY);
+        surfaceBiomeInvariant(report, registries, mars, surfaceY);
+        report.append(String.format("%n(j) crater-floor-stays-surface%n"
+                + "    deferred: no crater density function exists in this tree yet (0.15 not landed).%n"
+                + "    (i) above already proves the general surface-relative-cut invariant that (j) would specialize.%n"));
+        marginVsWorstDrop(report, surfaceY, vertices);
+        compositionInvariant(report, registries, surfaceY, random);
+        debugReadoutAgreement(report, registries, vertices);
 
         return report;
     }
@@ -969,6 +1000,247 @@ public final class VoronoiFieldSampler implements DataProvider {
         return columns;
     }
 
+    // ---------------------------------------------------------------------------- (i) surface biome field
+
+    /**
+     * The 0.7 bug as a permanent check, both directions. Runs against the real registered level stem
+     * (0.16b), so it exercises the actual {@code VoronoiBiomeSource} and a real, seeded {@code
+     * Climate.Sampler} taken from {@code RandomState.sampler()} — the legal, instantiated route 0.16 §3
+     * establishes. Also doubles as the headless proof the 0.16 order asked for: that surface columns
+     * resolve surface biomes and cave-band columns resolve underground biomes.
+     */
+    private static void surfaceBiomeInvariant(StringBuilder report, HolderLookup.Provider registries,
+                                               VoronoiSource mars, DensityFunction surfaceY) {
+        report.append(String.format("%n(i) surface-biome-at-surface / underground-biome-below-cut%n"));
+
+        Optional<NoiseBasedChunkGenerator> generator = liveGenerator(registries);
+        if (generator.isEmpty()) {
+            report.append("    skipped: the Mars level stem generator is not noise-based\n");
+            return;
+        }
+
+        NoiseGeneratorSettings settings = registries.lookupOrThrow(Registries.NOISE_SETTINGS)
+                .getOrThrow(RelictDimension.MARS_NOISE_SETTINGS).value();
+        RandomState state = RandomState.create(settings, registries.lookupOrThrow(Registries.NOISE), SEED);
+        Climate.Sampler sampler = state.sampler();
+        BiomeSource biomeSource = generator.get().getBiomeSource();
+
+        Set<Identifier> surfaceBiomes = biomeIds(mars);
+        // The real VoronoiBiomeSource seeds its sources lazily, on first read, from the running server's
+        // world seed (VoronoiSource.seeded). There is no server in datagen, so this must bind the
+        // underground source itself before the real getNoiseBiome path can touch it. Bound with
+        // UNDERGROUND_SEED, the same value undergroundReport binds it with later in the same run — a
+        // membership check does not care which seed picks the cell, and reusing the value keeps that
+        // report's own bindSeed call a no-op instead of silently losing its documented fixed seed.
+        Holder<VoronoiSource> undergroundHolder = registries.lookupOrThrow(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY)
+                .getOrThrow(RelictVoronoiSources.MARS_UNDERGROUND);
+        undergroundHolder.value().bindSeed(undergroundHolder.unwrapKey().orElseThrow().identifier(), UNDERGROUND_SEED);
+        Set<Identifier> undergroundBiomes = biomeIds(undergroundHolder.value());
+
+        int checked = 0;
+        int surfaceFailed = 0;
+        int undergroundFailed = 0;
+        int[] worstSurface = null;
+        int[] worstUnderground = null;
+
+        for (int z = -INVARIANT_SCAN_RADIUS; z <= INVARIANT_SCAN_RADIUS; z += INVARIANT_SCAN_STEP) {
+            for (int x = -INVARIANT_SCAN_RADIUS; x <= INVARIANT_SCAN_RADIUS; x += INVARIANT_SCAN_STEP) {
+                checked++;
+                double surface = sample(surfaceY, x, z);
+                int surfaceBlockY = Mth.floor(surface);
+
+                Identifier atSurface = biomeAt(biomeSource, x, surfaceBlockY, z, sampler);
+                if (!surfaceBiomes.contains(atSurface)) {
+                    surfaceFailed++;
+                    if (worstSurface == null) {
+                        worstSurface = new int[]{x, z};
+                    }
+                }
+
+                int belowCut = surfaceBlockY - RelictNoiseRouter.UNDERGROUND_MARGIN - UNDERGROUND_PROBE_DEPTH;
+                Identifier underCut = biomeAt(biomeSource, x, belowCut, z, sampler);
+                if (!undergroundBiomes.contains(underCut)) {
+                    undergroundFailed++;
+                    if (worstUnderground == null) {
+                        worstUnderground = new int[]{x, z};
+                    }
+                }
+            }
+        }
+
+        report.append(String.format("    checked %d columns%n", checked));
+        report.append(String.format("    at each column's own surface height, resolves to a surface biome     %d/%d failed%s  %s%n",
+                surfaceFailed, checked, worstSurface == null ? "" : String.format(" (first at x=%d z=%d)", worstSurface[0], worstSurface[1]),
+                surfaceFailed == 0 ? "PASS" : "FAIL"));
+        report.append(String.format("    %d blocks under the cut, resolves to an underground biome            %d/%d failed%s  %s%n",
+                UNDERGROUND_PROBE_DEPTH, undergroundFailed, checked,
+                worstUnderground == null ? "" : String.format(" (first at x=%d z=%d)", worstUnderground[0], worstUnderground[1]),
+                undergroundFailed == 0 ? "PASS" : "FAIL"));
+    }
+
+    private static Identifier biomeAt(BiomeSource biomeSource, int blockX, int blockY, int blockZ, Climate.Sampler sampler) {
+        Holder<Biome> biome = biomeSource.getNoiseBiome(QuartPos.fromBlock(blockX), QuartPos.fromBlock(blockY), QuartPos.fromBlock(blockZ), sampler);
+        return biome.unwrapKey().map(key -> key.identifier()).orElse(null);
+    }
+
+    private static Set<Identifier> biomeIds(VoronoiSource source) {
+        return source.provinces().unwrap().stream()
+                .map(Weighted::value)
+                .map(Holder::value)
+                .map(Province::biome)
+                .map(biome -> biome.unwrapKey().orElseThrow().identifier())
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private static Optional<NoiseBasedChunkGenerator> liveGenerator(HolderLookup.Provider registries) {
+        LevelStem levelStem = registries.lookupOrThrow(Registries.LEVEL_STEM).getOrThrow(RelictDimension.MARS_LEVELSTEM).value();
+        return levelStem.generator() instanceof NoiseBasedChunkGenerator generator ? Optional.of(generator) : Optional.empty();
+    }
+
+    // -------------------------------------------------------------------------- (k) margin vs. worst drop
+
+    /**
+     * Turns 0.16 §8's derivation into a guarantee: the worst |d surfaceY| between quart-adjacent columns
+     * (the biome grid's own resolution) must stay under {@code UNDERGROUND_MARGIN}, or a future primitive
+     * with a taller scarp could paint a lit cave face on a cliff (0.16 §7.2). Reuses the vertex list from
+     * (a); that is where two provinces meet and the drop is worst.
+     */
+    private static void marginVsWorstDrop(StringBuilder report, DensityFunction surfaceY, List<long[]> vertices) {
+        report.append(String.format("%n(k) margin vs. worst drop between adjacent quart columns%n"));
+
+        double worst = 0.0;
+        long[] worstAt = {0, 0};
+        int swept = 0;
+
+        for (int v = 0; v < vertices.size() && swept < VERTICES_SWEPT; v += Math.max(1, vertices.size() / VERTICES_SWEPT)) {
+            long[] vertex = vertices.get(v);
+            swept++;
+
+            for (boolean alongX : new boolean[]{true, false}) {
+                double previous = Double.NaN;
+
+                for (int d = -SWEEP_HALF_LENGTH; d <= SWEEP_HALF_LENGTH; d += QuartPos.toBlock(1)) {
+                    int x = (int) vertex[0] + (alongX ? d : 0);
+                    int z = (int) vertex[1] + (alongX ? 0 : d);
+                    double surface = sample(surfaceY, x, z);
+
+                    if (!Double.isNaN(previous)) {
+                        double drop = Math.abs(surface - previous);
+                        if (drop > worst) {
+                            worst = drop;
+                            worstAt = new long[]{x, z};
+                        }
+                    }
+
+                    previous = surface;
+                }
+            }
+        }
+
+        report.append(String.format("    swept %d vertices, two quart-stride (%d block) lines of %d blocks each%n",
+                swept, QuartPos.toBlock(1), 2 * SWEEP_HALF_LENGTH + 1));
+        report.append(String.format("    max |d surfaceY| between adjacent quart columns  %.4f blocks at x=%d z=%d  (margin %d)  %s%n",
+                worst, worstAt[0], worstAt[1], RelictNoiseRouter.UNDERGROUND_MARGIN,
+                worst <= RelictNoiseRouter.UNDERGROUND_MARGIN ? "PASS" : "FAIL"));
+    }
+
+    // ------------------------------------------------------------------ (l) RELIEF is the composition point
+
+    /**
+     * Pins the invariant 0.16 §6 depends on and §11.3 risk 1 warns about: surfaceY computed straight from
+     * the registered RELIEF handle must equal both the level stem's preliminary_surface_level slot and its
+     * continents slot. If a later session adds a height channel outside RELIEF, or repurposes continents,
+     * this fails loudly instead of the biome field silently going stale.
+     */
+    private static void compositionInvariant(StringBuilder report, HolderLookup.Provider registries,
+                                              DensityFunction surfaceY, PositionalRandomFactory random) {
+        report.append(String.format("%n(l) RELIEF is the single composition point%n"));
+
+        NoiseGeneratorSettings settings = registries.lookupOrThrow(Registries.NOISE_SETTINGS)
+                .getOrThrow(RelictDimension.MARS_NOISE_SETTINGS).value();
+        NoiseRouter router = settings.noiseRouter();
+        DensityFunction preliminary = seed(router.preliminarySurfaceLevel(), random);
+        DensityFunction continents = seed(router.continents(), random);
+
+        double worstPreliminary = 0.0;
+        double worstContinents = 0.0;
+
+        for (int z = -COMPOSITION_CHECK_RADIUS; z <= COMPOSITION_CHECK_RADIUS; z += COMPOSITION_CHECK_STEP) {
+            for (int x = -COMPOSITION_CHECK_RADIUS; x <= COMPOSITION_CHECK_RADIUS; x += COMPOSITION_CHECK_STEP) {
+                double expected = sample(surfaceY, x, z);
+                worstPreliminary = Math.max(worstPreliminary, Math.abs(sample(preliminary, x, z) - expected));
+                worstContinents = Math.max(worstContinents, Math.abs(sample(continents, x, z) - expected));
+            }
+        }
+
+        report.append(String.format("    surfaceY vs preliminary_surface_level slot   max delta %.6f  %s%n",
+                worstPreliminary, worstPreliminary < 1.0e-6 ? "PASS" : "FAIL"));
+        report.append(String.format("    surfaceY vs continents slot                  max delta %.6f  %s%n",
+                worstContinents, worstContinents < 1.0e-6 ? "PASS" : "FAIL"));
+    }
+
+    // ------------------------------------------------------------------------- (m) F3 readout agreement
+
+    /**
+     * Stops the debug path ({@code addDebugInfo}, the F3 readout) drifting from the real one ({@code
+     * getNoiseBiome}). Parses the province the F3 line reports and compares its biome to the one the real
+     * biome pick resolves, at the same position, both above and below the cut.
+     */
+    private static void debugReadoutAgreement(StringBuilder report, HolderLookup.Provider registries, List<long[]> vertices) {
+        report.append(String.format("%n(m) F3 readout agrees with the real biome pick%n"));
+
+        Optional<NoiseBasedChunkGenerator> generator = liveGenerator(registries);
+        if (generator.isEmpty() || vertices.isEmpty()) {
+            report.append("    skipped: no generator or no vertices to sample\n");
+            return;
+        }
+
+        NoiseGeneratorSettings settings = registries.lookupOrThrow(Registries.NOISE_SETTINGS)
+                .getOrThrow(RelictDimension.MARS_NOISE_SETTINGS).value();
+        RandomState state = RandomState.create(settings, registries.lookupOrThrow(Registries.NOISE), SEED);
+        Climate.Sampler sampler = state.sampler();
+        BiomeSource biomeSource = generator.get().getBiomeSource();
+        HolderLookup.RegistryLookup<Province> provinces = registries.lookupOrThrow(RelictCustomRegistries.PROVINCE_REGISTRY);
+
+        int checked = 0;
+        int mismatched = 0;
+        long[] worstAt = null;
+
+        for (int v = 0; v < vertices.size() && v < DEBUG_READOUT_SAMPLES; v++) {
+            long[] vertex = vertices.get(v);
+            int x = (int) vertex[0];
+            int z = (int) vertex[1];
+
+            // y=64 (above any plausible cut) and y=-32 (below any plausible cut) — two positions, one column.
+            for (int y : new int[]{64, -32}) {
+                checked++;
+                BlockPos pos = new BlockPos(x, y, z);
+
+                List<String> debugLines = new ArrayList<>();
+                biomeSource.addDebugInfo(debugLines, pos, sampler);
+                String line = debugLines.getFirst();
+                String provinceId = line.substring("Province: ".length(), line.indexOf(" cell"));
+
+                Identifier fromDebug = provinceId.equals("(inline)") ? null
+                        : provinces.getOrThrow(ResourceKey.create(RelictCustomRegistries.PROVINCE_REGISTRY, Identifier.parse(provinceId)))
+                                .value().biome().unwrapKey().orElseThrow().identifier();
+                Identifier fromReal = biomeAt(biomeSource, x, y, z, sampler);
+
+                if (!Objects.equals(fromDebug, fromReal)) {
+                    mismatched++;
+                    if (worstAt == null) {
+                        worstAt = new long[]{x, y, z};
+                    }
+                }
+            }
+        }
+
+        report.append(String.format("    checked %d positions across %d vertex columns%n", checked, Math.min(vertices.size(), DEBUG_READOUT_SAMPLES)));
+        report.append(String.format("    F3 province's biome matches getNoiseBiome's   %d/%d mismatched%s  %s%n",
+                mismatched, checked, worstAt == null ? "" : String.format(" (first at x=%d y=%d z=%d)", worstAt[0], worstAt[1], worstAt[2]),
+                mismatched == 0 ? "PASS" : "FAIL"));
+    }
+
     // ------------------------------------------------------------------------------------------ (f) maps
 
     private static void maps(StringBuilder report, Path directory, VoronoiSource source, DensityFunction surfaceY) {
@@ -1127,12 +1399,24 @@ public final class VoronoiFieldSampler implements DataProvider {
         RandomState state = RandomState.create(settings, registries.lookupOrThrow(Registries.NOISE), SEED);
         LevelHeightAccessor height = LevelHeightAccessor.create(settings.noiseSettings().minY(), settings.noiseSettings().height());
 
+        // Same seed the block generation above uses, so the band this reports is the band those blocks
+        // actually came from. 0.16 re-bases the census from an absolute y range to surface-relative: the
+        // band now runs from each column's own underground cut (surfaceY - UNDERGROUND_MARGIN) down
+        // CAVE_BAND_DEPTH blocks, instead of a fixed y -54..80.
+        PositionalRandomFactory random = new XoroshiroRandomSource(SEED).forkPositional();
+        HolderLookup.RegistryLookup<DensityFunction> functions = registries.lookupOrThrow(Registries.DENSITY_FUNCTION);
+        DensityFunction surfaceHeight = seed(holder(functions, RelictDensityFunctionGenerator.VORONOI_SURFACE_HEIGHT), random);
+        DensityFunction relief = seed(holder(functions, RelictDensityFunctionGenerator.RELIEF), random);
+        DensityFunction surfaceY = RelictNoiseRouter.surfaceY(surfaceHeight, relief, SEA_LEVEL);
+
         long banded = 0;
         long air = 0;
         long floors = 0;
         int columns = 0;
         int richestFloors = 0;
         int[] richest = null;
+        int lowestCut = Integer.MAX_VALUE;
+        int highestCut = Integer.MIN_VALUE;
 
         int half = CAVE_CENSUS_GRID * CAVE_CENSUS_STEP / 2;
         for (int ix = 0; ix < CAVE_CENSUS_GRID; ix++) {
@@ -1143,7 +1427,12 @@ public final class VoronoiFieldSampler implements DataProvider {
                 columns++;
                 int columnFloors = 0;
 
-                for (int y = CAVE_BAND_MIN; y <= CAVE_BAND_MAX; y++) {
+                int cut = Math.min(Mth.floor(sample(surfaceY, x, z)) - RelictNoiseRouter.UNDERGROUND_MARGIN, height.getMaxY());
+                int bandBottom = Math.max(cut - CAVE_BAND_DEPTH, height.getMinY());
+                lowestCut = Math.min(lowestCut, cut);
+                highestCut = Math.max(highestCut, cut);
+
+                for (int y = bandBottom; y <= cut; y++) {
                     banded++;
                     if (blocks.getBlock(y).isAir()) {
                         air++;
@@ -1164,8 +1453,8 @@ public final class VoronoiFieldSampler implements DataProvider {
         double airShare = (double) air / banded;
         double floorShare = (double) floors / (columns * (double) FULL_COLUMN_SPAN);
 
-        report.append(String.format("%ncave floor census over %d columns, band y %d..%d%n",
-                columns, CAVE_BAND_MIN, CAVE_BAND_MAX));
+        report.append(String.format("%ncave floor census over %d columns, band = cut..cut-%d per column, cut (surfaceY - margin) ranged y %d..%d%n",
+                columns, CAVE_BAND_DEPTH, lowestCut, highestCut));
         report.append(String.format("    cave air in the band            %.2f%% of %d blocks%n", 100.0 * airShare, banded));
         report.append(String.format("    cave floors per column          %.2f%n", (double) floors / columns));
         report.append(String.format("    one attempt survives, band + environment_scan   %.2f%%%n", 100.0 * airShare));

@@ -16,6 +16,9 @@ public class RelictNoiseRouter {
 
     public static final double ELEVATION_SCALE = 64.0;
 
+    /** How far below a column's own surface the underground biome field starts; see VoronoiBiomeSource. */
+    public static final int UNDERGROUND_MARGIN = 40;
+
     private static final double SURFACE_DENSITY_THRESHOLD = 25.0 / 16.0;
     private static final double CAVE_Y_SCALE = 8.0;
     private static final double CHEESE_Y_SCALE = 2.0 / 3.0;
@@ -39,7 +42,9 @@ public class RelictNoiseRouter {
                 DensityFunctions.zero(),
                 DensityFunctions.zero(),
                 DensityFunctions.zero(),
-                DensityFunctions.zero(),
+                // continents carries the column's own surface height, flat-cached, so VoronoiBiomeSource can
+                // read it cheaply through Climate.Sampler; it does not describe continentalness on Mars.
+                DensityFunctions.flatCache(surfaceY),
                 DensityFunctions.zero(),
                 DensityFunctions.mul(DensityFunctions.constant(1.0 / (DENSITY_PER_BLOCK * 128.0)), terrain),
                 DensityFunctions.zero(),

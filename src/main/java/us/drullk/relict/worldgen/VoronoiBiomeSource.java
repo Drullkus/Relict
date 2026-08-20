@@ -11,6 +11,7 @@ import net.minecraft.util.random.Weighted;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 
 import java.text.MessageFormat;
@@ -25,21 +26,21 @@ public class VoronoiBiomeSource extends BiomeSource {
     public static final MapCodec<VoronoiBiomeSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             SOURCE.fieldOf("voronoi_source").forGetter(biomeSource -> biomeSource.voronoiSource),
             SOURCE.optionalFieldOf("underground_source").forGetter(biomeSource -> biomeSource.undergroundSource),
-            Codec.INT.optionalFieldOf("underground_below", 0).forGetter(biomeSource -> biomeSource.undergroundBelow)
+            Codec.INT.optionalFieldOf("underground_depth", 0).forGetter(biomeSource -> biomeSource.undergroundDepth)
     ).apply(instance, VoronoiBiomeSource::new));
 
     private final Holder<VoronoiSource> voronoiSource;
     private final Optional<Holder<VoronoiSource>> undergroundSource;
-    private final int undergroundBelow;
+    private final int undergroundDepth;
 
     public VoronoiBiomeSource(final Holder<VoronoiSource> voronoiSource) {
         this(voronoiSource, Optional.empty(), 0);
     }
 
-    public VoronoiBiomeSource(final Holder<VoronoiSource> voronoiSource, final Optional<Holder<VoronoiSource>> undergroundSource, final int undergroundBelow) {
+    public VoronoiBiomeSource(final Holder<VoronoiSource> voronoiSource, final Optional<Holder<VoronoiSource>> undergroundSource, final int undergroundDepth) {
         this.voronoiSource = voronoiSource;
         this.undergroundSource = undergroundSource;
-        this.undergroundBelow = undergroundBelow;
+        this.undergroundDepth = undergroundDepth;
     }
 
     @Override
@@ -57,12 +58,12 @@ public class VoronoiBiomeSource extends BiomeSource {
 
     @Override
     public Holder<Biome> getNoiseBiome(final int quartX, final int quartY, final int quartZ, final Climate.Sampler sampler) {
-        return this.provinceAt(QuartPos.toBlock(quartX), QuartPos.toBlock(quartY), QuartPos.toBlock(quartZ)).value().biome();
+        return this.provinceAt(QuartPos.toBlock(quartX), QuartPos.toBlock(quartY), QuartPos.toBlock(quartZ), sampler).value().biome();
     }
 
     @Override
     public void addDebugInfo(final List<String> result, final BlockPos feetPos, final Climate.Sampler sampler) {
-        VoronoiSource source = this.sourceAt(feetPos.getY());
+        VoronoiSource source = this.sourceAt(feetPos.getX(), feetPos.getY(), feetPos.getZ(), sampler);
         VoronoiSource.Cell cell = source.nearest(feetPos.getX(), feetPos.getZ());
         Holder<Province> province = source.provinceAt(cell.cellX(), cell.cellZ());
 
@@ -72,26 +73,32 @@ public class VoronoiBiomeSource extends BiomeSource {
                 cell.cellX(),
                 cell.cellZ(),
                 String.format(
-                        " edge %.1f border %.1f epoch %+.2f",
+                        " edge %.1f border %.1f epoch %+.2f surface %.1f cut %.1f",
                         cell.edgeDistance(),
                         cell.distanceToSecondCenter() - cell.distanceToCenter(),
-                        source.cellEpoch(cell.cellX(), cell.cellZ())
+                        source.cellEpoch(cell.cellX(), cell.cellZ()),
+                        this.surfaceLevel(feetPos.getX(), feetPos.getZ(), sampler),
+                        this.surfaceLevel(feetPos.getX(), feetPos.getZ(), sampler) - this.undergroundDepth
                 )
         ));
     }
 
-    private Holder<Province> provinceAt(final int blockX, final int blockY, final int blockZ) {
-        VoronoiSource source = this.sourceAt(blockY);
+    private Holder<Province> provinceAt(final int blockX, final int blockY, final int blockZ, final Climate.Sampler sampler) {
+        VoronoiSource source = this.sourceAt(blockX, blockY, blockZ, sampler);
         VoronoiSource.Cell cell = source.nearest(blockX, blockZ);
         return source.provinceAt(cell.cellX(), cell.cellZ());
     }
 
-    private VoronoiSource sourceAt(final int blockY) {
-        if (this.undergroundSource.isEmpty() || blockY >= this.undergroundBelow) {
+    private VoronoiSource sourceAt(final int blockX, final int blockY, final int blockZ, final Climate.Sampler sampler) {
+        if (this.undergroundSource.isEmpty() || blockY >= this.surfaceLevel(blockX, blockZ, sampler) - this.undergroundDepth) {
             return VoronoiSource.seeded(this.voronoiSource);
         }
 
         return VoronoiSource.seeded(this.undergroundSource.get());
+    }
+
+    private double surfaceLevel(final int blockX, final int blockZ, final Climate.Sampler sampler) {
+        return sampler.continentalness().compute(new DensityFunction.SinglePointContext(blockX, 0, blockZ));
     }
 
 }
