@@ -21,12 +21,12 @@ public class RelictDamageTypeTags extends DamageTypeTagsProvider {
     protected void addTags(HolderLookup.Provider provider) {
         this.tag(RelictTags.IS_ELECTRIC).add(DamageTypes.LIGHTNING_BOLT);
 
-        this.tag(DamageTypeTags.BYPASSES_ARMOR).add(RelictDamageTypes.UNBREATHABLE);
-        this.tag(DamageTypeTags.BYPASSES_EFFECTS).add(RelictDamageTypes.UNBREATHABLE);
-        this.tag(DamageTypeTags.BYPASSES_ENCHANTMENTS).add(RelictDamageTypes.UNBREATHABLE);
-        this.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).add(RelictDamageTypes.UNBREATHABLE);
-        this.tag(DamageTypeTags.BYPASSES_RESISTANCE).add(RelictDamageTypes.UNBREATHABLE);
-        this.tag(DamageTypeTags.NO_KNOCKBACK).add(RelictDamageTypes.UNBREATHABLE);
+        this.tag(DamageTypeTags.BYPASSES_ARMOR).add(RelictDamageTypes.UNBREATHABLE, RelictDamageTypes.AIR_DEPLETED);
+        this.tag(DamageTypeTags.BYPASSES_EFFECTS).add(RelictDamageTypes.UNBREATHABLE, RelictDamageTypes.AIR_DEPLETED);
+        this.tag(DamageTypeTags.BYPASSES_ENCHANTMENTS).add(RelictDamageTypes.UNBREATHABLE, RelictDamageTypes.AIR_DEPLETED);
+        this.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).add(RelictDamageTypes.UNBREATHABLE, RelictDamageTypes.AIR_DEPLETED);
+        this.tag(DamageTypeTags.BYPASSES_RESISTANCE).add(RelictDamageTypes.UNBREATHABLE, RelictDamageTypes.AIR_DEPLETED);
+        this.tag(DamageTypeTags.NO_KNOCKBACK).add(RelictDamageTypes.UNBREATHABLE, RelictDamageTypes.AIR_DEPLETED);
     }
 
 }

@@ -4,8 +4,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class RelictTags {
 
@@ -17,10 +19,16 @@ public class RelictTags {
 
     public static final TagKey<Block> SPELEOTHEM_REPLACEABLE = TagKey.create(Registries.BLOCK, Relict.id("speleothem_replaceable"));
 
-    /** Vanilla's {@code dripstone_replaceable} equivalent: what dripstone patches and speleothems may grow into. */
+    public static final TagKey<Biome> HAS_STRUCTURE_PORTAL_RUIN = TagKey.create(Registries.BIOME, Relict.id("has_structure/portal_ruin"));
+
+    public static final TagKey<Biome> HAS_STRUCTURE_UNMANNED_WRECK = TagKey.create(Registries.BIOME, Relict.id("has_structure/unmanned_wreck"));
+
+    public static final TagKey<Biome> HAS_STRUCTURE_RUIN_A = TagKey.create(Registries.BIOME, Relict.id("has_structure/ruin_a"));
+
+    public static final TagKey<Structure> SEISMIC_LOCATED = TagKey.create(Registries.STRUCTURE, Relict.id("locators/seismic"));
+
     public static final TagKey<Block> DRIPSTONE_REPLACEABLE = TagKey.create(Registries.BLOCK, Relict.id("dripstone_replaceable"));
 
-    /** Vanilla's {@code base_stone_overworld} equivalent: the Mars underground's base rock for ore-style features. */
     public static final TagKey<Block> BASE_STONE_MARS = TagKey.create(Registries.BLOCK, Relict.id("base_stone_mars"));
 
 }

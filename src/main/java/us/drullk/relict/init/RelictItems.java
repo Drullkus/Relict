@@ -15,7 +15,9 @@ import net.minecraft.world.item.equipment.Equippable;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import us.drullk.relict.Relict;
+import us.drullk.relict.item.SeismicLocatorItem;
 import us.drullk.relict.item.StoredCharges;
+import us.drullk.relict.item.VizardItem;
 
 import java.util.function.UnaryOperator;
 
@@ -23,11 +25,14 @@ public class RelictItems {
 
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Relict.MODID);
 
-    public static final DeferredItem<Item> VITAL_VIZARD = ITEMS.registerItem("vital_vizard", Item::new, properties -> serviceArmor(properties, ArmorType.HELMET, modifiers -> modifiers
+    // 1 durability per 10-tick scan (RelictEvents); 3600s * 20t/s / 10 = the helmet lasts one Mars hour
+    public static final int VITAL_VIZARD_DURABILITY = 7_200;
+
+    public static final DeferredItem<Item> VITAL_VIZARD = ITEMS.registerItem("vital_vizard", VizardItem::new, properties -> serviceArmor(properties, ArmorType.HELMET, modifiers -> modifiers
             .withModifierAdded(RelictAttributes.MARS_LIFE_SUPPORT, RelictAttributes.enable(RelictAttributes.MARS_LIFE_SUPPORT.getId().withPrefix("vizard_")), EquipmentSlotGroup.HEAD)
             .withModifierAdded(RelictAttributes.NAUSEA_IMMUNITY, RelictAttributes.enable(RelictAttributes.NAUSEA_IMMUNITY.getId().withPrefix("vizard_")), EquipmentSlotGroup.HEAD)
             .withModifierAdded(Attributes.OXYGEN_BONUS, add(Relict.id("vizard_oxygen_bonus"), 4.0), EquipmentSlotGroup.HEAD)
-    ).component(DataComponents.EQUIPPABLE, vizardEquippable(RelictArmorMaterials.VITAL_VIZARD_ASSET)));
+    ).component(DataComponents.EQUIPPABLE, vizardEquippable(RelictArmorMaterials.VITAL_VIZARD_ASSET)).durability(VITAL_VIZARD_DURABILITY));
     public static final DeferredItem<Item> SPENT_VIZARD = ITEMS.registerItem("spent_vizard", Item::new, properties -> properties.stacksTo(1).attributes(RelictArmorMaterials.SERVICE.createAttributes(ArmorType.HELMET)).component(DataComponents.EQUIPPABLE, vizardEquippable(RelictArmorMaterials.SPENT_VIZARD_ASSET)));
     public static final DeferredItem<Item> RANGING_CAISSON = ITEMS.registerItem("ranging_caisson", Item::new, properties -> serviceArmor(properties, ArmorType.CHESTPLATE, UnaryOperator.identity()).component(RelictDataComponents.STORED_CHARGE.get(), StoredCharges.EMPTY));
     public static final DeferredItem<Item> RESTLESS_STRIDERS = ITEMS.registerItem("restless_striders", Item::new, properties -> serviceArmor(properties, ArmorType.LEGGINGS, modifiers -> modifiers
@@ -39,6 +44,8 @@ public class RelictItems {
             .withModifierAdded(Attributes.SAFE_FALL_DISTANCE, add(Relict.id("treads_safe_fall_distance"), 10.0), EquipmentSlotGroup.FEET)
             .withModifierAdded(RelictAttributes.ELECTRIC_DAMAGE, add(RelictAttributes.ELECTRIC_DAMAGE.getId().withPrefix("treads_"), -0.1), EquipmentSlotGroup.FEET)
     ));
+
+    public static final DeferredItem<Item> SEISMIC_LOCATOR = ITEMS.registerItem("seismic_locator", SeismicLocatorItem::new, properties -> properties.stacksTo(1));
 
     private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
         return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));

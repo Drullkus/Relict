@@ -222,6 +222,14 @@ tasks.register('runMoonConfig', JavaExec) {
     args file('src/data/resources/moons').getAbsolutePath()
 }
 
+tasks.register('runStructureTemplates', JavaExec) {
+    group = 'relict'
+    description = 'Writes grayboxed structure NBT templates'
+    classpath = sourceSets.data.runtimeClasspath
+    mainClass = 'us.drullk.relict.datagen.tool.RelictStructureTemplates'
+    args file('src/main/resources').getAbsolutePath()
+}
+
 // Sets up a dependency configuration called 'localRuntime'.
 // This configuration should be used instead of 'runtimeOnly' to declare
 // a dependency that will be present for runtime testing but that is

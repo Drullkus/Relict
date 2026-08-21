@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "#relict:has_structure/portal_ruin",
+  "max_distance_from_center": 80,
+  "size": 1,
+  "spawn_overrides": {},
+  "start_height": {
+    "type": "minecraft:uniform",
+    "max_inclusive": {
+      "absolute": 60
+    },
+    "min_inclusive": {
+      "absolute": -40
+    }
+  },
+  "start_pool": "relict:mars_portal_ruin/start",
+  "step": "underground_structures",
+  "terrain_adaptation": "beard_box",
+  "use_expansion_hack": false
+}

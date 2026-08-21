@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "relict:seismic_locator"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "relict:chests/unmanned_wreck"
+}

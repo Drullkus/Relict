@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:dripstone_caves",
+    "minecraft:sulfur_caves",
+    "relict:basalt_caves",
+    "relict:calcite_caves",
+    "relict:ice_caves",
+    "relict:sulfur_caves"
+  ]
+}

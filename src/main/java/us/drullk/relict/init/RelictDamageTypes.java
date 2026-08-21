@@ -8,5 +8,6 @@ import us.drullk.relict.Relict;
 public class RelictDamageTypes {
 
     public static final ResourceKey<DamageType> UNBREATHABLE = ResourceKey.create(Registries.DAMAGE_TYPE, Relict.id("mars_unbreathable"));
+    public static final ResourceKey<DamageType> AIR_DEPLETED = ResourceKey.create(Registries.DAMAGE_TYPE, Relict.id("air_depleted"));
 
 }

@@ -17,6 +17,7 @@ import us.drullk.relict.datagen.tags.RelictBlockTags;
 import us.drullk.relict.datagen.tags.RelictDamageTypeTags;
 import us.drullk.relict.datagen.tags.RelictDimensionTypeTags;
 import us.drullk.relict.datagen.tags.RelictItemTags;
+import us.drullk.relict.datagen.tags.RelictStructureTags;
 import us.drullk.relict.datagen.tags.RelictTimelineTags;
 import us.drullk.relict.datagen.worldgen.*;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
@@ -45,6 +46,7 @@ public class RelictDatagen {
         event.addProvider(new RelictDamageTypeTags(output, builtinDatapackProvider));
         event.addProvider(new RelictDimensionTypeTags(output, builtinDatapackProvider));
         event.addProvider(new RelictItemTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictStructureTags(output, builtinDatapackProvider));
         event.addProvider(new RelictTimelineTags(output, builtinDatapackProvider));
 
         event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
@@ -70,6 +72,7 @@ public class RelictDatagen {
                 .add(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY, RelictProvinceGenerator::bootstrapVoronoiSources)
                 .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
                 .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet)
+                .add(Registries.TEMPLATE_POOL, RelictTemplatePoolGenerator::bootstrapTemplatePools)
                 .add(Registries.TIMELINE, timelineGenerator::bootstrapTimelines)
                 .add(Registries.WORLD_CLOCK, timelineGenerator::bootstrapWorldClocks);
     }

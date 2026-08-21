@@ -9,12 +9,20 @@
   "item.relict.restless_striders": "Restless Striders",
   "item.relict.grounding_treads": "Grounding Treads",
   "item.relict.stored_charges.charge": "Charge: %s / %s",
+  "item.relict.seismic_locator": "Seismic Lead",
+  "item.relict.seismic_locator.no_signal": "FIXME no seismic signal in range",
+
+  "block.relict.mars_portal": "Mars Portal",
 
   "attribute.name.relict.mars_life_support": "Mars Life Support",
   "attribute.name.relict.nausea_immunity": "Nausea Immunity",
   "attribute.name.relict.electric_damage": "Electric Damage",
 
   "death.attack.relict.mars_unbreathable": "%1$s tried to breathe Mars",
+  "death.attack.relict.air_depleted": "%1$s's bubble popped on Mars",
+
+  "relict.vizard.warning": "%s%% air remaining",
+  "relict.vizard.inert": "Air depleted",
 
   "relict.configuration.title": "Relict Configs",
   "relict.configuration.section.relict.common.toml": "Relict Configs",

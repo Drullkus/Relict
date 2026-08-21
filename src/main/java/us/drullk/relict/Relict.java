@@ -15,6 +15,7 @@ import us.drullk.relict.init.RelictCreativeTabs;
 import us.drullk.relict.init.RelictDataComponents;
 import us.drullk.relict.init.RelictEnvironmentAttributes;
 import us.drullk.relict.init.RelictItems;
+import us.drullk.relict.init.RelictSounds;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.worldgen.RelictWorldgenTypes;
 
@@ -29,6 +30,7 @@ public class Relict {
         RelictCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
         RelictAttributes.register(modEventBus);
         RelictDataComponents.register(modEventBus);
+        RelictSounds.register(modEventBus);
         RelictEnvironmentAttributes.register(modEventBus);
         RelictWorldgenTypes.register(modEventBus);
 

@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 841005,
+    "separation": 12,
+    "spacing": 20
+  },
+  "structures": [
+    {
+      "structure": "relict:unmanned_wreck",
+      "weight": 1
+    }
+  ]
+}
