@@ -38,6 +38,13 @@ public final class VoronoiSource {
 
     private static final double EPOCH_OCTAVE_SHIFT = 0.3660254;
 
+    /**
+     * Direct-mapped, and a power of two. A chunk touches about thirty cells, so a table this size is
+     * effectively a hit for chunk generation and still small enough to hold in cache.
+     */
+    private static final int SITE_CACHE_SIZE = 1 << 13;
+    private static final int SITE_CACHE_MASK = SITE_CACHE_SIZE - 1;
+
     private final int cellSize;
     private final float jitter;
     private final float blendWidth;
@@ -47,6 +54,14 @@ public final class VoronoiSource {
 
     private final List<Holder<Province>> provinceValues;
     private final int[] weights;
+
+    /**
+     * Worldgen reads a biome source from several threads at once, so entries are immutable and published by
+     * a plain array write: a reader either sees a fully built entry or misses and builds its own. A miss on
+     * a live entry costs one recomputation and nothing else.
+     */
+    private final Site[] sites = new Site[SITE_CACHE_SIZE];
+    private final Landform[] landforms = new Landform[SITE_CACHE_SIZE];
 
     private volatile boolean seeded;
     private long seed;
@@ -145,7 +160,7 @@ public final class VoronoiSource {
         int gridX = Math.floorDiv(blockX, this.cellSize);
         int gridZ = Math.floorDiv(blockZ, this.cellSize);
         double[] distances = new double[CANDIDATES];
-        double[] centers = this.scan(gridX, gridZ, blockX, blockZ, distances);
+        this.scan(gridX, gridZ, blockX, blockZ, distances);
 
         int nearest = 0;
         double second = Double.MAX_VALUE;
@@ -159,7 +174,7 @@ public final class VoronoiSource {
         }
 
         return new Cell(gridX + nearest % SCAN_WIDTH - SCAN_RADIUS, gridZ + nearest / SCAN_WIDTH - SCAN_RADIUS,
-                distances[nearest], second, edgeDistance(centers, nearest, blockX, blockZ));
+                distances[nearest], second, this.edgeDistance(gridX, gridZ, nearest, blockX, blockZ));
     }
 
     @FunctionalInterface
@@ -190,26 +205,19 @@ public final class VoronoiSource {
             int cellX = gridX + i % SCAN_WIDTH - SCAN_RADIUS;
             int cellZ = gridZ + i / SCAN_WIDTH - SCAN_RADIUS;
             total += weight;
-            sum += weight * field.valueAt(this.provinceAt(cellX, cellZ).value(), cellX, cellZ);
+            sum += weight * field.valueAt(this.landform(cellX, cellZ).province().value(), cellX, cellZ);
         }
 
         return sum / total;
     }
 
-    private double[] scan(final int gridX, final int gridZ, final int blockX, final int blockZ, final double[] distances) {
-        double[] centers = new double[CANDIDATES * 2];
-
+    private void scan(final int gridX, final int gridZ, final int blockX, final int blockZ, final double[] distances) {
         for (int i = 0; i < CANDIDATES; i++) {
-            int cellX = gridX + i % SCAN_WIDTH - SCAN_RADIUS;
-            int cellZ = gridZ + i / SCAN_WIDTH - SCAN_RADIUS;
-            double centerX = this.center(cellX, cellZ, cellX, CENTER_X_SALT);
-            double centerZ = this.center(cellX, cellZ, cellZ, CENTER_Z_SALT);
-            centers[i * 2] = centerX;
-            centers[i * 2 + 1] = centerZ;
+            Site site = this.site(gridX + i % SCAN_WIDTH - SCAN_RADIUS, gridZ + i / SCAN_WIDTH - SCAN_RADIUS);
+            double centerX = site.centerX();
+            double centerZ = site.centerZ();
             distances[i] = Math.sqrt((centerX - blockX) * (centerX - blockX) + (centerZ - blockZ) * (centerZ - blockZ));
         }
-
-        return centers;
     }
 
     private double kernel(final double surplus) {
@@ -221,9 +229,10 @@ public final class VoronoiSource {
         return falloff <= 0.0 ? 0.0 : falloff * falloff;
     }
 
-    private static double edgeDistance(final double[] centers, final int nearest, final int blockX, final int blockZ) {
-        double centerX = centers[nearest * 2];
-        double centerZ = centers[nearest * 2 + 1];
+    private double edgeDistance(final int gridX, final int gridZ, final int nearest, final int blockX, final int blockZ) {
+        Site nearestSite = this.site(gridX + nearest % SCAN_WIDTH - SCAN_RADIUS, gridZ + nearest / SCAN_WIDTH - SCAN_RADIUS);
+        double centerX = nearestSite.centerX();
+        double centerZ = nearestSite.centerZ();
         double edge = Double.MAX_VALUE;
 
         for (int i = 0; i < CANDIDATES; i++) {
@@ -231,8 +240,9 @@ public final class VoronoiSource {
                 continue;
             }
 
-            double towardsX = centers[i * 2] - centerX;
-            double towardsZ = centers[i * 2 + 1] - centerZ;
+            Site site = this.site(gridX + i % SCAN_WIDTH - SCAN_RADIUS, gridZ + i / SCAN_WIDTH - SCAN_RADIUS);
+            double towardsX = site.centerX() - centerX;
+            double towardsZ = site.centerZ() - centerZ;
             double length = Math.sqrt(towardsX * towardsX + towardsZ * towardsZ);
             if (length == 0.0) {
                 continue;
@@ -247,15 +257,66 @@ public final class VoronoiSource {
     }
 
     public double centerX(final int cellX, final int cellZ) {
-        return this.center(cellX, cellZ, cellX, CENTER_X_SALT);
+        return this.site(cellX, cellZ).centerX();
     }
 
     public double centerZ(final int cellX, final int cellZ) {
-        return this.center(cellX, cellZ, cellZ, CENTER_Z_SALT);
+        return this.site(cellX, cellZ).centerZ();
     }
 
     private double center(final int cellX, final int cellZ, final int axis, final long salt) {
         return (axis + 0.5 + this.jitter * (unitInterval(hash(this.seed(), cellX, cellZ, salt)) - 0.5)) * this.cellSize;
+    }
+
+    /**
+     * A cell's jittered site. Every candidate scan derives twenty-five of these per sample and neighboring
+     * samples derive the same ones again, so one memo per cell serves the whole field.
+     */
+    private record Site(long key, double centerX, double centerZ) {}
+
+    /**
+     * A cell's epoch and the province the epoch picked. Held apart from the site because a scan needs all
+     * twenty-five sites but only the one or two cells the blend kernel keeps: folding these into the site
+     * would make a scan pay for twenty-three epochs it discards.
+     */
+    private record Landform(long key, double epoch, Holder<Province> province) {}
+
+    private static long cellKey(final int cellX, final int cellZ) {
+        return (cellX & 0xFFFFFFFFL) | ((long) cellZ << 32);
+    }
+
+    private static int slotFor(final long key) {
+        return (int) (mix(key) & SITE_CACHE_MASK);
+    }
+
+    private Site site(final int cellX, final int cellZ) {
+        long key = cellKey(cellX, cellZ);
+        int slot = slotFor(key);
+        Site cached = this.sites[slot];
+
+        if (cached != null && cached.key() == key) {
+            return cached;
+        }
+
+        Site site = new Site(key, this.center(cellX, cellZ, cellX, CENTER_X_SALT), this.center(cellX, cellZ, cellZ, CENTER_Z_SALT));
+        this.sites[slot] = site;
+        return site;
+    }
+
+    private Landform landform(final int cellX, final int cellZ) {
+        long key = cellKey(cellX, cellZ);
+        int slot = slotFor(key);
+        Landform cached = this.landforms[slot];
+
+        if (cached != null && cached.key() == key) {
+            return cached;
+        }
+
+        Site site = this.site(cellX, cellZ);
+        double epoch = this.epochAt(site.centerX(), site.centerZ());
+        Landform landform = new Landform(key, epoch, this.pickProvince(cellX, cellZ, epoch));
+        this.landforms[slot] = landform;
+        return landform;
     }
 
     public double epochAt(final double worldX, final double worldZ) {
@@ -272,7 +333,7 @@ public final class VoronoiSource {
     }
 
     public double cellEpoch(final int cellX, final int cellZ) {
-        return this.epochAt(this.centerX(cellX, cellZ), this.centerZ(cellX, cellZ));
+        return this.landform(cellX, cellZ).epoch();
     }
 
     public double cellElevation(final Province province, final int cellX, final int cellZ) {
@@ -300,7 +361,10 @@ public final class VoronoiSource {
     }
 
     public Holder<Province> provinceAt(final int cellX, final int cellZ) {
-        double epoch = this.cellEpoch(cellX, cellZ);
+        return this.landform(cellX, cellZ).province();
+    }
+
+    private Holder<Province> pickProvince(final int cellX, final int cellZ, final double epoch) {
         double total = 0.0;
 
         for (int i = 0; i < this.weights.length; i++) {

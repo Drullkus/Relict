@@ -69,6 +69,7 @@ public class RelictDatagen {
 
         event.addProvider(new RidgeFieldSampler(output, builtinDatapackProvider));
         event.addProvider(new VoronoiFieldSampler(output, builtinDatapackProvider));
+        event.addProvider(new TerrainPerformanceSampler(output, builtinDatapackProvider));
     }
 
     @SubscribeEvent
