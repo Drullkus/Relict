@@ -1,5 +1,6 @@
 {
   "biome": "relict:wrinkle_plains",
+  "crater_exposure": 0.7,
   "plain_roughness": 3.0,
   "ridge_amplitude": 26.0
 }

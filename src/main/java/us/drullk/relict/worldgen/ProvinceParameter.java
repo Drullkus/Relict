@@ -61,6 +61,14 @@ public enum ProvinceParameter implements StringRepresentable {
         public double compute(final VoronoiSource source, final int blockX, final int blockZ) {
             return source.blend(blockX, blockZ, (province, cellX, cellZ) -> province.mesaAmplitude());
         }
+    },
+    CRATER_EXPOSURE("crater_exposure", 0.0, Province.MAX_CRATER_EXPOSURE) {
+        @Override
+        public double compute(final VoronoiSource source, final int blockX, final int blockZ) {
+            // Placement straddles borders; only how much of a crater survives is per-province, so the blend
+            // reads as one province burying what its neighbor keeps rather than as a cut circle.
+            return source.blend(blockX, blockZ, (province, cellX, cellZ) -> province.craterExposure());
+        }
     };
 
     public static final Codec<ProvinceParameter> CODEC = StringRepresentable.fromEnum(ProvinceParameter::values);

@@ -37,7 +37,9 @@ import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
 import us.drullk.relict.init.worldgen.RelictNoises;
+import us.drullk.relict.worldgen.CraterFieldFunction;
 import us.drullk.relict.worldgen.DuneWaveFunction;
+import us.drullk.relict.worldgen.LatticeHash;
 import us.drullk.relict.worldgen.ElevationClass;
 import us.drullk.relict.worldgen.NoiseSpread;
 import us.drullk.relict.worldgen.Province;
@@ -205,6 +207,43 @@ public final class VoronoiFieldSampler implements DataProvider {
     private static final int RELIEF_PATCH = 384;
     private static final int RELIEF_PATCH_STEP = 2;
 
+    /** (s) contiguous census window, so the per-layer counts are areal densities and not just tallies. */
+    private static final int CRATER_CENSUS_SPAN = 16384;
+
+    /** (s) half-octave diameter thresholds for the cumulative size-frequency fit, in blocks. */
+    private static final double[] CRATER_SIZE_THRESHOLDS = {16.0, 22.6, 32.0, 45.3, 64.0, 90.5, 128.0, 181.0};
+
+    private static final double CRATER_SLOPE_LOWEST = -2.4;
+    private static final double CRATER_SLOPE_HIGHEST = -1.6;
+
+    /**
+     * (t) cells drawn per layer, scattered across {@link #CRATER_EPOCH_SPAN}. Large because the check is a
+     * strict monotonicity over eleven bins and the youngest two bins are the flattest part of a convex curve:
+     * at this count the smallest legitimate step is several times the counting noise.
+     */
+    private static final int CRATER_EPOCH_CELLS = 400000;
+    private static final int CRATER_EPOCH_SPAN = 200000;
+    private static final int CRATER_EPOCH_BINS = 11;
+    private static final int CRATER_EPOCH_MIN_CELLS = 500;
+
+    private static final double BLOCKS_PER_SQUARE_KILOMETRE = 1.0e6;
+
+    /** (u) the three size classes the depth law was calibrated at. */
+    private static final double[] CRATER_PROFILE_DIAMETERS = {24.0, 96.0, 224.0};
+    private static final double CRATER_PROFILE_RADIUS_STEP = 0.002;
+    private static final double CRATER_PROFILE_FRESH = 0.05;
+    private static final double CRATER_PROFILE_TOLERANCE = 0.05;
+    private static final int CRATER_PROFILE_SEARCH_CELLS = 400000;
+    private static final int CRATER_PROFILE_RING_SAMPLES = 64;
+
+    /** (v) overlap window. Stride is coprime with every cell edge, so no layer is sampled in phase. */
+    private static final int CRATER_OVERLAP_SPAN = 2048;
+    private static final int CRATER_OVERLAP_STEP = 13;
+
+    /** (j) how many of the deepest fresh bowls are swept, and the ring the transects run out to. */
+    private static final int CRATER_FLOOR_CASES = 6;
+    private static final int CRATER_FLOOR_SEARCH_CELLS = 200000;
+
     private final CompletableFuture<HolderLookup.Provider> registries;
 
     public VoronoiFieldSampler(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
@@ -262,9 +301,11 @@ public final class VoronoiFieldSampler implements DataProvider {
     private static StringBuilder surfaceReport(HolderLookup.Provider registries, List<String> failures) {
         PositionalRandomFactory random = new XoroshiroRandomSource(SEED).forkPositional();
 
-        VoronoiSource mars = registries.lookupOrThrow(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY)
-                .getOrThrow(RelictVoronoiSources.MARS).value();
+        Holder<VoronoiSource> marsHolder = registries.lookupOrThrow(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY)
+                .getOrThrow(RelictVoronoiSources.MARS);
+        VoronoiSource mars = marsHolder.value();
         mars.bindSeed(RelictVoronoiSources.MARS.identifier(), SEED);
+        CraterFieldFunction craters = new CraterFieldFunction(marsHolder, CraterFieldFunction.Mode.DELTA);
 
         HolderLookup.RegistryLookup<DensityFunction> functions = registries.lookupOrThrow(Registries.DENSITY_FUNCTION);
         DensityFunction surfaceHeight = seed(holder(functions, RelictDensityFunctionGenerator.VORONOI_SURFACE_HEIGHT), random);
@@ -292,9 +333,7 @@ public final class VoronoiFieldSampler implements DataProvider {
         elevationLadder(report, mars);
         detachedSolids(report, registries, mars, surfaceY);
         surfaceBiomeInvariant(report, registries, mars, surfaceY);
-        report.append(String.format("%n(j) crater-floor-stays-surface%n"
-                + "    deferred: no crater density function exists in this tree yet (0.15 not landed).%n"
-                + "    (i) above already proves the general surface-relative-cut invariant that (j) would specialize.%n"));
+        craterFloorInvariant(report, registries, mars, craters, surfaceY);
         marginVsWorstDrop(report, surfaceY, vertices);
         compositionInvariant(report, registries, surfaceY, random);
         debugReadoutAgreement(report, registries, vertices);
@@ -302,7 +341,12 @@ public final class VoronoiFieldSampler implements DataProvider {
         duneMorphology(report, registries, random, failures);
         mesaMorphology(report, registries, random, failures);
         provinceRelief(report, registries, mars, random);
+        craterCensus(report, mars, failures);
+        craterEpochDensity(report, mars, failures);
+        craterProfile(report, registries, mars, craters, random, failures);
+        craterOverlapBound(report, mars, craters, failures);
         surfaceTeleports(report, mars, surfaceY);
+        craterTeleports(report, mars, craters, surfaceY);
 
         return report;
     }
@@ -1056,8 +1100,8 @@ public final class VoronoiFieldSampler implements DataProvider {
         report.append(String.format("%n(d) max contrast, a test source of elevation_offset -1 against +1, epoch_relief 0%n"));
 
         HolderLookup.RegistryLookup<Biome> biomes = registries.lookupOrThrow(Registries.BIOME);
-        Holder<Province> low = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.LOW, -1.0F, 0.0F, 0.0F, 0.0F, 0.0F));
-        Holder<Province> high = Holder.direct(new Province(biomes.getOrThrow(Biomes.BADLANDS), ElevationClass.HIGH, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+        Holder<Province> low = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.LOW, -1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+        Holder<Province> high = Holder.direct(new Province(biomes.getOrThrow(Biomes.BADLANDS), ElevationClass.HIGH, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
 
         VoronoiSource source = new VoronoiSource(RelictProvinceGenerator.CELL_SIZE, RelictProvinceGenerator.JITTER,
                 RelictProvinceGenerator.BLEND_WIDTH, RelictProvinceGenerator.EPOCH_SPACING, 0.0F,
@@ -1257,7 +1301,7 @@ public final class VoronoiFieldSampler implements DataProvider {
     /** Two sources configured alike must not tessellate alike, which is what the registry-ID salt buys. */
     private static void identitySalt(StringBuilder report, HolderLookup.Provider registries) {
         HolderLookup.RegistryLookup<Biome> biomes = registries.lookupOrThrow(Registries.BIOME);
-        Holder<Province> only = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.MID, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+        Holder<Province> only = Holder.direct(new Province(biomes.getOrThrow(Biomes.DESERT), ElevationClass.MID, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         WeightedList<Holder<Province>> provinces = WeightedList.<Holder<Province>>builder().add(only, 1).build();
 
         VoronoiSource first = new VoronoiSource(RelictProvinceGenerator.CELL_SIZE, RelictProvinceGenerator.JITTER,
@@ -1826,6 +1870,563 @@ public final class VoronoiFieldSampler implements DataProvider {
                 }
             }
         }
+    }
+
+    // ------------------------------------------------------------------------------- crater field checks
+
+    /**
+     * (s) The size-frequency law, re-measured through the same rolls the density function makes. A cumulative
+     * log-log slope near -2 is the whole reason the diameter draw is a truncated Pareto, and it is the one
+     * property that silently dies if the exponent or the layer bands are retuned.
+     */
+    private static void craterCensus(StringBuilder report, VoronoiSource source, List<String> failures) {
+        report.append(String.format("%n(s) crater census over a %d-block window, through the field's own rolls%n",
+                CRATER_CENSUS_SPAN));
+
+        long seed = CraterFieldFunction.craterSeed(source.seed());
+        int half = CRATER_CENSUS_SPAN / 2;
+        double area = (double) CRATER_CENSUS_SPAN * CRATER_CENSUS_SPAN / BLOCKS_PER_SQUARE_KILOMETRE;
+        List<Double> diameters = new ArrayList<>();
+
+        report.append(String.format("    %-8s %10s %12s %14s %14s%n", "layer", "cells", "craters", "per cell", "per km^2"));
+
+        for (CraterFieldFunction.Layer layer : CraterFieldFunction.LAYERS) {
+            int from = Mth.floor(-half / layer.cell());
+            int to = Mth.floor(half / layer.cell());
+            long cells = 0;
+            long found = 0;
+
+            for (int cellZ = from; cellZ <= to; cellZ++) {
+                for (int cellX = from; cellX <= to; cellX++) {
+                    cells++;
+                    CraterFieldFunction.Crater crater = CraterFieldFunction.rollCrater(seed, layer, cellX, cellZ, source);
+                    if (crater != null) {
+                        found++;
+                        diameters.add(crater.diameter());
+                    }
+                }
+            }
+
+            report.append(String.format("    %-8.0f %10d %12d %14.4f %14.1f%n",
+                    layer.cell(), cells, found, (double) found / cells, found / area));
+        }
+
+        report.append(String.format("    %-8s %10s %12d %14s %14.1f%n", "all", "", diameters.size(), "", diameters.size() / area));
+
+        double[] logDiameter = new double[CRATER_SIZE_THRESHOLDS.length];
+        double[] logCount = new double[CRATER_SIZE_THRESHOLDS.length];
+        int fitted = 0;
+
+        report.append(String.format("%n    %-14s %14s%n", "diameter >=", "cumulative"));
+
+        for (double threshold : CRATER_SIZE_THRESHOLDS) {
+            long above = diameters.stream().filter(diameter -> diameter >= threshold).count();
+            report.append(String.format("    %-14.1f %14d%n", threshold, above));
+
+            if (above > 0) {
+                logDiameter[fitted] = Math.log(threshold);
+                logCount[fitted] = Math.log(above);
+                fitted++;
+            }
+        }
+
+        bar(report, failures, "size-frequency slope", leastSquaresSlope(logDiameter, logCount, fitted),
+                CRATER_SLOPE_LOWEST, CRATER_SLOPE_HIGHEST, "");
+    }
+
+    private static double leastSquaresSlope(double[] xs, double[] ys, int count) {
+        double meanX = 0.0;
+        double meanY = 0.0;
+        for (int i = 0; i < count; i++) {
+            meanX += xs[i] / count;
+            meanY += ys[i] / count;
+        }
+
+        double covariance = 0.0;
+        double variance = 0.0;
+        for (int i = 0; i < count; i++) {
+            covariance += (xs[i] - meanX) * (ys[i] - meanY);
+            variance += (xs[i] - meanX) * (xs[i] - meanX);
+        }
+
+        return covariance / variance;
+    }
+
+    /**
+     * (t) Density against the age of the ground it sits on, measured rather than asserted: cells drawn from
+     * across the world, bucketed by the oldness at their own centre, counted for whether they produced a
+     * crater. A sign error in the epoch hookup is the classic silent failure here — the field would still
+     * look like a crater field, just with the chronology reversed — and only monotonicity catches it.
+     */
+    private static void craterEpochDensity(StringBuilder report, VoronoiSource source, List<String> failures) {
+        report.append(String.format("%n(t) crater density against epoch, %d cells per layer over +-%d blocks%n",
+                CRATER_EPOCH_CELLS, CRATER_EPOCH_SPAN));
+
+        long seed = CraterFieldFunction.craterSeed(source.seed());
+        int layerCount = CraterFieldFunction.LAYERS.size();
+        long[][] cells = new long[layerCount][CRATER_EPOCH_BINS];
+        long[][] found = new long[layerCount][CRATER_EPOCH_BINS];
+
+        for (int index = 0; index < layerCount; index++) {
+            CraterFieldFunction.Layer layer = CraterFieldFunction.LAYERS.get(index);
+            long range = (long) (CRATER_EPOCH_SPAN / layer.cell());
+
+            for (int draw = 0; draw < CRATER_EPOCH_CELLS; draw++) {
+                long spread = LatticeHash.mix(draw * 0x9E3779B97F4A7C15L + index * 0xC2B2AE3D27D4EB4FL);
+                int cellX = (int) (Math.floorMod(spread, 2L * range + 1L) - range);
+                int cellZ = (int) (Math.floorMod(LatticeHash.mix(spread), 2L * range + 1L) - range);
+
+                double[] centre = CraterFieldFunction.cellCenter(seed, layer, cellX, cellZ);
+                double oldness = CraterFieldFunction.oldnessAt(source, centre[0], centre[1]);
+                int bin = Math.min((int) (oldness * CRATER_EPOCH_BINS), CRATER_EPOCH_BINS - 1);
+
+                cells[index][bin]++;
+                if (CraterFieldFunction.rollCrater(seed, layer, cellX, cellZ, source) != null) {
+                    found[index][bin]++;
+                }
+            }
+        }
+
+        report.append(String.format("    %-12s %10s %14s%n", "oldness", "cells", "per km^2"));
+
+        double previous = Double.NEGATIVE_INFINITY;
+        int compared = 0;
+        boolean monotone = true;
+
+        for (int bin = 0; bin < CRATER_EPOCH_BINS; bin++) {
+            long binCells = 0;
+            double density = 0.0;
+            boolean usable = true;
+
+            for (int index = 0; index < layerCount; index++) {
+                binCells += cells[index][bin];
+                if (cells[index][bin] < CRATER_EPOCH_MIN_CELLS) {
+                    usable = false;
+                    continue;
+                }
+
+                double cell = CraterFieldFunction.LAYERS.get(index).cell();
+                density += (double) found[index][bin] / cells[index][bin] / (cell * cell) * BLOCKS_PER_SQUARE_KILOMETRE;
+            }
+
+            report.append(String.format("    %-12s %10d %14s%n",
+                    String.format("%.2f..%.2f", (double) bin / CRATER_EPOCH_BINS, (bin + 1.0) / CRATER_EPOCH_BINS),
+                    binCells, usable ? String.format("%.1f", density) : "(too few cells)"));
+
+            if (!usable) {
+                continue;
+            }
+
+            if (compared > 0 && density <= previous) {
+                monotone = false;
+            }
+
+            previous = density;
+            compared++;
+        }
+
+        bar(report, failures, "epoch bins compared", compared, 8.0, CRATER_EPOCH_BINS, "bins");
+        bar(report, failures, "density strictly increasing", monotone ? 1.0 : 0.0, 1.0, 1.0, "");
+    }
+
+    /**
+     * (u) The depth law as a permanent pin, in two halves because the field cannot supply both.
+     *
+     * <p>The synthetic half sweeps the three calibrated size classes on a sub-block radius grid, so block
+     * quantization cannot blunt the rim crest of the smallest class. It measures shape, not just endpoints:
+     * the crest has to sit at the rim radius and the bowl has to climb to it without a local maximum, which
+     * is what a wrong bowl exponent or a wrong flank exponent would break.
+     *
+     * <p>The live half repeats the measurement on a real crater the field placed, which pins the gather —
+     * the layer scan, the epoch read, the wobble remap, the truncation product — and not only the profile.
+     * Only the smaller classes can supply one: a 224-block bowl has a footprint of some 114,000 blocks, and
+     * at even the youngest crater densities something else always lands inside it. That is the field working
+     * as designed, not a gap in it.
+     */
+    private static void craterProfile(StringBuilder report, HolderLookup.Provider registries, VoronoiSource source,
+                                      CraterFieldFunction craters, PositionalRandomFactory random, List<String> failures) {
+        report.append(String.format("%n(u) crater profile against the depth law, tolerance %.0f%%%n",
+                100.0 * CRATER_PROFILE_TOLERANCE));
+
+        long seed = CraterFieldFunction.craterSeed(source.seed());
+        report.append(String.format("%n    synthetic, fresh, swept at %.3f in r%n", CRATER_PROFILE_RADIUS_STEP));
+        report.append(String.format("    %-10s %10s %10s %10s %10s %10s %8s%n",
+                "diameter", "floor", "law", "rim", "law", "crest r", "beyond"));
+
+        for (double diameter : CRATER_PROFILE_DIAMETERS) {
+            double lawDepth = CraterFieldFunction.freshDepth(diameter);
+            double lawRim = CraterFieldFunction.RIM_RATIO * lawDepth;
+
+            double floor = 0.0;
+            double rim = Double.NEGATIVE_INFINITY;
+            double crest = 0.0;
+            double beyond = 0.0;
+            double previous = Double.NEGATIVE_INFINITY;
+            int bowlReversals = 0;
+
+            for (double r = 0.0; r <= CraterFieldFunction.FOOTPRINT + 0.3; r += CRATER_PROFILE_RADIUS_STEP) {
+                double height = CraterFieldFunction.craterDelta(r, diameter, 0.0);
+                floor = Math.min(floor, height);
+
+                if (height > rim) {
+                    rim = height;
+                    crest = r;
+                }
+
+                if (r < 1.0 && height < previous) {
+                    bowlReversals++;
+                }
+
+                if (r >= CraterFieldFunction.FOOTPRINT) {
+                    beyond = Math.max(beyond, Math.abs(height));
+                }
+
+                previous = height;
+            }
+
+            report.append(String.format("    %-10.0f %10.3f %10.3f %10.3f %10.3f %10.3f %8.1e%n",
+                    diameter, floor, -lawDepth, rim, lawRim, crest, beyond));
+
+            bar(report, failures, String.format("D%.0f floor / law", diameter), floor / -lawDepth,
+                    1.0 - CRATER_PROFILE_TOLERANCE, 1.0 + CRATER_PROFILE_TOLERANCE, "");
+            bar(report, failures, String.format("D%.0f rim / law", diameter), rim / lawRim,
+                    1.0 - CRATER_PROFILE_TOLERANCE, 1.0 + CRATER_PROFILE_TOLERANCE, "");
+            bar(report, failures, String.format("D%.0f crest radius", diameter), crest, 0.99, 1.01, "");
+            bar(report, failures, String.format("D%.0f bowl reversals", diameter), bowlReversals, 0.0, 0.0, "");
+            bar(report, failures, String.format("D%.0f beyond footprint", diameter), beyond, 0.0, ROUNDING, "blocks");
+        }
+
+        report.append(String.format("%n    live, the freshest isolated crater the field places%n"));
+        report.append(String.format("    %-10s %10s %10s %10s %10s %10s %8s%n",
+                "diameter", "age", "floor", "law", "rim", "law", "beyond"));
+
+        CraterFieldFunction.Crater crater = findIsolatedCrater(seed, source, craters);
+
+        if (crater == null) {
+            report.append("    none found  FAIL\n");
+            failures.add("crater profile, live: the field placed no isolated fresh crater to measure");
+        } else {
+            double radius = 0.5 * crater.diameter();
+            double lawDepth = CraterFieldFunction.freshDepth(crater.diameter())
+                    * (1.0 - CraterFieldFunction.DEPTH_LOSS * crater.degradation());
+            double lawRim = CraterFieldFunction.RIM_RATIO * CraterFieldFunction.freshDepth(crater.diameter())
+                    * (1.0 - CraterFieldFunction.RIM_LOSS * crater.degradation());
+
+            double floor = craters.sampleAt(source, crater.centerX(), crater.centerZ()).delta();
+            double rim = Double.NEGATIVE_INFINITY;
+            double beyond = 0.0;
+
+            for (int step = 0; step < CRATER_PROFILE_RING_SAMPLES; step++) {
+                double angle = 2.0 * Math.PI * step / CRATER_PROFILE_RING_SAMPLES;
+
+                for (double r = 0.85; r <= 1.25; r += CRATER_PROFILE_RADIUS_STEP) {
+                    rim = Math.max(rim, delta(craters, source, crater, radius * r, angle));
+                }
+
+                beyond = Math.max(beyond, Math.abs(delta(craters, source, crater,
+                        radius * (CraterFieldFunction.FOOTPRINT + 0.2), angle)));
+            }
+
+            report.append(String.format("    %-10.1f %10.3f %10.3f %10.3f %10.3f %10.3f %8.1e%n",
+                    crater.diameter(), crater.degradation(), floor, -lawDepth, rim, lawRim, beyond));
+
+            bar(report, failures, "live floor / law", floor / -lawDepth,
+                    1.0 - CRATER_PROFILE_TOLERANCE, 1.0 + CRATER_PROFILE_TOLERANCE, "");
+            bar(report, failures, "live rim / law", rim / lawRim,
+                    1.0 - CRATER_PROFILE_TOLERANCE, 1.0 + CRATER_PROFILE_TOLERANCE, "");
+            bar(report, failures, "live beyond footprint", beyond, 0.0, ROUNDING, "blocks");
+        }
+
+        HolderLookup.RegistryLookup<DensityFunction> functions = registries.lookupOrThrow(Registries.DENSITY_FUNCTION);
+        DensityFunction registered = seed(holder(functions, RelictDensityFunctionGenerator.CRATER_DELTA), random);
+        double worst = 0.0;
+
+        for (int z = -COMPOSITION_CHECK_RADIUS; z <= COMPOSITION_CHECK_RADIUS; z += COMPOSITION_CHECK_STEP) {
+            for (int x = -COMPOSITION_CHECK_RADIUS; x <= COMPOSITION_CHECK_RADIUS; x += COMPOSITION_CHECK_STEP) {
+                worst = Math.max(worst, Math.abs(sample(registered, x, z) - craters.sampleAt(source, x, z).delta()));
+            }
+        }
+
+        bar(report, failures, "registered df vs gather", worst, 0.0, ROUNDING, "blocks");
+    }
+
+    private static double delta(CraterFieldFunction craters, VoronoiSource source, CraterFieldFunction.Crater crater,
+                                double distance, double angle) {
+        return craters.sampleAt(source, crater.centerX() + distance * Math.cos(angle),
+                crater.centerZ() + distance * Math.sin(angle)).delta();
+    }
+
+    /**
+     * The widest fresh crater with nothing else inside its footprint, so its delta is its own profile and not
+     * a truncation product. Searched widest layer first and across the whole world rather than near the
+     * origin, because isolation only happens on young ground.
+     */
+    private static CraterFieldFunction.Crater findIsolatedCrater(long seed, VoronoiSource source, CraterFieldFunction craters) {
+        for (int index = CraterFieldFunction.LAYERS.size() - 1; index >= 0; index--) {
+            CraterFieldFunction.Layer layer = CraterFieldFunction.LAYERS.get(index);
+            long range = (long) (CRATER_EPOCH_SPAN / layer.cell());
+
+            for (int draw = 0; draw < CRATER_PROFILE_SEARCH_CELLS; draw++) {
+                long spread = LatticeHash.mix(draw * 0x2545F4914F6CDD1DL + index * 0x14057B7EF767814FL);
+                int cellX = (int) (Math.floorMod(spread, 2L * range + 1L) - range);
+                int cellZ = (int) (Math.floorMod(LatticeHash.mix(spread), 2L * range + 1L) - range);
+
+                CraterFieldFunction.Crater crater = CraterFieldFunction.rollCrater(seed, layer, cellX, cellZ, source);
+                if (crater != null && crater.degradation() <= CRATER_PROFILE_FRESH && isolated(craters, source, crater)) {
+                    return crater;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static boolean isolated(CraterFieldFunction craters, VoronoiSource source, CraterFieldFunction.Crater crater) {
+        double radius = 0.5 * crater.diameter();
+
+        if (craters.sampleAt(source, crater.centerX(), crater.centerZ()).covering() != 1) {
+            return false;
+        }
+
+        for (int step = 0; step < CRATER_PROFILE_RING_SAMPLES; step++) {
+            double angle = 2.0 * Math.PI * step / CRATER_PROFILE_RING_SAMPLES;
+
+            for (double r : new double[]{0.5, 1.0, 1.4}) {
+                if (covering(craters, source, crater, radius * r, angle) != 1) {
+                    return false;
+                }
+            }
+
+            if (covering(craters, source, crater, radius * (CraterFieldFunction.FOOTPRINT + 0.2), angle) != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static int covering(CraterFieldFunction craters, VoronoiSource source, CraterFieldFunction.Crater crater,
+                                double distance, double angle) {
+        return craters.sampleAt(source, crater.centerX() + distance * Math.cos(angle),
+                crater.centerZ() + distance * Math.sin(angle)).covering();
+    }
+
+    /**
+     * (v) The gather's fixed array is the one place this field can lose craters silently: past the ceiling it
+     * drops them rather than growing. This measures the real crowding so a future presence retune cannot walk
+     * into the ceiling unnoticed.
+     */
+    private static void craterOverlapBound(StringBuilder report, VoronoiSource source, CraterFieldFunction craters,
+                                           List<String> failures) {
+        report.append(String.format("%n(v) craters covering one column, over a %d-block window at %d-block stride%n",
+                2 * CRATER_OVERLAP_SPAN, CRATER_OVERLAP_STEP));
+
+        int[] histogram = new int[CraterFieldFunction.MAX_COVERING + 1];
+        long columns = 0;
+        long total = 0;
+        int highest = 0;
+
+        for (int z = -CRATER_OVERLAP_SPAN; z <= CRATER_OVERLAP_SPAN; z += CRATER_OVERLAP_STEP) {
+            for (int x = -CRATER_OVERLAP_SPAN; x <= CRATER_OVERLAP_SPAN; x += CRATER_OVERLAP_STEP) {
+                int covering = craters.sampleAt(source, x, z).covering();
+                histogram[covering]++;
+                columns++;
+                total += covering;
+                highest = Math.max(highest, covering);
+            }
+        }
+
+        long running = 0;
+        int ninetyNinth = 0;
+        for (int covering = 0; covering < histogram.length; covering++) {
+            running += histogram[covering];
+            if (running <= 0.99 * columns) {
+                ninetyNinth = covering + 1;
+            }
+        }
+
+        report.append(String.format("    columns %d   mean %.2f   p99 %d   max %d   ceiling %d%n",
+                columns, (double) total / columns, ninetyNinth, highest, CraterFieldFunction.MAX_COVERING));
+        bar(report, failures, "max craters over a column", highest, 0.0, CraterFieldFunction.MAX_COVERING - 1.0, "craters");
+    }
+
+    /**
+     * (j) The crater specialization of (i), deferred from 0.16b until a crater field existed. A fresh bowl is
+     * the deepest thing that can sit under an otherwise flat column, so it is the landform most able to drop
+     * a column's own surface far enough below its neighbour's that the surface-relative underground cut
+     * paints cave visuals on a crater wall. Reports the worst quart-adjacent drop across real bowls against
+     * the margin, and checks the floors themselves still resolve to surface biomes.
+     */
+    private static void craterFloorInvariant(StringBuilder report, HolderLookup.Provider registries, VoronoiSource source,
+                                             CraterFieldFunction craters, DensityFunction surfaceY) {
+        report.append(String.format("%n(j) crater-floor-stays-surface%n"));
+
+        Optional<NoiseBasedChunkGenerator> generator = liveGenerator(registries);
+        if (generator.isEmpty()) {
+            report.append("    skipped: the Mars level stem generator is not noise-based\n");
+            return;
+        }
+
+        NoiseGeneratorSettings settings = registries.lookupOrThrow(Registries.NOISE_SETTINGS)
+                .getOrThrow(RelictDimension.MARS_NOISE_SETTINGS).value();
+        RandomState state = RandomState.create(settings, registries.lookupOrThrow(Registries.NOISE), SEED);
+        Climate.Sampler sampler = state.sampler();
+        BiomeSource biomeSource = generator.get().getBiomeSource();
+        Set<Identifier> surfaceBiomes = biomeIds(source);
+
+        List<CraterFieldFunction.Crater> deepest = deepestFreshCraters(source);
+        report.append(String.format("    %-12s %10s %10s %12s %10s %-24s%n",
+                "diameter", "age", "bowl", "worst quart", "floor y", "biome at floor"));
+
+        double worst = 0.0;
+        int failed = 0;
+
+        for (CraterFieldFunction.Crater crater : deepest) {
+            int centreX = Mth.floor(crater.centerX());
+            int centreZ = Mth.floor(crater.centerZ());
+            double bowl = craters.sampleAt(source, crater.centerX(), crater.centerZ()).delta();
+            double drop = quartDropAcross(surfaceY, crater);
+            worst = Math.max(worst, drop);
+            int floorY = Mth.floor(sample(surfaceY, centreX, centreZ));
+            Identifier atFloor = biomeAt(biomeSource, centreX, floorY, centreZ, sampler);
+            boolean onSurface = surfaceBiomes.contains(atFloor);
+            if (!onSurface) {
+                failed++;
+            }
+
+            report.append(String.format("    %-12.1f %10.3f %10.2f %12.4f %10d %-24s %s%n",
+                    crater.diameter(), crater.degradation(), bowl, drop, floorY,
+                    atFloor == null ? "(none)" : atFloor.getPath(), onSurface ? "PASS" : "FAIL"));
+        }
+
+        report.append(String.format("    worst quart-adjacent drop across %d bowls  %.4f blocks  (margin %d)  %s%n",
+                deepest.size(), worst, RelictNoiseRouter.UNDERGROUND_MARGIN,
+                worst <= RelictNoiseRouter.UNDERGROUND_MARGIN ? "PASS" : "FAIL"));
+        report.append(String.format("    floors resolving to a surface biome        %d/%d failed  %s%n",
+                failed, deepest.size(), failed == 0 ? "PASS" : "FAIL"));
+    }
+
+    /** The deepest bowls the field actually places within reach of the origin, deepest first. */
+    private static List<CraterFieldFunction.Crater> deepestFreshCraters(VoronoiSource source) {
+        List<CraterFieldFunction.Crater> found = new ArrayList<>(
+                scanCraters(source, VERTEX_SCAN_RADIUS * 4, CRATER_FLOOR_SEARCH_CELLS, 0x165667B19E3779F9L).values());
+        found.sort(Comparator.comparingDouble(crater -> -bowlDepth(crater)));
+        return found.subList(0, Math.min(CRATER_FLOOR_CASES, found.size()));
+    }
+
+    private static double bowlDepth(CraterFieldFunction.Crater crater) {
+        return CraterFieldFunction.freshDepth(crater.diameter()) * (1.0 - CraterFieldFunction.DEPTH_LOSS * crater.degradation());
+    }
+
+    /**
+     * Craters drawn from cells scattered over a square of the given half-width, keyed by cell so a repeated
+     * draw cannot report the same crater twice.
+     */
+    private static Map<Long, CraterFieldFunction.Crater> scanCraters(VoronoiSource source, int reach, int draws, long salt) {
+        long seed = CraterFieldFunction.craterSeed(source.seed());
+        Map<Long, CraterFieldFunction.Crater> found = new LinkedHashMap<>();
+
+        for (int index = 0; index < CraterFieldFunction.LAYERS.size(); index++) {
+            CraterFieldFunction.Layer layer = CraterFieldFunction.LAYERS.get(index);
+            long range = (long) (reach / layer.cell());
+
+            for (int draw = 0; draw < draws; draw++) {
+                long spread = LatticeHash.mix(draw * salt + index * 0x27D4EB2F165667C5L);
+                int cellX = (int) (Math.floorMod(spread, 2L * range + 1L) - range);
+                int cellZ = (int) (Math.floorMod(LatticeHash.mix(spread), 2L * range + 1L) - range);
+
+                CraterFieldFunction.Crater crater = CraterFieldFunction.rollCrater(seed, layer, cellX, cellZ, source);
+                if (crater != null) {
+                    found.putIfAbsent(((long) index << 62) ^ ((long) cellZ << 31) ^ cellX, crater);
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /**
+     * Crater spots for the producer's in-game pass, one per province and one per corner of the age and size
+     * space, because the field's whole claim is that those two axes read differently on the ground.
+     */
+    private static void craterTeleports(StringBuilder report, VoronoiSource source, CraterFieldFunction craters,
+                                        DensityFunction surfaceY) {
+        report.append(String.format("%n(w) crater teleport spots (this seed)%n"));
+
+        Map<String, CraterFieldFunction.Crater> picks = new LinkedHashMap<>();
+        Map<String, Double> scores = new LinkedHashMap<>();
+
+        for (CraterFieldFunction.Crater crater : scanCraters(source, VERTEX_SCAN_RADIUS * 2,
+                CRATER_FLOOR_SEARCH_CELLS, 0x9E3779B97F4A7C15L).values()) {
+            int centreX = Mth.floor(crater.centerX());
+            int centreZ = Mth.floor(crater.centerZ());
+            VoronoiSource.Cell cell = source.nearest(centreX, centreZ);
+            String province = source.provinceAt(cell.cellX(), cell.cellZ()).unwrapKey().orElseThrow().identifier().getPath();
+
+            boolean fresh = crater.degradation() < 0.15;
+            boolean ghost = crater.degradation() > 0.7;
+
+            // Bigger is more legible on foot, so every category keeps its widest example rather than its first.
+            if (fresh) {
+                offer(picks, scores, "fresh, on " + province, crater, crater.diameter());
+                offer(picks, scores, "fresh, smallest", crater, -crater.diameter());
+                offer(picks, scores, "fresh, largest", crater, crater.diameter());
+            }
+
+            if (ghost) {
+                offer(picks, scores, "degraded, on " + province, crater, crater.diameter());
+                offer(picks, scores, "degraded, largest", crater, crater.diameter());
+            }
+
+            if (craters.sampleAt(source, crater.centerX(), crater.centerZ()).covering() > 2) {
+                offer(picks, scores, "crowded, crater on crater", crater, crater.diameter());
+            }
+
+            // Margin stress: a bowl cut into the mesa scarps, where the crater relief and the province's own
+            // cliffs stack into the same column drop check (k) and check (j) both police.
+            if ("fretted_mesas".equals(province)) {
+                offer(picks, scores, "on a mesa scarp", crater, quartDropAcross(surfaceY, crater));
+            }
+        }
+
+        picks.forEach((label, crater) -> {
+            int centreX = Mth.floor(crater.centerX());
+            int centreZ = Mth.floor(crater.centerZ());
+            report.append(String.format("    %-32s D%-6.0f g%-5.2f /execute in relict:mars run tp @s %d %d %d%n",
+                    label, crater.diameter(), crater.degradation(), centreX,
+                    Mth.ceil(sample(surfaceY, centreX, centreZ)) + 2, centreZ));
+        });
+    }
+
+    private static void offer(Map<String, CraterFieldFunction.Crater> picks, Map<String, Double> scores,
+                              String label, CraterFieldFunction.Crater crater, double score) {
+        if (score > scores.getOrDefault(label, Double.NEGATIVE_INFINITY)) {
+            scores.put(label, score);
+            picks.put(label, crater);
+        }
+    }
+
+    /** The worst step between quart-adjacent columns on two transects through a crater's footprint. */
+    private static double quartDropAcross(DensityFunction surfaceY, CraterFieldFunction.Crater crater) {
+        int centreX = Mth.floor(crater.centerX());
+        int centreZ = Mth.floor(crater.centerZ());
+        int span = Mth.ceil(CraterFieldFunction.FOOTPRINT * 0.5 * crater.diameter());
+        double worst = 0.0;
+
+        for (boolean alongX : new boolean[]{true, false}) {
+            double previous = Double.NaN;
+
+            for (int d = -span; d <= span; d += QuartPos.toBlock(1)) {
+                double surface = sample(surfaceY, centreX + (alongX ? d : 0), centreZ + (alongX ? 0 : d));
+                if (!Double.isNaN(previous)) {
+                    worst = Math.max(worst, Math.abs(surface - previous));
+                }
+
+                previous = surface;
+            }
+        }
+
+        return worst;
     }
 
     // ---------------------------------------------------------------------------------- underground report

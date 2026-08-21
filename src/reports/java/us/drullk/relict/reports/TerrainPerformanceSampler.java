@@ -82,10 +82,11 @@ public final class TerrainPerformanceSampler implements DataProvider {
     private static final long UNDERGROUND_SEED = 20260818L;
 
     /**
-     * Fold of the field outputs over {@link #GOLDEN_SAMPLES} spread positions, captured before the
-     * performance work. Set to 0 to print a fresh value instead of checking against this one.
+     * Fold of the field outputs over {@link #GOLDEN_SAMPLES} spread positions. Set to 0 to print a fresh
+     * value instead of checking against this one. Re-baselined when the crater field entered RELIEF, which
+     * moves every surface height on purpose; before that it read {@code 0xBA6B5935249A3C77L}.
      */
-    private static final long GOLDEN_HASH = 0xBA6B5935249A3C77L;
+    private static final long GOLDEN_HASH = 0x6E33514A28623FFEL;
 
     private static final int GOLDEN_SAMPLES = 4096;
 
@@ -194,6 +195,8 @@ public final class TerrainPerformanceSampler implements DataProvider {
         row(report, "density function, ridge shape", index -> sample(bench.ridgeShape(), x(index), z(index)));
         row(report, "density function, dune shape", index -> sample(bench.duneShape(), x(index), z(index)));
         row(report, "density function, mesa shape", index -> sample(bench.mesaShape(), x(index), z(index)));
+        row(report, "density function, crater delta", index -> sample(bench.craterDelta(), x(index), z(index)));
+        row(report, "density function, crater damp", index -> sample(bench.craterDamp(), x(index), z(index)));
 
         report.append(String.format("%n    the same voronoi reads on a scattered sample set, one cell per call%n"));
         row(report, "voronoi nearest cell, scattered", index -> bench.mars().nearest(scatterX(index), scatterZ(index)).distanceToCenter());
@@ -475,7 +478,8 @@ public final class TerrainPerformanceSampler implements DataProvider {
                          RandomState state, Climate.Sampler sampler, LevelHeightAccessor height,
                          NoiseGeneratorSettings settings, DensityFunction surfaceY, DensityFunction surfaceHeight,
                          DensityFunction relief, DensityFunction epoch, DensityFunction ridgeShape,
-                         DensityFunction duneShape, DensityFunction mesaShape) {
+                         DensityFunction duneShape, DensityFunction mesaShape, DensityFunction craterDelta,
+                         DensityFunction craterDamp) {
 
         /** The same build {@code getBaseHeight} makes before it can read a single block of the column. */
         NoiseChunk noiseChunk(int blockX, int blockZ) {
@@ -526,7 +530,9 @@ public final class TerrainPerformanceSampler implements DataProvider {
                     epoch,
                     seed(holder(functions, RelictDensityFunctionGenerator.RIDGE_SHAPE), random),
                     seed(holder(functions, RelictDensityFunctionGenerator.DUNE_SHAPE), random),
-                    seed(holder(functions, RelictDensityFunctionGenerator.MESA_SHAPE), random)
+                    seed(holder(functions, RelictDensityFunctionGenerator.MESA_SHAPE), random),
+                    seed(holder(functions, RelictDensityFunctionGenerator.CRATER_DELTA), random),
+                    seed(holder(functions, RelictDensityFunctionGenerator.CRATER_DAMP), random)
             );
         }
 

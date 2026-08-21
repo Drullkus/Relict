@@ -1,5 +1,6 @@
 {
   "biome": "relict:ice_caves",
+  "crater_exposure": 0.0,
   "elevation_class": "neutral",
   "plain_roughness": 0.0
 }

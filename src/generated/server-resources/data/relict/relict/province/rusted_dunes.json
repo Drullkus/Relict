@@ -1,5 +1,6 @@
 {
   "biome": "relict:rusted_dunes",
+  "crater_exposure": 0.1,
   "dune_amplitude": 24.0,
   "elevation_class": "low",
   "elevation_offset": -0.15,

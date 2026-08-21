@@ -13,6 +13,7 @@ import us.drullk.relict.datagen.worldgen.densityfields.RelictRidgeField;
 import us.drullk.relict.datagen.worldgen.densityfields.RelictMesaField;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
+import us.drullk.relict.worldgen.CraterFieldFunction;
 import us.drullk.relict.worldgen.ProvinceParameter;
 import us.drullk.relict.worldgen.VoronoiParameterFunction;
 import us.drullk.relict.worldgen.VoronoiSource;
@@ -28,6 +29,10 @@ public class RelictDensityFunctionGenerator {
     public static final ResourceKey<DensityFunction> DUNE_SHAPE = create("terrain/dune_shape");
 
     public static final ResourceKey<DensityFunction> MESA_SHAPE = create("terrain/mesa_shape");
+
+    public static final ResourceKey<DensityFunction> CRATER_DELTA = create("terrain/crater_delta");
+
+    public static final ResourceKey<DensityFunction> CRATER_DAMP = create("terrain/crater_damp");
 
     public static final ResourceKey<DensityFunction> RELIEF = create("terrain/relief");
 
@@ -47,10 +52,13 @@ public class RelictDensityFunctionGenerator {
         context.register(DUNE_SHAPE, RelictMesaField.duneShape(noises::getOrThrow));
         context.register(MESA_SHAPE, RelictMesaField.mesaShape(noises::getOrThrow));
 
+        context.register(CRATER_DELTA, DensityFunctions.cache2d(new CraterFieldFunction(mars, CraterFieldFunction.Mode.DELTA)));
+        context.register(CRATER_DAMP, DensityFunctions.cache2d(new CraterFieldFunction(mars, CraterFieldFunction.Mode.DAMP)));
+
         // One landform channel per province signature, each gated by its own blended province scalar, plus the
         // dimension-wide plain. RELIEF is the single composition point: the underground biome cut and the
         // preliminary surface level both read it, so a height channel added anywhere else goes unseen.
-        context.register(RELIEF, DensityFunctions.cache2d(DensityFunctions.add(
+        DensityFunction host = DensityFunctions.add(
                 DensityFunctions.add(
                         DensityFunctions.mul(
                                 parameter(mars, ProvinceParameter.RIDGE_AMPLITUDE),
@@ -70,6 +78,16 @@ public class RelictDensityFunctionGenerator {
                                 parameter(mars, ProvinceParameter.MESA_AMPLITUDE),
                                 new DensityFunctions.HolderHolder(functions.getOrThrow(MESA_SHAPE))
                         )
+                )
+        );
+
+        // An impact resets the surface it hits, so the crater field damps the landform channels rather than
+        // the plateau, and adds its own bowls and rims on top of what survives.
+        context.register(RELIEF, DensityFunctions.cache2d(DensityFunctions.add(
+                DensityFunctions.mul(new DensityFunctions.HolderHolder(functions.getOrThrow(CRATER_DAMP)), host),
+                DensityFunctions.mul(
+                        parameter(mars, ProvinceParameter.CRATER_EXPOSURE),
+                        new DensityFunctions.HolderHolder(functions.getOrThrow(CRATER_DELTA))
                 )
         )));
     }

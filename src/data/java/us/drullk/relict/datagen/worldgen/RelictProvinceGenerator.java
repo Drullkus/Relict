@@ -42,6 +42,17 @@ public class RelictProvinceGenerator {
 
     public static final float MESA_AMPLITUDE = 30.0F;
 
+    /**
+     * How much of the crater record a province keeps. Craters are placed globally and straddle borders, so
+     * this is the only per-province term and it cross-fades over the blend width: an active dune sea buries
+     * almost everything it inherits, while old high crust keeps the whole record.
+     */
+    public static final float PLAINS_CRATER_EXPOSURE = 0.7F;
+
+    public static final float DUNE_CRATER_EXPOSURE = 0.1F;
+
+    public static final float HIGHLAND_CRATER_EXPOSURE = 1.0F;
+
     public static void bootstrapNoises(BootstrapContext<NormalNoise.NoiseParameters> context) {
         RelictCommonFields.NOISE_PARAMETERS.forEach(context::register);
 
@@ -55,24 +66,26 @@ public class RelictProvinceGenerator {
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
 
         context.register(RelictProvinces.WRINKLE_PLAINS, new Province(biomes.getOrThrow(RelictBiomes.WRINKLE_PLAINS),
-                ElevationClass.MID, 0.0F, RIDGE_AMPLITUDE, PLAIN_ROUGHNESS, 0.0F, 0.0F));
+                ElevationClass.MID, 0.0F, RIDGE_AMPLITUDE, PLAIN_ROUGHNESS, 0.0F, 0.0F, PLAINS_CRATER_EXPOSURE));
         context.register(RelictProvinces.RUSTED_DUNES, new Province(biomes.getOrThrow(RelictBiomes.RUSTED_DUNES),
-                ElevationClass.LOW, -0.15F, 0.0F, DUNE_PLAIN_ROUGHNESS, DUNE_AMPLITUDE, 0.0F));
+                ElevationClass.LOW, -0.15F, 0.0F, DUNE_PLAIN_ROUGHNESS, DUNE_AMPLITUDE, 0.0F, DUNE_CRATER_EXPOSURE));
         context.register(RelictProvinces.FRETTED_MESAS, new Province(biomes.getOrThrow(RelictBiomes.FRETTED_MESAS),
-                ElevationClass.HIGH, 0.18F, 0.0F, MESA_PLAIN_ROUGHNESS, 0.0F, MESA_AMPLITUDE));
+                ElevationClass.HIGH, 0.18F, 0.0F, MESA_PLAIN_ROUGHNESS, 0.0F, MESA_AMPLITUDE, HIGHLAND_CRATER_EXPOSURE));
 
         // TODO implement as mountain range-shaped province
         context.register(RelictProvinces.SHATTERED_HIGHLANDS, new Province(biomes.getOrThrow(RelictBiomes.SHATTERED_HIGHLANDS),
-                ElevationClass.HIGH, 0.18F, 0.0F, PLAIN_ROUGHNESS, 0.0F, 0.0F));
+                ElevationClass.HIGH, 0.18F, 0.0F, PLAIN_ROUGHNESS, 0.0F, 0.0F, HIGHLAND_CRATER_EXPOSURE));
 
+        // Cave provinces reach the terrain graph through the underground source, which carries no relief, so
+        // their crater exposure is never read.
         context.register(RelictProvinces.BASALT_CAVES, new Province(biomes.getOrThrow(RelictBiomes.BASALT_CAVES),
-                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         context.register(RelictProvinces.SULFUR_CAVES, new Province(biomes.getOrThrow(RelictBiomes.SULFUR_CAVES),
-                ElevationClass.MID, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+                ElevationClass.MID, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         context.register(RelictProvinces.ICE_CAVES, new Province(biomes.getOrThrow(RelictBiomes.ICE_CAVES),
-                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+                ElevationClass.NEUTRAL, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
         context.register(RelictProvinces.CALCITE_CAVES, new Province(biomes.getOrThrow(RelictBiomes.CALCITE_CAVES),
-                ElevationClass.HIGH, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
+                ElevationClass.HIGH, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F));
     }
 
     public static void bootstrapVoronoiSources(BootstrapContext<VoronoiSource> context) {

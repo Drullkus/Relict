@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:cache_2d",
+  "argument": {
+    "type": "relict:crater_field",
+    "mode": "damp",
+    "voronoi_source": "relict:mars"
+  }
+}

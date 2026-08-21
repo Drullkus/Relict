@@ -3,51 +3,67 @@
   "argument": {
     "type": "minecraft:add",
     "argument1": {
-      "type": "minecraft:add",
-      "argument1": {
-        "type": "minecraft:mul",
-        "argument1": {
-          "type": "relict:voronoi_parameter",
-          "parameter": "ridge_amplitude",
-          "voronoi_source": "relict:mars"
-        },
-        "argument2": "relict:terrain/ridge_shape"
-      },
+      "type": "minecraft:mul",
+      "argument1": "relict:terrain/crater_damp",
       "argument2": {
-        "type": "minecraft:mul",
+        "type": "minecraft:add",
         "argument1": {
-          "type": "relict:voronoi_parameter",
-          "parameter": "plain_roughness",
-          "voronoi_source": "relict:mars"
+          "type": "minecraft:add",
+          "argument1": {
+            "type": "minecraft:mul",
+            "argument1": {
+              "type": "relict:voronoi_parameter",
+              "parameter": "ridge_amplitude",
+              "voronoi_source": "relict:mars"
+            },
+            "argument2": "relict:terrain/ridge_shape"
+          },
+          "argument2": {
+            "type": "minecraft:mul",
+            "argument1": {
+              "type": "relict:voronoi_parameter",
+              "parameter": "plain_roughness",
+              "voronoi_source": "relict:mars"
+            },
+            "argument2": {
+              "type": "minecraft:noise",
+              "noise": "relict:plain",
+              "xz_scale": 0.08888888888888889,
+              "y_scale": 0.0
+            }
+          }
         },
         "argument2": {
-          "type": "minecraft:noise",
-          "noise": "relict:plain",
-          "xz_scale": 0.08888888888888889,
-          "y_scale": 0.0
+          "type": "minecraft:add",
+          "argument1": {
+            "type": "minecraft:mul",
+            "argument1": {
+              "type": "relict:voronoi_parameter",
+              "parameter": "dune_amplitude",
+              "voronoi_source": "relict:mars"
+            },
+            "argument2": "relict:terrain/dune_shape"
+          },
+          "argument2": {
+            "type": "minecraft:mul",
+            "argument1": {
+              "type": "relict:voronoi_parameter",
+              "parameter": "mesa_amplitude",
+              "voronoi_source": "relict:mars"
+            },
+            "argument2": "relict:terrain/mesa_shape"
+          }
         }
       }
     },
     "argument2": {
-      "type": "minecraft:add",
+      "type": "minecraft:mul",
       "argument1": {
-        "type": "minecraft:mul",
-        "argument1": {
-          "type": "relict:voronoi_parameter",
-          "parameter": "dune_amplitude",
-          "voronoi_source": "relict:mars"
-        },
-        "argument2": "relict:terrain/dune_shape"
+        "type": "relict:voronoi_parameter",
+        "parameter": "crater_exposure",
+        "voronoi_source": "relict:mars"
       },
-      "argument2": {
-        "type": "minecraft:mul",
-        "argument1": {
-          "type": "relict:voronoi_parameter",
-          "parameter": "mesa_amplitude",
-          "voronoi_source": "relict:mars"
-        },
-        "argument2": "relict:terrain/mesa_shape"
-      }
+      "argument2": "relict:terrain/crater_delta"
     }
   }
 }
