@@ -37,6 +37,7 @@ import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
 import us.drullk.relict.worldgen.LatticeHash;
 import us.drullk.relict.worldgen.ProvinceParameter;
+import us.drullk.relict.worldgen.RelictChunkGenerator;
 import us.drullk.relict.datagen.worldgen.RelictNoiseRouter;
 import us.drullk.relict.worldgen.VoronoiSource;
 
@@ -72,6 +73,9 @@ import java.util.function.IntToDoubleFunction;
  *   <li><b>(E) column throughput</b> — whole-column block states, the chunk-generation side.</li>
  *   <li><b>(F) golden hash</b> — biome, relief, surface height and epoch over a fixed spread set, folded to
  *       one number. Optimization work must not move it.</li>
+ *   <li><b>(H) probe window</b> — {@link us.drullk.relict.worldgen.RelictChunkGenerator}'s shortened height
+ *       probe against the vanilla whole-column walk, column for column. The shortcut is only legitimate
+ *       while these agree everywhere.</li>
  * </ul>
  */
 public final class TerrainPerformanceSampler implements DataProvider {
@@ -97,6 +101,9 @@ public final class TerrainPerformanceSampler implements DataProvider {
 
     private static final int TIMED_SAMPLES = 20000;
     private static final int WARMUP_SAMPLES = 5000;
+
+    /** Half a chunk raster and half a scattered spread, so the window meets both callers' access patterns. */
+    private static final int WINDOW_SAMPLES = 4096;
 
     /** The scattered sample set spans this much in each direction, which is far wider than one cell. */
     private static final int TIMED_SPAN = 40000;
@@ -171,6 +178,7 @@ public final class TerrainPerformanceSampler implements DataProvider {
             columnSplit(report, bench);
             columnThroughput(report, bench);
             golden(report, bench, failures);
+            probeWindow(report, bench, failures);
 
             writeReport(report.toString());
             System.out.print(report);
@@ -292,6 +300,8 @@ public final class TerrainPerformanceSampler implements DataProvider {
 
         double probe = row(report, "getBaseHeight, whole probe", index ->
                 bench.generator().getBaseHeight(x(index), z(index), Heightmap.Types.WORLD_SURFACE_WG, bench.height(), bench.state()));
+        double wholeColumn = row(report, "getBaseHeight, vanilla whole column", index ->
+                bench.baseline().getBaseHeight(x(index), z(index), Heightmap.Types.WORLD_SURFACE_WG, bench.height(), bench.state()));
         double build = row(report, "  noise chunk build only", index -> bench.noiseChunk(x(index), z(index)).hashCode());
         double surfaceY = row(report, "  surface graph, one read", index -> sample(bench.surfaceY(), x(index), z(index)));
 
@@ -299,6 +309,7 @@ public final class TerrainPerformanceSampler implements DataProvider {
         report.append(String.format("    column walk share of a probe         %.1f%%%n", 100.0 * (probe - build) / probe));
         report.append(String.format("    surface graph share of a probe       %.1f%%   (four corner columns)%n",
                 100.0 * 4.0 * surfaceY / probe));
+        report.append(String.format("    probe window against whole column    %.2fx faster%n", wholeColumn / probe));
     }
 
     private static void columnThroughput(StringBuilder report, Bench bench) {
@@ -364,9 +375,64 @@ public final class TerrainPerformanceSampler implements DataProvider {
         }
     }
 
+    private static void probeWindow(StringBuilder report, Bench bench, List<String> failures) {
+        report.append(String.format("%n(H) probe window against the whole-column walk, %d columns per heightmap type%n", WINDOW_SAMPLES));
+
+        int mismatches = 0;
+        int deepest = 0;
+        int columns = 0;
+        int belowWindow = 0;
+        int aboveSurface = 0;
+
+        for (Heightmap.Types type : new Heightmap.Types[]{Heightmap.Types.WORLD_SURFACE_WG, Heightmap.Types.OCEAN_FLOOR_WG}) {
+            for (int index = 0; index < WINDOW_SAMPLES; index++) {
+                int blockX = index < WINDOW_SAMPLES / 2 ? x(index) : scatterX(index);
+                int blockZ = index < WINDOW_SAMPLES / 2 ? z(index) : scatterZ(index);
+
+                int windowed = bench.generator().getBaseHeight(blockX, blockZ, type, bench.height(), bench.state());
+                int whole = bench.baseline().getBaseHeight(blockX, blockZ, type, bench.height(), bench.state());
+
+                if (windowed != whole) {
+                    mismatches++;
+
+                    if (mismatches <= 4) {
+                        report.append(String.format("    MISMATCH %s at %d, %d: window %d, whole column %d%n",
+                                type.getSerializationKey(), blockX, blockZ, windowed, whole));
+                    }
+                }
+
+                int drop = Mth.floor(sample(bench.surfaceY(), blockX, blockZ)) - whole;
+                deepest = Math.max(deepest, drop);
+                columns++;
+
+                if (drop > RelictChunkGenerator.PROBE_DEPTH) {
+                    belowWindow++;
+                }
+
+                if (drop < -RelictChunkGenerator.PROBE_HEADROOM) {
+                    aboveSurface++;
+                }
+            }
+        }
+
+        report.append(String.format("    %-42s %12d%n", "mismatched columns", mismatches));
+        report.append(String.format("    %-42s %12d %14s%n", "deepest surface below its own preliminary", deepest, "blocks"));
+        report.append(String.format("    %-42s %12d %14s%n", "window looks this far down", RelictChunkGenerator.PROBE_DEPTH, "blocks"));
+        report.append(String.format("    %-42s %11.2f%% %n", "columns needing the second, lower walk", 100.0 * belowWindow / columns));
+        report.append(String.format("    %-42s %12d%n", "columns solid above the window", aboveSurface));
+        report.append(String.format("    %s%n", mismatches == 0 ? "    PASS" : "    FAIL"));
+        report.append(String.format("%n    A column whose surface sits deeper than the window walks what is under the window as%n"));
+        report.append(String.format("    well, so a deep figure costs speed, never correctness. Nothing may be solid above the%n"));
+        report.append(String.format("    window: that count is the shortcut's own premise and has to stay zero.%n"));
+
+        if (mismatches != 0) {
+            failures.add(mismatches + " columns where the shortened height probe disagrees with the whole-column walk");
+        }
+    }
+
     // ------------------------------------------------------------------------------------------ plumbing
 
-    private static double candidateCost(Bench bench, int chunkX, int chunkZ) {
+    static double candidateCost(Bench bench, int chunkX, int chunkZ) {
         int blockX = (chunkX << 4) + 8;
         int blockZ = (chunkZ << 4) + 8;
         int blockY = bench.generator().getBaseHeight(blockX, blockZ, Heightmap.Types.WORLD_SURFACE_WG, bench.height(), bench.state());
@@ -375,7 +441,7 @@ public final class TerrainPerformanceSampler implements DataProvider {
         return blockY + biome.hashCode();
     }
 
-    private static List<int[]> ringCandidates() {
+    static List<int[]> ringCandidates() {
         List<int[]> candidates = new ArrayList<>();
 
         for (int radius = 1; radius <= LOCATE_MEASURED_RINGS; radius++) {
@@ -434,12 +500,12 @@ public final class TerrainPerformanceSampler implements DataProvider {
      * four corner columns, and chunks arrive next to each other, so a sample set that jumps across the world
      * every call measures a machine nobody runs.
      */
-    private static int x(int index) {
+    static int x(int index) {
         int chunk = Math.floorDiv(index, QUARTS_PER_CHUNK);
         return (Math.floorMod(chunk, RASTER_CHUNKS) << 4) + ((Math.floorMod(index, QUARTS_PER_CHUNK) & 3) << 2);
     }
 
-    private static int z(int index) {
+    static int z(int index) {
         int chunk = Math.floorDiv(index, QUARTS_PER_CHUNK);
         return (Math.floorDiv(chunk, RASTER_CHUNKS) << 4) + ((Math.floorMod(index, QUARTS_PER_CHUNK) >> 2) << 2);
     }
@@ -474,7 +540,8 @@ public final class TerrainPerformanceSampler implements DataProvider {
     }
 
     /** Everything the timings read, built once so no row pays for setup. */
-    private record Bench(VoronoiSource mars, NoiseBasedChunkGenerator generator, BiomeSource biomeSource,
+    record Bench(VoronoiSource mars, NoiseBasedChunkGenerator generator, NoiseBasedChunkGenerator baseline,
+                         BiomeSource biomeSource,
                          RandomState state, Climate.Sampler sampler, LevelHeightAccessor height,
                          NoiseGeneratorSettings settings, DensityFunction surfaceY, DensityFunction surfaceHeight,
                          DensityFunction relief, DensityFunction epoch, DensityFunction ridgeShape,
@@ -519,6 +586,7 @@ public final class TerrainPerformanceSampler implements DataProvider {
             return new Bench(
                     marsHolder.value(),
                     generator,
+                    new NoiseBasedChunkGenerator(generator.getBiomeSource(), generator.generatorSettings()),
                     generator.getBiomeSource(),
                     state,
                     state.sampler(),

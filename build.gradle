@@ -181,6 +181,9 @@ neoForge {
             // directory is run/.
             systemProperty 'relict.terrainReportDir', file('prototypes/out').getAbsolutePath()
 
+            // Where -Drelict.reports=profile drops its .jfr captures.
+            systemProperty 'relict.jfrDir', file('prototypes/out/jfr').getAbsolutePath()
+
             // `data`'s classes are loaded (see the mods{} comment above) so RelictDatagen's own
             // @EventBusSubscriber methods are discovered too; this tells RelictDatagen.generateData to
             // step aside so its tag/loot/advancement/registry-JSON providers do not also run here.
@@ -191,6 +194,17 @@ neoForge {
             if (System.getProperty('relict.reports') != null) {
                 systemProperty 'relict.reports', System.getProperty('relict.reports')
             }
+        }
+
+        // A dedicated server that runs the structure search once and stops, so the ring scan can be timed
+        // against the watchdog headlessly. The harness is in the reports source set (see LocateProbe), which
+        // is why this loads the reports mod rather than the plain one.
+        locateProbe {
+            server()
+            sourceSet = sourceSets.reports
+            loadedMods = [reportsMod]
+            programArgument '--nogui'
+            systemProperty 'relict.locateProbe', 'true'
         }
 
         // applies to all the run configs above

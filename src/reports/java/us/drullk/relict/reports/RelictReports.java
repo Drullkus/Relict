@@ -36,8 +36,9 @@ public final class RelictReports {
                 case "ridge" -> event.addProvider(new RidgeFieldSampler(output, registries));
                 case "voronoi" -> event.addProvider(new VoronoiFieldSampler(output, registries));
                 case "performance" -> event.addProvider(new TerrainPerformanceSampler(output, registries));
+                case "profile" -> event.addProvider(new TerrainFlightProfiler(output, registries));
                 default -> throw new IllegalArgumentException("Unknown relict.reports entry: " + name
-                        + " (expected one of: ridge, voronoi, performance)");
+                        + " (expected one of: ridge, voronoi, performance, profile)");
             }
         }
     }

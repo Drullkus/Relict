@@ -1,7 +1,7 @@
 {
   "type": "relict:mars",
   "generator": {
-    "type": "minecraft:noise",
+    "type": "relict:noise",
     "biome_source": {
       "type": "relict:voronoi",
       "underground_depth": 40,

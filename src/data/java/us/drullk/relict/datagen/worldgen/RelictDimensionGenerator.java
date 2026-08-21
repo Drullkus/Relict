@@ -22,6 +22,7 @@ import us.drullk.relict.Relict;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
+import us.drullk.relict.worldgen.RelictChunkGenerator;
 import us.drullk.relict.worldgen.VoronoiBiomeSource;
 import us.drullk.relict.worldgen.VoronoiSource;
 
@@ -85,7 +86,7 @@ public class RelictDimensionGenerator {
         HolderGetter<VoronoiSource> voronoiSources = context.lookup(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY);
 
         VoronoiBiomeSource biomeSource = new VoronoiBiomeSource(voronoiSources.getOrThrow(RelictVoronoiSources.MARS), Optional.of(voronoiSources.getOrThrow(RelictVoronoiSources.MARS_UNDERGROUND)), RelictNoiseRouter.UNDERGROUND_MARGIN);
-        NoiseBasedChunkGenerator generator = new NoiseBasedChunkGenerator(biomeSource, noiseSettings.getOrThrow(RelictDimension.MARS_NOISE_SETTINGS));
+        RelictChunkGenerator generator = new RelictChunkGenerator(biomeSource, noiseSettings.getOrThrow(RelictDimension.MARS_NOISE_SETTINGS));
         context.register(RelictDimension.MARS_LEVELSTEM, new LevelStem(dimensionTypes.getOrThrow(RelictDimension.MARS_TYPE), generator));
     }
 

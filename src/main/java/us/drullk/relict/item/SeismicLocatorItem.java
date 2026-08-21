@@ -25,7 +25,7 @@ import java.util.Optional;
 
 public class SeismicLocatorItem extends CompassItem {
 
-    private static final int SEARCH_RADIUS_CHUNKS = 100;
+    private static final int SEARCH_RADIUS_CHUNKS = 10;
 
     public SeismicLocatorItem(Properties properties) {
         super(properties);
