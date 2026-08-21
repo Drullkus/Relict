@@ -1,7 +1,5 @@
 {
-  "itemGroup.relict": "Example Mod Tab",
-  "block.relict.example_block": "Example Block",
-  "item.relict.example_item": "Example Item",
+  "itemGroup.relict": "Relict",
 
   "item.relict.vital_vizard": "Vital Vizard",
   "item.relict.spent_vizard": "Spent Vizard",
@@ -9,7 +7,7 @@
   "item.relict.restless_striders": "Restless Striders",
   "item.relict.grounding_treads": "Grounding Treads",
   "item.relict.stored_charges.charge": "Charge: %s / %s",
-  "item.relict.seismic_locator": "Seismic Lead",
+  "item.relict.seismic_locator": "Seismic Locator",
   "item.relict.seismic_locator.no_signal": "FIXME no seismic signal in range",
 
   "block.relict.mars_portal": "Mars Portal",

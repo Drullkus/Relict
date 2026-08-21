@@ -43,7 +43,7 @@ public class SeismicLocatorItem extends CompassItem {
                 .findNearestMapStructure(serverLevel, leads, player.blockPosition(), SEARCH_RADIUS_CHUNKS, false);
 
         if (found == null) {
-            player.sendOverlayMessage(Component.translatable("item.relict.seismic_lead.no_signal"));
+            player.sendOverlayMessage(Component.translatable("item.relict.seismic_locator.no_signal"));
             return InteractionResult.FAIL;
         }
 
