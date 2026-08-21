@@ -12,6 +12,15 @@
 
   "block.relict.mars_portal": "Mars Portal",
 
+  "biome.relict.wrinkle_plains": "Wrinkle Plains",
+  "biome.relict.rusted_dunes": "Rusted Dunes",
+  "biome.relict.fretted_mesas": "Fretted Mesas",
+  "biome.relict.shattered_highlands": "Shattered Highlands",
+  "biome.relict.basalt_caves": "Basalt Caves",
+  "biome.relict.calcite_caves": "Calcite Caves",
+  "biome.relict.ice_caves": "Ice Caves",
+  "biome.relict.sulfur_caves": "Sulfur Caves",
+
   "attribute.name.relict.mars_life_support": "Mars Life Support",
   "attribute.name.relict.nausea_immunity": "Nausea Immunity",
   "attribute.name.relict.electric_damage": "Electric Damage",

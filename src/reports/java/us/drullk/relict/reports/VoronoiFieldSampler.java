@@ -26,6 +26,7 @@ import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
@@ -33,11 +34,13 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import us.drullk.relict.Relict;
 import us.drullk.relict.datagen.worldgen.RelictDensityFunctionGenerator;
 import us.drullk.relict.datagen.worldgen.RelictProvinceGenerator;
+import us.drullk.relict.datagen.worldgen.RelictSurfaceRules;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
 import us.drullk.relict.init.worldgen.RelictNoises;
 import us.drullk.relict.worldgen.CraterFieldFunction;
+import us.drullk.relict.worldgen.DuneCrest;
 import us.drullk.relict.worldgen.DuneWaveFunction;
 import us.drullk.relict.worldgen.LatticeHash;
 import us.drullk.relict.worldgen.ElevationClass;
@@ -207,6 +210,15 @@ public final class VoronoiFieldSampler implements DataProvider {
     private static final int RELIEF_PATCH = 384;
     private static final int RELIEF_PATCH_STEP = 2;
 
+    /** dune crest palette-map plate colours, schematic rather than texture-accurate. */
+    private static final double[] BASALT_RGB = {58.0, 58.0, 64.0};
+    private static final double[] RED_SAND_RGB = {196.0, 94.0, 48.0};
+    private static final double[] GRAVEL_RGB = {132.0, 132.0, 132.0};
+
+    /** wrinkle_plains gravel-patch sanity plate window. */
+    private static final int GRAVEL_WINDOW = 1000;
+    private static final int GRAVEL_WINDOW_STEP = 2;
+
     /** (s) contiguous census window, so the per-layer counts are areal densities and not just tallies. */
     private static final int CRATER_CENSUS_SPAN = 16384;
 
@@ -341,6 +353,8 @@ public final class VoronoiFieldSampler implements DataProvider {
         duneMorphology(report, registries, random, failures);
         mesaMorphology(report, registries, random, failures);
         provinceRelief(report, registries, mars, random);
+        dunePalette(report, registries, reportDirectory(), random);
+        wrinklePlainsGravelPalette(report, registries, reportDirectory(), mars, surfaceY, random);
         craterCensus(report, mars, failures);
         craterEpochDensity(report, mars, failures);
         craterProfile(report, registries, mars, craters, random, failures);
@@ -731,6 +745,190 @@ public final class VoronoiFieldSampler implements DataProvider {
                     source.blend(centreX, centreZ, (province, cellX, cellZ) -> province.ridgeAmplitude()),
                     source.blend(centreX, centreZ, (province, cellX, cellZ) -> province.duneAmplitude()),
                     source.blend(centreX, centreZ, (province, cellX, cellZ) -> province.mesaAmplitude())));
+        }
+    }
+
+    // -------------------------------------------------------------------------- 1.9 palette-map plates
+
+    /**
+     * Top-down palette map of {@code rusted_dunes}: each column coloured by the surface block the
+     * rule resolves to, shaded by the same Lambert hillshade {@link #maps} uses so the dune geometry
+     * stays legible under the paint. Reuses the (o) morphology windows and the same
+     * {@link RelictProvinceGenerator#DUNE_AMPLITUDE}/{@link RelictProvinceGenerator#DUNE_PLAIN_ROUGHNESS}
+     * the shipped province blends to, and {@link DuneCrest#isCrest} — the exact test
+     * {@code DuneCrestCondition} runs at world-gen time, just fed heights sampled straight off
+     * {@code terrain/dune_shape} instead of the world's heightmap, so this plate cannot silently drift
+     * from what {@code runServerData} ships.
+     */
+    private static void dunePalette(StringBuilder report, HolderLookup.Provider registries, Path directory,
+                                    PositionalRandomFactory random) {
+        report.append(String.format("%n(1.9-a) rusted_dunes crest palette map: dark smooth_basalt body, red_sand crest%n"));
+
+        if (directory == null) {
+            report.append("    relict.terrainReportDir unset, plates skipped\n");
+            return;
+        }
+
+        HolderLookup.RegistryLookup<DensityFunction> functions = registries.lookupOrThrow(Registries.DENSITY_FUNCTION);
+        DensityFunction shape = seed(holder(functions, RelictDensityFunctionGenerator.DUNE_SHAPE), random);
+        DensityFunction plain = seed(RelictRidgeField.plain(registries.lookupOrThrow(Registries.NOISE)::getOrThrow), random);
+
+        int side = DUNE_WINDOW / DUNE_WINDOW_STEP;
+        int window = 0;
+
+        for (int[] origin : MORPHOLOGY_WINDOWS) {
+            double[][] heights = new double[side][side];
+            for (int iz = 0; iz < side; iz++) {
+                for (int ix = 0; ix < side; ix++) {
+                    heights[iz][ix] = duneHeightAt(shape, plain, origin[0] + ix * DUNE_WINDOW_STEP, origin[1] + iz * DUNE_WINDOW_STEP);
+                }
+            }
+
+            int[][][] rgb = new int[side][side][3];
+            int crestPixels = 0;
+            List<int[]> crestSpots = new ArrayList<>();
+
+            for (int iz = 0; iz < side; iz++) {
+                for (int ix = 0; ix < side; ix++) {
+                    int x = origin[0] + ix * DUNE_WINDOW_STEP;
+                    int z = origin[1] + iz * DUNE_WINDOW_STEP;
+                    boolean crest = DuneCrest.isCrest((dx, dz) -> duneHeightAt(shape, plain, x + dx, z + dz));
+                    double shade = lambert(heights, ix, iz, side, DUNE_WINDOW_STEP);
+                    double[] base = crest ? RED_SAND_RGB : BASALT_RGB;
+
+                    for (int c = 0; c < 3; c++) {
+                        rgb[iz][ix][c] = (int) Math.round(base[c] * shade);
+                    }
+
+                    if (crest) {
+                        crestPixels++;
+
+                        // One spot per window quadrant crossed, so the teleport list is spread across the
+                        // plate rather than three copies of the same corner.
+                        if ((ix > side / 4 && iz > side / 4 && crestSpots.isEmpty())
+                                || (ix > 3 * side / 4 && iz > 3 * side / 4 && crestSpots.size() == 1)) {
+                            crestSpots.add(new int[]{x, z, (int) Math.ceil(heights[iz][ix]) + 2});
+                        }
+                    }
+                }
+            }
+
+            String name = String.format("1.9-dunes-w%d-palette.ppm", window);
+            try {
+                Files.createDirectories(directory);
+                writeColor(directory.resolve(name), rgb);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+
+            report.append(String.format("    window %d blocks at x=%d z=%d, %d blocks/pixel -> %s  (crest %.1f%% of pixels)%n",
+                    DUNE_WINDOW, origin[0], origin[1], DUNE_WINDOW_STEP,
+                    directory.resolve(name).toAbsolutePath(), 100.0 * crestPixels / (side * (double) side)));
+            for (int[] spot : crestSpots) {
+                report.append(String.format("        crest spot   /execute in relict:mars run tp @s %d %d %d%n",
+                        spot[0], spot[2], spot[1]));
+            }
+            window++;
+        }
+    }
+
+    /** The same per-column height formula (o) uses, factored out so the palette plate cannot drift from it. */
+    private static double duneHeightAt(DensityFunction shape, DensityFunction plain, int x, int z) {
+        return SEA_LEVEL + RelictProvinceGenerator.DUNE_AMPLITUDE * sample(shape, x, z)
+                + RelictProvinceGenerator.DUNE_PLAIN_ROUGHNESS * sample(plain, x, z);
+    }
+
+    /** Lambert shading from a fixed low sun, as a 0..1 multiplier — the same lighting {@link #writeHillshade} uses. */
+    private static double lambert(double[][] heights, int ix, int iz, int side, int step) {
+        double dx = heights[iz][Math.min(ix + 1, side - 1)] - heights[iz][Math.max(ix - 1, 0)];
+        double dz = heights[Math.min(iz + 1, side - 1)][ix] - heights[Math.max(iz - 1, 0)][ix];
+        double nx = -dx / (2.0 * step);
+        double nz = -dz / (2.0 * step);
+        double length = Math.sqrt(nx * nx + 1.0 + nz * nz);
+        double lit = (nx * -0.612 + 0.5 + nz * -0.612) / length;
+        return 0.35 + 0.65 * Math.clamp(lit * 1.9, 0.0, 1.0);
+    }
+
+    /**
+     * Sanity plate for the {@code wrinkle_plains} gravel patch: grey where
+     * {@link RelictSurfaceRules#PAVEMENT_LO}..{@link RelictSurfaceRules#PAVEMENT_HI} fires on
+     * {@code Noises.SURFACE}, red_sand otherwise, sampled at raw block coordinates exactly the way
+     * {@code noiseCondition2d} reads it in-game (no external scale, unlike the dune warp/crenulation
+     * channels) — so the patch density and scale in the plate is what the game will actually render.
+     */
+    private static void wrinklePlainsGravelPalette(StringBuilder report, HolderLookup.Provider registries, Path directory,
+                                                    VoronoiSource source, DensityFunction surfaceY, PositionalRandomFactory random) {
+        report.append(String.format("%n(1.9-b) wrinkle_plains gravel-patch sanity plate%n"));
+
+        if (directory == null) {
+            report.append("    relict.terrainReportDir unset, plate skipped\n");
+            return;
+        }
+
+        int[] centre = deepestSurfaceCells(source).get("wrinkle_plains");
+        if (centre == null) {
+            report.append("    no wrinkle_plains cell found, plate skipped\n");
+            return;
+        }
+
+        HolderLookup.RegistryLookup<NormalNoise.NoiseParameters> parameters = registries.lookupOrThrow(Registries.NOISE);
+        NormalNoise surface = NormalNoise.create(random.fromHashOf(Noises.SURFACE.identifier()), parameters.getOrThrow(Noises.SURFACE).value());
+
+        int side = GRAVEL_WINDOW / GRAVEL_WINDOW_STEP;
+        int[][][] rgb = new int[side][side][3];
+        int gravelPixels = 0;
+        List<int[]> gravelSpots = new ArrayList<>();
+
+        for (int iz = 0; iz < side; iz++) {
+            for (int ix = 0; ix < side; ix++) {
+                int x = centre[0] - GRAVEL_WINDOW / 2 + ix * GRAVEL_WINDOW_STEP;
+                int z = centre[1] - GRAVEL_WINDOW / 2 + iz * GRAVEL_WINDOW_STEP;
+                double value = surface.getValue(x, 0.0, z);
+                boolean gravel = value >= RelictSurfaceRules.PAVEMENT_LO && value <= RelictSurfaceRules.PAVEMENT_HI;
+                double[] base = gravel ? GRAVEL_RGB : RED_SAND_RGB;
+
+                for (int c = 0; c < 3; c++) {
+                    rgb[iz][ix][c] = (int) Math.round(base[c]);
+                }
+
+                if (gravel) {
+                    gravelPixels++;
+
+                    if ((ix > side / 4 && iz > side / 4 && gravelSpots.isEmpty())
+                            || (ix > 3 * side / 4 && iz > 3 * side / 4 && gravelSpots.size() == 1)) {
+                        gravelSpots.add(new int[]{x, z, Mth.ceil(sample(surfaceY, x, z)) + 2});
+                    }
+                }
+            }
+        }
+
+        String name = "1.9-wrinkle-plains-palette.ppm";
+        try {
+            Files.createDirectories(directory);
+            writeColor(directory.resolve(name), rgb);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        report.append(String.format("    window %d blocks at x=%d z=%d, %d blocks/pixel -> %s  (gravel %.1f%% of pixels)%n",
+                GRAVEL_WINDOW, centre[0], centre[1], GRAVEL_WINDOW_STEP,
+                directory.resolve(name).toAbsolutePath(), 100.0 * gravelPixels / (side * (double) side)));
+        for (int[] spot : gravelSpots) {
+            report.append(String.format("        gravel spot  /execute in relict:mars run tp @s %d %d %d%n",
+                    spot[0], spot[2], spot[1]));
+        }
+    }
+
+    private static void writeColor(Path path, int[][][] rgb) throws IOException {
+        try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(path))) {
+            out.write(("P6\n" + rgb[0].length + " " + rgb.length + "\n255\n").getBytes(StandardCharsets.US_ASCII));
+            for (int[][] row : rgb) {
+                for (int[] pixel : row) {
+                    out.write(Math.clamp(pixel[0], 0, 255));
+                    out.write(Math.clamp(pixel[1], 0, 255));
+                    out.write(Math.clamp(pixel[2], 0, 255));
+                }
+            }
         }
     }
 

@@ -12,6 +12,7 @@ import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import us.drullk.relict.Relict;
 import us.drullk.relict.init.worldgen.RelictBiomes;
+import us.drullk.relict.worldgen.DuneCrestCondition;
 
 public class RelictSurfaceRules {
 
@@ -21,6 +22,7 @@ public class RelictSurfaceRules {
     private static final SurfaceRules.RuleSource SMOOTH_BASALT = state(Blocks.SMOOTH_BASALT);
     private static final SurfaceRules.RuleSource TERRACOTTA = state(Blocks.TERRACOTTA);
     private static final SurfaceRules.RuleSource TUFF = state(Blocks.TUFF);
+    private static final SurfaceRules.RuleSource GRAVEL = state(Blocks.GRAVEL);
 
     private static final SurfaceRules.RuleSource SULFUR = state(Blocks.SULFUR);
     private static final SurfaceRules.RuleSource CINNABAR = state(Blocks.CINNABAR);
@@ -31,11 +33,16 @@ public class RelictSurfaceRules {
 
     private static final int BEDROCK_FLOOR_DEPTH = 5;
 
-    /** Where the oxide veneer is already stripped and the dark body reaches the surface. */
-    private static final double VENEER_CUT = -0.35;
-
     /** Where wind-blown dust has collected on an otherwise bare crust. */
     private static final double DUST_CATCH = 0.15;
+
+    /**
+     * The wrinkle-plains gravel/duricrust patch band, mirroring the width {@code rusted_dunes}' old cut
+     * patch used. Public so the report tooling can render the identical band instead of a second copy
+     * that could drift from what actually ships.
+     */
+    public static final double PAVEMENT_LO = -0.55;
+    public static final double PAVEMENT_HI = -0.35;
 
     public SurfaceRules.RuleSource composeSurface(BootstrapContext<NoiseGeneratorSettings> context) {
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
@@ -88,26 +95,29 @@ public class RelictSurfaceRules {
                 SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, RED_SANDSTONE),
                 RED_SAND);
 
+        SurfaceRules.RuleSource floor = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.noiseCondition2d(Noises.SURFACE, PAVEMENT_LO, PAVEMENT_HI), GRAVEL),
+                sandOrSandstoneIfCeiling);
+
         return SurfaceRules.sequence(
-                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, sandOrSandstoneIfCeiling),
+                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, floor),
                 SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, sandOrSandstoneIfCeiling),
                 SurfaceRules.ifTrue(SurfaceRules.DEEP_UNDER_FLOOR, RED_SANDSTONE));
     }
 
     /**
-     * A thin oxide skin over a dark body, keyed on <em>depth</em> rather than slope.
-     * <p>
-     * Slope keying was checked and cannot work here: {@code steep()} needs a rise of 2 blocks per block, and a
-     * slip face at the angle of repose is a third of that, so it never fires on a dune. Depth is true to the
-     * geology anyway — the rust is a veneer — and it shows the moment anything digs or a crater cuts through.
-     * The deep band is free: {@code smooth_basalt} is already the noise settings' default block.
+     * Dark {@code smooth_basalt} dune bodies with {@code red_sand} confined to the crests. Crest selection
+     * keys off the dune wave field's own local-maximum shape along its wind axis ({@link DuneCrestCondition})
+     * rather than slope — {@code steep()} cannot fire on a dune slip face
      */
     private static SurfaceRules.RuleSource rustedDunes() {
+        SurfaceRules.RuleSource crestOrBody = SurfaceRules.sequence(
+                SurfaceRules.ifTrue(DuneCrestCondition.INSTANCE, RED_SAND),
+                SMOOTH_BASALT);
+
         return SurfaceRules.sequence(
-                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, SurfaceRules.sequence(
-                        SurfaceRules.ifTrue(SurfaceRules.noiseCondition2d(Noises.SURFACE, -1.0, VENEER_CUT), SMOOTH_BASALT),
-                        RED_SAND)),
-                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, RED_SAND),
+                SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, crestOrBody),
+                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SMOOTH_BASALT),
                 SurfaceRules.ifTrue(SurfaceRules.DEEP_UNDER_FLOOR, SMOOTH_BASALT));
     }
 
