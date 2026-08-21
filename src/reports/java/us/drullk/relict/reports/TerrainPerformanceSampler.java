@@ -1,4 +1,4 @@
-package us.drullk.relict.datagen.worldgen;
+package us.drullk.relict.reports;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -31,11 +31,13 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import us.drullk.relict.datagen.worldgen.RelictDensityFunctionGenerator;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
 import us.drullk.relict.worldgen.LatticeHash;
 import us.drullk.relict.worldgen.ProvinceParameter;
+import us.drullk.relict.datagen.worldgen.RelictNoiseRouter;
 import us.drullk.relict.worldgen.VoronoiSource;
 
 import java.io.IOException;

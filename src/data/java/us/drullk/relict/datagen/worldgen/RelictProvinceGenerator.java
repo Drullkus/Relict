@@ -34,12 +34,13 @@ public class RelictProvinceGenerator {
 
     static final float PLAIN_ROUGHNESS = 3.0F;
 
-    static final float DUNE_PLAIN_ROUGHNESS = 2.4F;
-    static final float MESA_PLAIN_ROUGHNESS = 2.6F;
+    /** Public: read by the reports source set's {@code VoronoiFieldSampler}, which compiles against this output. */
+    public static final float DUNE_PLAIN_ROUGHNESS = 2.4F;
+    public static final float MESA_PLAIN_ROUGHNESS = 2.6F;
 
-    static final float DUNE_AMPLITUDE = 24.0F;
+    public static final float DUNE_AMPLITUDE = 24.0F;
 
-    static final float MESA_AMPLITUDE = 30.0F;
+    public static final float MESA_AMPLITUDE = 30.0F;
 
     public static void bootstrapNoises(BootstrapContext<NormalNoise.NoiseParameters> context) {
         RelictCommonFields.NOISE_PARAMETERS.forEach(context::register);

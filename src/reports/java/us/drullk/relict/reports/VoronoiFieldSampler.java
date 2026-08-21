@@ -1,4 +1,4 @@
-package us.drullk.relict.datagen.worldgen;
+package us.drullk.relict.reports;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -31,7 +31,8 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import us.drullk.relict.Relict;
-import us.drullk.relict.datagen.worldgen.densityfields.RelictRidgeField;
+import us.drullk.relict.datagen.worldgen.RelictDensityFunctionGenerator;
+import us.drullk.relict.datagen.worldgen.RelictProvinceGenerator;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 import us.drullk.relict.init.custom.RelictVoronoiSources;
 import us.drullk.relict.init.worldgen.RelictDimension;
@@ -40,8 +41,10 @@ import us.drullk.relict.worldgen.DuneWaveFunction;
 import us.drullk.relict.worldgen.ElevationClass;
 import us.drullk.relict.worldgen.NoiseSpread;
 import us.drullk.relict.worldgen.Province;
+import us.drullk.relict.datagen.worldgen.RelictNoiseRouter;
 import us.drullk.relict.worldgen.VariantSelector;
 import us.drullk.relict.worldgen.VoronoiSource;
+import us.drullk.relict.datagen.worldgen.densityfields.RelictRidgeField;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -73,7 +76,7 @@ import java.util.stream.Collectors;
  * {@code main} either — see {@link RidgeFieldSampler} for that story. Running inside datagen gets the graph
  * datagen emits, with the seed injected through {@link VoronoiSource#bindSeed(net.minecraft.resources.Identifier, long)}
  * rather than borrowed from a server that does not exist yet. Emits no datapack files — writes plain-text
- * reports and PGM images under {@code relict.terrainReportDir} (set by {@code runServerData}; see
+ * reports and PGM images under {@code relict.terrainReportDir} (set by {@code reportsData}; see
  * build.gradle), and always prints to stdout regardless of whether that property is set.
  *
  * <h2>What each surface check answers</h2>

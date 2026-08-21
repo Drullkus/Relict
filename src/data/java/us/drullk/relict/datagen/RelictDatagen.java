@@ -29,14 +29,33 @@ public class RelictDatagen {
 
     @SubscribeEvent
     public static void generateData(GatherDataEvent.Server event) {
+        if (Boolean.getBoolean("relict.reportsOnly")) {
+            return;
+        }
+
         DataGenerator generator = event.getGenerator();
         PackOutput output = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
+        DatapackBuiltinEntriesProvider builtinDatapack = event.addProvider(new DatapackBuiltinEntriesProvider(output, lookupProvider, datapackRegistryEntries(), Set.of(Relict.MODID)));
+        CompletableFuture<HolderLookup.Provider> builtinDatapackProvider = builtinDatapack.getRegistryProvider();
+
+        event.addProvider(new RelictBiomeTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictBlockTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictDamageTypeTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictDimensionTypeTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictItemTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictTimelineTags(output, builtinDatapackProvider));
+
+        event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
+        event.addProvider(new RelictLootTables(output, builtinDatapackProvider));
+    }
+
+    public static RegistrySetBuilder datapackRegistryEntries() {
         RelictDimensionGenerator dimensionGenerator = new RelictDimensionGenerator(-64, 384, 128);
         RelictTimelineGenerator timelineGenerator = new RelictTimelineGenerator(22);
 
-        RegistrySetBuilder datapackRegistryEntries = new RegistrySetBuilder()
+        return new RegistrySetBuilder()
                 .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)
                 .add(Registries.CONFIGURED_CARVER, RelictCarverGenerator::bootstrapCarvers)
                 .add(Registries.CONFIGURED_FEATURE, RelictConfiguredFeatureGenerator::bootstrapConfiguredFeatures)
@@ -53,23 +72,6 @@ public class RelictDatagen {
                 .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet)
                 .add(Registries.TIMELINE, timelineGenerator::bootstrapTimelines)
                 .add(Registries.WORLD_CLOCK, timelineGenerator::bootstrapWorldClocks);
-
-        DatapackBuiltinEntriesProvider builtinDatapack = event.addProvider(new DatapackBuiltinEntriesProvider(output, lookupProvider, datapackRegistryEntries, Set.of(Relict.MODID)));
-        CompletableFuture<HolderLookup.Provider> builtinDatapackProvider = builtinDatapack.getRegistryProvider();
-
-        event.addProvider(new RelictBiomeTags(output, builtinDatapackProvider));
-        event.addProvider(new RelictBlockTags(output, builtinDatapackProvider));
-        event.addProvider(new RelictDamageTypeTags(output, builtinDatapackProvider));
-        event.addProvider(new RelictDimensionTypeTags(output, builtinDatapackProvider));
-        event.addProvider(new RelictItemTags(output, builtinDatapackProvider));
-        event.addProvider(new RelictTimelineTags(output, builtinDatapackProvider));
-
-        event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
-        event.addProvider(new RelictLootTables(output, builtinDatapackProvider));
-
-        event.addProvider(new RidgeFieldSampler(output, builtinDatapackProvider));
-        event.addProvider(new VoronoiFieldSampler(output, builtinDatapackProvider));
-        event.addProvider(new TerrainPerformanceSampler(output, builtinDatapackProvider));
     }
 
     @SubscribeEvent
