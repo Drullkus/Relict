@@ -21,9 +21,9 @@ import us.drullk.relict.atmosphere.AtmosphereCurve.StormArc;
  * Hooked against real 26.2 NeoForge client APIs, verified in {@code neoforge-26.2.0.57-sources.jar}:
  * {@link ViewportEvent.ComputeFogColor} and {@link ViewportEvent.RenderFog} (both {@code NeoForge.EVENT_BUS},
  * client logical side only, fired every frame for whichever fog is currently rendering) and
- * {@link ClientTickEvent.Post} for the ambient particle spawner. All three gate on the Mars dimension and on
- * {@link RelictAtmosphere#isSynced()}, so a joining player never sees a flash of storm dust from a guessed
- * cycle.
+ * {@link ClientTickEvent.Post} for the ambient particle spawner and the vanilla rain/thunder suppression
+ * below. All three gate on the Mars dimension and on {@link RelictAtmosphere#isSynced()}, so a joining
+ * player never sees a flash of storm dust from a guessed cycle.
  */
 public final class RelictStormVisuals {
 
@@ -91,6 +91,13 @@ public final class RelictStormVisuals {
         if (level == null || player == null || !isOnMars()) {
             return;
         }
+
+        // Level.canHaveWeather() admits Mars, so the server-global rain clock ramps this level's
+        // rainLevel/thunderLevel the same as the Overworld's, and vanilla keys sun/moon/star alpha and
+        // sky-light off them. Re-zeroed every tick so an incoming RAIN_LEVEL_CHANGE packet never sticks;
+        // storm visibility is owned by the tau arc below, not by vanilla weather.
+        level.setRainLevel(0.0F);
+        level.setThunderLevel(0.0F);
 
         StormArc arc = RelictAtmosphere.clientArc();
         float intensity = Mth.clamp(arc.tau(), 0.0F, 1.0F);

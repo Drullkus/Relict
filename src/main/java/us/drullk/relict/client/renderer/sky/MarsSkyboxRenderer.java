@@ -199,11 +199,11 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
         orient(poseStack, 0.0F, sunAngleDegrees);
         drawQuad(layerView, "Mars sun", RenderPipelines.CELESTIAL, resources.celestials(), resources.sunBuffer(), 0,
                 poseStack, RelictDimension.SUN_QUAD_EXTENT,
-                new Vector4f(sunBrightness, sunBrightness, sunBrightness, skyRenderState.rainBrightness));
+                new Vector4f(sunBrightness, sunBrightness, sunBrightness, 1.0F));
         poseStack.popPose();
 
         for (MarsMoons moon : MarsMoons.values()) {
-            drawMoon(layerView, resources, moon, state, sunAngleDegrees, skyRenderState.rainBrightness, poseStack);
+            drawMoon(layerView, resources, moon, state, sunAngleDegrees, poseStack);
         }
 
         composite(layer, main);
@@ -257,7 +257,7 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
     }
 
     private static void drawMoon(GpuTextureView layer, MarsSkyResources resources, MarsMoons moon, MarsSkyState state,
-                                 float sunAngleDegrees, float rainBrightness, PoseStack poseStack) {
+                                 float sunAngleDegrees, PoseStack poseStack) {
         float angle = state.angle(moon);
         float inclination = state.inclination(moon);
         float extent = moon.quadExtent() * state.scale(moon);
@@ -269,9 +269,9 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
         // The mask sits after the phases in the buffer. Erase first, back to the layer's black, then add the
         // lit face over the hole — so the unlit part of the moon ends up contributing nothing at all.
         drawQuad(layer, "Mars moon occluder", RelictRenderPipelines.CELESTIAL_OCCLUDER, celestials, buffer, moon.phases(),
-                poseStack, extent, new Vector4f(0.0F, 0.0F, 0.0F, rainBrightness));
+                poseStack, extent, new Vector4f(0.0F, 0.0F, 0.0F, 1.0F));
         drawQuad(layer, "Mars moon", RenderPipelines.CELESTIAL, celestials, buffer, phaseFrame(angle, sunAngleDegrees, inclination, moon.phases()),
-                poseStack, extent, new Vector4f(1.0F, 1.0F, 1.0F, rainBrightness));
+                poseStack, extent, new Vector4f(1.0F, 1.0F, 1.0F, 1.0F));
 
         poseStack.popPose();
     }
