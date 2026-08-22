@@ -2,6 +2,6 @@
 Relict
 =======
 
-Explore past epochs of Mars and uncover artifacts that remade the planet.
+An archaeology mod for [**Curseforge's 2026 themed modjam**](https://mod.curseforge.com/minecraft/modjam2026/). The dig site is a planet. Explore ruins from epochs and uncover artifacts.
 
-A mod entry for Curseforge's 2026 themed modjam, [**Echos of the Past**](https://mod.curseforge.com/minecraft/modjam2026/).
+Copyright 2026 Drullkus All Rights Reserved
