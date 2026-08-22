@@ -27,6 +27,7 @@
 
   "death.attack.relict.mars_unbreathable": "%1$s tried to breathe Mars",
   "death.attack.relict.air_depleted": "%1$s's bubble popped on Mars",
+  "death.attack.relict.storm_discharge": "%1$s was shocked by a dust storm",
 
   "relict.vizard.warning": "%s%% air remaining",
   "relict.vizard.inert": "Air depleted",
@@ -37,5 +38,10 @@
   "relict.configuration.items": "Item List",
   "relict.configuration.logDirtBlock": "Log Dirt Block",
   "relict.configuration.magicNumberIntroduction": "Magic Number Text",
-  "relict.configuration.magicNumber": "Magic Number"
+  "relict.configuration.magicNumber": "Magic Number",
+
+  "gamerule.category.relict.atmosphere": "Atmosphere",
+  "gamerule.relict.atmosphere_cycle_tenth_sols": "Atmosphere cycle length (tenths of a sol)",
+  "gamerule.relict.storm_frequency_percent": "Storm chance per stay (percent)",
+  "gamerule.relict.storm_damage": "Storm discharge damage"
 }

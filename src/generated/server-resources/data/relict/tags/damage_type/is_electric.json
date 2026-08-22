@@ -1,5 +1,6 @@
 {
   "values": [
-    "minecraft:lightning_bolt"
+    "minecraft:lightning_bolt",
+    "relict:storm_discharge"
   ]
 }

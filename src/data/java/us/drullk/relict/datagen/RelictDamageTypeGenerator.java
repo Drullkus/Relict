@@ -10,6 +10,7 @@ public class RelictDamageTypeGenerator {
     public static void bootstrapDamageTypes(BootstrapContext<DamageType> context) {
         context.register(RelictDamageTypes.UNBREATHABLE, new DamageType("relict.mars_unbreathable", DamageScaling.NEVER, 0.0F));
         context.register(RelictDamageTypes.AIR_DEPLETED, new DamageType("relict.air_depleted", DamageScaling.NEVER, 0.0F));
+        context.register(RelictDamageTypes.STORM_DISCHARGE, new DamageType("relict.storm_discharge", DamageScaling.NEVER, 0.0F));
     }
 
 }

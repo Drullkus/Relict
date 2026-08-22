@@ -55,7 +55,7 @@ public class RelictDatagen {
 
     public static RegistrySetBuilder datapackRegistryEntries() {
         RelictDimensionGenerator dimensionGenerator = new RelictDimensionGenerator(-64, 384, 128);
-        RelictTimelineGenerator timelineGenerator = new RelictTimelineGenerator(22);
+        RelictTimelineGenerator timelineGenerator = new RelictTimelineGenerator();
 
         return new RegistrySetBuilder()
                 .add(Registries.BIOME, RelictBiomeGenerator::bootstrapBiomes)

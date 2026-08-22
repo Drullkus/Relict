@@ -21,6 +21,10 @@ public class RelictDimension {
     public static final ResourceKey<NoiseGeneratorSettings> MARS_NOISE_SETTINGS = ResourceKey.create(Registries.NOISE_SETTINGS, Relict.id("mars"));
 
     // Mars time
+
+    /** Ticks per Mars sol: 22 real minutes * 60 seconds per minute * 20 ticks per second */
+    public static final int SOL_TICKS = 22 * 60 * 20;
+
     public static final ResourceKey<WorldClock> MARS_CLOCK = ResourceKey.create(Registries.WORLD_CLOCK, Relict.id("mars"));
     public static final ResourceKey<Timeline> MARS_SOL = ResourceKey.create(Registries.TIMELINE, Relict.id("mars_sol"));
     public static final ResourceKey<Timeline> PHOBOS_ORBIT = ResourceKey.create(Registries.TIMELINE, Relict.id("phobos_orbit"));

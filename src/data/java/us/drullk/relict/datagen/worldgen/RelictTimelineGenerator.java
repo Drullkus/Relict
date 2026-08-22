@@ -40,8 +40,8 @@ public class RelictTimelineGenerator {
     private final int solTicks;
     private final OrbitTransitSolver orbitTransitSolver;
 
-    public RelictTimelineGenerator(int cycleMinutes) {
-        this.solTicks = cycleMinutes * 1200;
+    public RelictTimelineGenerator() {
+        this.solTicks = RelictDimension.SOL_TICKS;
         this.orbitTransitSolver = new OrbitTransitSolver(this.solTicks);
     }
 

@@ -1,6 +1,7 @@
 {
   "values": [
     "relict:mars_unbreathable",
-    "relict:air_depleted"
+    "relict:air_depleted",
+    "relict:storm_discharge"
   ]
 }
