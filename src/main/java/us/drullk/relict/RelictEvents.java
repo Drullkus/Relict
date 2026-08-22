@@ -43,7 +43,7 @@ public class RelictEvents {
 
     public void levelTick(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level)
-                || !level.dimensionTypeRegistration().is(RelictTags.REQUIRES_MARS_LIFE_SUPPORT)
+                || !level.dimensionTypeRegistration().is(RelictTags.HAS_MARS_ATMOSPHERE)
                 || Math.floorMod(level.getGameTime(), 10) != 0L) {
             return;
         }
@@ -134,7 +134,7 @@ public class RelictEvents {
             return;
         }
 
-        if (level.dimensionTypeRegistration().is(RelictTags.REQUIRES_MARS_LIFE_SUPPORT)) {
+        if (level.dimensionTypeRegistration().is(RelictTags.HAS_MARS_ATMOSPHERE)) {
             applyMarsGravity(serverPlayer);
         } else {
             removeMarsGravity(serverPlayer);

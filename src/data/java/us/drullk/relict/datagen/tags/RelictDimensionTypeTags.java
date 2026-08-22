@@ -19,7 +19,8 @@ public class RelictDimensionTypeTags extends TagsProvider<DimensionType> {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        this.tag(RelictTags.REQUIRES_MARS_LIFE_SUPPORT).add(RelictDimension.MARS_TYPE);
+        this.tag(RelictTags.IS_MARS).add(RelictDimension.MARS_TYPE);
+        this.tag(RelictTags.HAS_MARS_ATMOSPHERE).addTag(RelictTags.IS_MARS);
     }
 
 }

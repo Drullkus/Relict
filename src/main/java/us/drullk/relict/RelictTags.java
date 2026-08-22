@@ -13,7 +13,9 @@ public class RelictTags {
 
     public static final TagKey<DamageType> IS_ELECTRIC = TagKey.create(Registries.DAMAGE_TYPE, Relict.id("is_electric"));
 
-    public static final TagKey<DimensionType> REQUIRES_MARS_LIFE_SUPPORT = TagKey.create(Registries.DIMENSION_TYPE, Relict.id("requires_mars_life_support"));
+    public static final TagKey<DimensionType> IS_MARS = TagKey.create(Registries.DIMENSION_TYPE, Relict.id("is_mars"));
+
+    public static final TagKey<DimensionType> HAS_MARS_ATMOSPHERE = TagKey.create(Registries.DIMENSION_TYPE, Relict.id("has_mars_atmosphere"));
 
     public static final TagKey<Item> REPAIRS_SERVICE_ARMOR = TagKey.create(Registries.ITEM, Relict.id("repairs_service_armor"));
 

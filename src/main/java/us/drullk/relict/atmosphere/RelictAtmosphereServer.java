@@ -62,7 +62,7 @@ public class RelictAtmosphereServer {
     private StormPhase lastPhase = null;
 
     public void levelTick(LevelTickEvent.Post event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || !level.dimensionTypeRegistration().is(RelictTags.REQUIRES_MARS_LIFE_SUPPORT)) {
+        if (!(event.getLevel() instanceof ServerLevel level) || !level.dimensionTypeRegistration().is(RelictTags.HAS_MARS_ATMOSPHERE)) {
             return;
         }
 
@@ -110,7 +110,7 @@ public class RelictAtmosphereServer {
 
     private void sendImmediateSync(Player player) {
         if (!(player instanceof ServerPlayer serverPlayer) || !(player.level() instanceof ServerLevel level)
-                || !level.dimensionTypeRegistration().is(RelictTags.REQUIRES_MARS_LIFE_SUPPORT)) {
+                || !level.dimensionTypeRegistration().is(RelictTags.HAS_MARS_ATMOSPHERE)) {
             return;
         }
 
