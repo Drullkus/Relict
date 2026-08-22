@@ -48,6 +48,9 @@ public class Relict {
         NeoForge.EVENT_BUS.addListener(events::levelTick);
         NeoForge.EVENT_BUS.addListener(events::incomingElectricDamage);
         NeoForge.EVENT_BUS.addListener(events::mobEffectApplicable);
+        NeoForge.EVENT_BUS.addListener(events::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(events::onPlayerChangedDimension);
+        NeoForge.EVENT_BUS.addListener(events::onPlayerRespawn);
 
         RelictAtmosphereServer atmosphere = new RelictAtmosphereServer();
         NeoForge.EVENT_BUS.addListener(atmosphere::levelTick);
