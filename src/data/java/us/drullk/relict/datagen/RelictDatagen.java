@@ -10,6 +10,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import us.drullk.relict.Relict;
+import us.drullk.relict.datagen.atmosphere.AtmosphereCurveSampler;
 import us.drullk.relict.datagen.celestial.RelictCelestialSprites;
 import us.drullk.relict.datagen.loottables.RelictLootTables;
 import us.drullk.relict.datagen.tags.RelictBiomeTags;
@@ -51,6 +52,8 @@ public class RelictDatagen {
 
         event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
         event.addProvider(new RelictLootTables(output, builtinDatapackProvider));
+
+        event.addProvider(new AtmosphereCurveSampler(output, builtinDatapackProvider));
     }
 
     public static RegistrySetBuilder datapackRegistryEntries() {

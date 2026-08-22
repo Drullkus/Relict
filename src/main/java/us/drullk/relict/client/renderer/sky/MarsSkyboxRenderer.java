@@ -20,6 +20,8 @@ import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.state.level.SkyRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.data.AtlasIds;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.attribute.EnvironmentAttributeProbe;
 import net.neoforged.neoforge.client.CustomSkyboxRenderer;
@@ -31,6 +33,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.jspecify.annotations.Nullable;
 import us.drullk.relict.Relict;
+import us.drullk.relict.client.atmosphere.RelictAtmosphere;
 import us.drullk.relict.client.renderer.RelictRenderPipelines;
 import us.drullk.relict.init.worldgen.RelictDimension;
 
@@ -65,6 +68,23 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
 
     private static final float CELESTIAL_HEIGHT = 100.0F;
     private static final Vector4f LAYER_CLEAR = new Vector4f(0.0F);
+
+    /**
+     * Tau-driven storm darkness, composed on top of the existing sky-color spec rather than replacing it;
+     * a pressure-driven "thinner air" read at the vacuum end of the season. {@code clientTau()} already
+     * equals {@code arcShape(phase) x tauCeiling(dustAxis)}, so the storm arc deepens the sky through this
+     * same read with no further edits needed elsewhere. All four numbers are tunable.
+     */
+    private static final int STORM_DUST_COLOR = ARGB.color(150, 100, 60);
+    private static final float STORM_SKY_BLEND_MAX = 0.85F;
+    private static final float VACUUM_SKY_SCALE = 0.72F;
+    private static final float STORM_SUN_DIM_MAX = 0.7F;
+
+    private static int stormSkyColor(int baseColor, float pressure, float tau) {
+        float thinAirScale = Mth.lerp(pressure, VACUUM_SKY_SCALE, 1.0F);
+        int scaled = ARGB.scaleRGB(baseColor, thinAirScale);
+        return ARGB.srgbLerp(Mth.clamp(tau, 0.0F, 1.0F) * STORM_SKY_BLEND_MAX, scaled, STORM_DUST_COLOR);
+    }
 
     private @Nullable MarsSkyResources resources;
 
@@ -152,9 +172,12 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
             return false;
         }
 
+        float pressure = RelictAtmosphere.clientPressure();
+        float tau = RelictAtmosphere.clientTau();
+
         RenderTarget layer = this.celestialLayer(main);
         setupFog.run();
-        vanilla.renderSkyDisc(skyRenderState.skyColor);
+        vanilla.renderSkyDisc(stormSkyColor(skyRenderState.skyColor, pressure, tau));
 
         PoseStack poseStack = new PoseStack();
         vanilla.renderSunriseAndSunset(poseStack, skyRenderState.sunAngle, skyRenderState.sunriseAndSunsetColor);
@@ -170,9 +193,13 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
             poseStack.popPose();
         }
 
+        // Dust dims the sun to a pale disc rather than erasing it; the moons ride on top untouched, so
+        // occlusion behind thick dust falls out of the same layer-composite this renderer already does.
+        float sunBrightness = 1.0F - Mth.clamp(tau, 0.0F, 1.0F) * STORM_SUN_DIM_MAX;
         orient(poseStack, 0.0F, sunAngleDegrees);
         drawQuad(layerView, "Mars sun", RenderPipelines.CELESTIAL, resources.celestials(), resources.sunBuffer(), 0,
-                poseStack, RelictDimension.SUN_QUAD_EXTENT, new Vector4f(1.0F, 1.0F, 1.0F, skyRenderState.rainBrightness));
+                poseStack, RelictDimension.SUN_QUAD_EXTENT,
+                new Vector4f(sunBrightness, sunBrightness, sunBrightness, skyRenderState.rainBrightness));
         poseStack.popPose();
 
         for (MarsMoons moon : MarsMoons.values()) {
