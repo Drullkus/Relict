@@ -18,6 +18,7 @@ import us.drullk.relict.Relict;
 import us.drullk.relict.item.SeismicLocatorItem;
 import us.drullk.relict.item.StoredCharges;
 import us.drullk.relict.item.VizardItem;
+import us.drullk.relict.item.WeatherglassItem;
 
 import java.util.function.UnaryOperator;
 
@@ -46,6 +47,7 @@ public class RelictItems {
     ));
 
     public static final DeferredItem<Item> SEISMIC_LOCATOR = ITEMS.registerItem("seismic_locator", SeismicLocatorItem::new, properties -> properties.stacksTo(1));
+    public static final DeferredItem<Item> WEATHERGLASS = ITEMS.registerItem("weatherglass", WeatherglassItem::new, properties -> properties.stacksTo(1));
 
     private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
         return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));

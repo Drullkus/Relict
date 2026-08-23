@@ -1,0 +1,1949 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "cases": [
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "relict:item/weatherglass/clear",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "minecraft:constant",
+              "value": -2589109
+            },
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            }
+          ]
+        },
+        "when": "mars_clear"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "relict:item/weatherglass/clear",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            },
+            {
+              "type": "minecraft:constant",
+              "value": -11823656
+            },
+            {
+              "type": "minecraft:constant",
+              "value": -1
+            }
+          ]
+        },
+        "when": "default"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "rain_into"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "thunder_into"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "storm_into"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -14729895
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "rain_exit"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -6663963
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11823656
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "thunder_exit"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1748885
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "storm_exit"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "atmo_thinning"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "atmo_vacuum"
+      },
+      {
+        "model": {
+          "type": "minecraft:range_dispatch",
+          "entries": [
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_1",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.0
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_2",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.125
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_3",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.25
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_4",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.375
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_5",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.5
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_6",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.625
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_7",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.75
+            },
+            {
+              "model": {
+                "type": "minecraft:model",
+                "model": "relict:item/weatherglass/meter_8",
+                "tints": [
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -11184811
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -1
+                  },
+                  {
+                    "type": "minecraft:constant",
+                    "value": -2589109
+                  }
+                ]
+              },
+              "threshold": 0.875
+            }
+          ],
+          "property": "relict:weatherglass_countdown"
+        },
+        "when": "atmo_filling"
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "relict:item/weatherglass/clear",
+      "tints": [
+        {
+          "type": "minecraft:constant",
+          "value": -1
+        },
+        {
+          "type": "minecraft:constant",
+          "value": -11823656
+        },
+        {
+          "type": "minecraft:constant",
+          "value": -1
+        }
+      ]
+    },
+    "property": "relict:weatherglass_face"
+  }
+}

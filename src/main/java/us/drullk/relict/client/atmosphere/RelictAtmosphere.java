@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.util.Mth;
 import net.minecraft.world.clock.WorldClock;
 import us.drullk.relict.atmosphere.AtmosphereCurve;
 import us.drullk.relict.atmosphere.AtmosphereCurve.CycleGeometry;
@@ -95,6 +96,35 @@ public final class RelictAtmosphere {
         }
 
         return AtmosphereCurve.stormAt(totalTicks, geometry(totalTicks), schedule);
+    }
+
+    public static float clientStormExitFraction() {
+        Long totalTicks = marsTotalTicks();
+        if (totalTicks == null || !schedule.hasStorm()) {
+            return 0.0F;
+        }
+
+        long warped = AtmosphereCurve.warpedElapsed(totalTicks, geometry(totalTicks), schedule);
+        return schedule.durationTicks() <= 0 ? 0.0F : Mth.clamp(warped / (float) schedule.durationTicks(), 0.0F, 1.0F);
+    }
+
+    public static float clientAtmosphereFraction() {
+        Long totalTicks = marsTotalTicks();
+        if (totalTicks == null) {
+            return 0.0F;
+        }
+
+        CycleGeometry geo = geometry(totalTicks);
+        return switch (AtmosphereCurve.phaseAt(totalTicks, geo)) {
+            case FILLING -> rampFraction(totalTicks, geo.cycleStartTick(), geo.rampTicks());
+            case THINNING -> rampFraction(totalTicks, geo.presentEnd(), geo.rampTicks());
+            case VACUUM -> rampFraction(totalTicks, geo.thinningEnd(), geo.cycleTicks() - geo.halfTicks() - geo.rampTicks());
+            case PRESENT -> 0.0F;
+        };
+    }
+
+    private static float rampFraction(long totalTicks, long rampStartTick, long rampLengthTicks) {
+        return rampLengthTicks <= 0 ? 1.0F : Mth.clamp((totalTicks - rampStartTick) / (float) rampLengthTicks, 0.0F, 1.0F);
     }
 
     private static CycleGeometry geometry(long totalTicks) {

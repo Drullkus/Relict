@@ -102,7 +102,7 @@ public class RelictStormCommand {
         return 1;
     }
 
-    private static long nextBoundaryTick(long now, CycleGeometry geo) {
+    public static long nextBoundaryTick(long now, CycleGeometry geo) {
         long offset = now - geo.cycleStartTick();
         long[] boundaries = {geo.rampTicks(), geo.halfTicks(), geo.halfTicks() + geo.rampTicks(), geo.cycleTicks()};
         for (long boundary : boundaries) {
@@ -241,13 +241,13 @@ public class RelictStormCommand {
     }
 
     /** {@code mm:ss}, always non-negative (a duration or a magnitude). */
-    private static String clock(long ticks) {
+    public static String clock(long ticks) {
         long seconds = Math.abs(ticks) / 20;
         return String.format("%d:%02d", seconds / 60, seconds % 60);
     }
 
     /** {@code mm:ss} with an explicit sign, for "offset from now" fields where negative means already past. */
-    private static String signedClock(long ticks) {
+    public static String signedClock(long ticks) {
         return (ticks < 0 ? "-" : "") + clock(ticks);
     }
 

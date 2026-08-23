@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "relict:item/weatherglass/weatherglass_foot",
+    "layer1": "relict:item/weatherglass/weatherglass_orb",
+    "layer2": "relict:item/weatherglass/weatherglass_streaks"
+  }
+}

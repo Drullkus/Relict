@@ -10,6 +10,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import us.drullk.relict.Relict;
 import us.drullk.relict.item.StoredCharges;
+import us.drullk.relict.item.WeatherglassReading;
 
 public class RelictDataComponents {
 
@@ -17,6 +18,7 @@ public class RelictDataComponents {
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<StoredCharges>> STORED_CHARGE = DATA_COMPONENTS.registerComponentType("stored_charge", builder -> builder.persistent(StoredCharges.CODEC).networkSynchronized(StoredCharges.STREAM_CODEC));
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Unit>> INERT = DATA_COMPONENTS.registerComponentType("inert", builder -> builder.persistent(Unit.CODEC).networkSynchronized(Unit.STREAM_CODEC));
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<WeatherglassReading>> WEATHERGLASS_READING = DATA_COMPONENTS.registerComponentType("weatherglass_reading", builder -> builder.persistent(WeatherglassReading.CODEC).networkSynchronized(WeatherglassReading.STREAM_CODEC));
 
     public static void register(IEventBus modEventBus) {
         DATA_COMPONENTS.register(modEventBus);

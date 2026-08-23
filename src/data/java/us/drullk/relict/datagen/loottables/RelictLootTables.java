@@ -32,7 +32,7 @@ public class RelictLootTables extends LootTableProvider {
         super(output, Set.of(), List.of(
                 new SubProviderEntry(_ -> generator -> {
                     generator.accept(PORTAL_RUIN, kitLoot());
-                    generator.accept(RUIN_A_KNOWLEDGE, kitLoot());
+                    generator.accept(RUIN_A_KNOWLEDGE, knowledgeLoot());
                     generator.accept(RUIN_A_MATERIAL, kitLoot());
                     generator.accept(UNMANNED_WRECK, locatorLoot());
                 }, LootContextParamSets.CHEST)
@@ -44,6 +44,12 @@ public class RelictLootTables extends LootTableProvider {
                 .withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(LootItem.lootTableItem(RelictItems.SEISMIC_LOCATOR.get())));
+    }
+
+    private static LootTable.Builder knowledgeLoot() {
+        return kitLoot().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .add(LootItem.lootTableItem(RelictItems.WEATHERGLASS.get())));
     }
 
     private static LootTable.Builder kitLoot() {

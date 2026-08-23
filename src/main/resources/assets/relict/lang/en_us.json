@@ -9,6 +9,7 @@
   "item.relict.stored_charges.charge": "Charge: %s / %s",
   "item.relict.seismic_locator": "Seismic Locator",
   "item.relict.seismic_locator.no_signal": "FIXME no seismic signal in range",
+  "item.relict.weatherglass": "Patient Weatherglass",
 
   "block.relict.mars_portal": "Mars Portal",
 
