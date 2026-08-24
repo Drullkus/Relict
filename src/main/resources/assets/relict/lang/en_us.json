@@ -13,6 +13,15 @@
 
   "block.relict.mars_portal": "Mars Portal",
 
+  "block.relict.lab_block": "Lab Block",
+  "block.relict.lab_shaft": "Lab Shaft",
+  "block.relict.lab_mast": "Lab Mast",
+  "block.relict.rover_wheel": "Rover Wheel",
+  "block.relict.solar_panel": "Solar Panel",
+  "block.relict.solar_panel_sprinkled": "Sprinkled Solar Panel",
+  "block.relict.solar_panel_dusted": "Dusted Solar Panel",
+  "block.relict.solar_panel_sanded": "Sanded Solar Panel",
+
   "biome.relict.wrinkle_plains": "Wrinkle Plains",
   "biome.relict.rusted_dunes": "Rusted Dunes",
   "biome.relict.fretted_mesas": "Fretted Mesas",

@@ -21,6 +21,7 @@ import us.drullk.relict.datagen.tags.RelictItemTags;
 import us.drullk.relict.datagen.tags.RelictStructureTags;
 import us.drullk.relict.datagen.tags.RelictTimelineTags;
 import us.drullk.relict.datagen.worldgen.*;
+import us.drullk.relict.datagen.wreck.SolarPanelDecaySampler;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 
 import java.util.Set;
@@ -54,6 +55,7 @@ public class RelictDatagen {
         event.addProvider(new RelictLootTables(output, builtinDatapackProvider));
 
         event.addProvider(new AtmosphereCurveSampler(output, builtinDatapackProvider));
+        event.addProvider(new SolarPanelDecaySampler(output, builtinDatapackProvider));
     }
 
     public static RegistrySetBuilder datapackRegistryEntries() {

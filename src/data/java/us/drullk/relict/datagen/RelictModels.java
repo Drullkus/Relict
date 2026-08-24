@@ -1,25 +1,33 @@
 package us.drullk.relict.datagen;
 
+import com.mojang.math.Quadrant;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.MultiVariant;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.data.models.model.ModelTemplate;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.client.renderer.block.dispatch.Variant;
+import net.minecraft.client.renderer.block.dispatch.VariantMutator;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.RangeSelectItemModel;
 import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredItem;
 import us.drullk.relict.Relict;
+import us.drullk.relict.block.wreck.SolarPanelBlock;
 import us.drullk.relict.client.item.WeatherglassCountdownProperty;
 import us.drullk.relict.client.item.WeatherglassFace;
 import us.drullk.relict.client.item.WeatherglassFaceProperty;
@@ -28,6 +36,7 @@ import us.drullk.relict.init.RelictItems;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class RelictModels extends ModelProvider {
 
@@ -41,6 +50,11 @@ public class RelictModels extends ModelProvider {
 
     private static final TextureSlot WEATHERGLASS_METER_SLOT = TextureSlot.create("layer3");
     private static final ModelTemplate WEATHERGLASS_METER_TEMPLATE = ModelTemplates.createItem("generated", TextureSlot.LAYER0, TextureSlot.LAYER1, TextureSlot.LAYER2, WEATHERGLASS_METER_SLOT);
+
+    private static final ModelTemplate LAB_SHAFT_TEMPLATE = new ModelTemplate(Optional.of(Relict.id("block/template_lab_shaft")), Optional.empty(), TextureSlot.ALL);
+    private static final ModelTemplate ROVER_WHEEL_TEMPLATE = new ModelTemplate(Optional.of(Relict.id("block/template_rover_wheel")), Optional.empty(), TextureSlot.SIDE, TextureSlot.END);
+    private static final ModelTemplate SOLAR_PANEL_TEMPLATE = new ModelTemplate(Optional.of(Relict.id("block/template_solar_panel")), Optional.empty(), TextureSlot.TOP, TextureSlot.SIDE);
+    private static final ModelTemplate LAB_MAST_TEMPLATE = new ModelTemplate(Optional.of(Relict.id("block/template_lab_mast")), Optional.empty(), TextureSlot.FRONT, TextureSlot.BACK, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
 
     private final float[] weatherGlassCountdownThresholds;
 
@@ -77,6 +91,88 @@ public class RelictModels extends ModelProvider {
         itemModels.generateFlatItem(RelictItems.SEISMIC_LOCATOR.get(), ModelTemplates.FLAT_ITEM);
 
         this.generateWeatherglassItem(itemModels);
+
+        this.registerLabBlock(blockModels, itemModels);
+        this.registerLabShaft(blockModels, itemModels);
+        this.registerRoverWheel(blockModels, itemModels);
+        this.registerSolarPanel(blockModels, itemModels, RelictBlocks.SOLAR_PANEL, RelictItems.SOLAR_PANEL, "solar_panel");
+        this.registerSolarPanel(blockModels, itemModels, RelictBlocks.SOLAR_PANEL_SPRINKLED, RelictItems.SOLAR_PANEL_SPRINKLED, "solar_panel_sprinkled");
+        this.registerSolarPanel(blockModels, itemModels, RelictBlocks.SOLAR_PANEL_DUSTED, RelictItems.SOLAR_PANEL_DUSTED, "solar_panel_dusted");
+        this.registerSolarPanel(blockModels, itemModels, RelictBlocks.SOLAR_PANEL_SANDED, RelictItems.SOLAR_PANEL_SANDED, "solar_panel_sanded");
+        this.registerLabMast(blockModels, itemModels);
+    }
+
+    private static Material wreckTexture(String name) {
+        return new Material(Relict.id("block/unmanned_wreck/" + name));
+    }
+
+    private void registerLabBlock(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+        Identifier modelId = ModelTemplates.CUBE_ALL.create(RelictBlocks.LAB_BLOCK.get(),
+                TextureMapping.cube(wreckTexture("lab_block")), blockModels.modelOutput);
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(RelictBlocks.LAB_BLOCK.get(), variant(modelId)));
+        itemModels.itemModelOutput.accept(RelictItems.LAB_BLOCK.get(), ItemModelUtils.plainModel(modelId));
+    }
+
+    private void registerLabShaft(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+        TextureMapping textures = TextureMapping.cube(wreckTexture("lab_block"));
+        Identifier modelId = LAB_SHAFT_TEMPLATE.create(RelictBlocks.LAB_SHAFT.get(), textures, blockModels.modelOutput);
+
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(RelictBlocks.LAB_SHAFT.get())
+                .with(PropertyDispatch.initial(BlockStateProperties.AXIS)
+                        .select(Direction.Axis.Y, variant(modelId))
+                        .select(Direction.Axis.Z, variant(modelId).with(VariantMutator.X_ROT.withValue(Quadrant.R90)))
+                        .select(Direction.Axis.X, variant(modelId)
+                                .with(VariantMutator.X_ROT.withValue(Quadrant.R90))
+                                .with(VariantMutator.Y_ROT.withValue(Quadrant.R90)))));
+        itemModels.itemModelOutput.accept(RelictItems.LAB_SHAFT.get(), ItemModelUtils.plainModel(modelId));
+    }
+
+    private void registerRoverWheel(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+        TextureMapping textures = new TextureMapping()
+                .put(TextureSlot.END, wreckTexture("rover_wheel_hub"))
+                .put(TextureSlot.SIDE, wreckTexture("rover_wheel_treads"));
+        Identifier modelId = ROVER_WHEEL_TEMPLATE.create(RelictBlocks.ROVER_WHEEL.get(), textures, blockModels.modelOutput);
+
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(RelictBlocks.ROVER_WHEEL.get())
+                .with(PropertyDispatch.initial(BlockStateProperties.AXIS)
+                        .select(Direction.Axis.Y, variant(modelId))
+                        .select(Direction.Axis.Z, variant(modelId).with(VariantMutator.X_ROT.withValue(Quadrant.R90)))
+                        .select(Direction.Axis.X, variant(modelId)
+                                .with(VariantMutator.X_ROT.withValue(Quadrant.R90))
+                                .with(VariantMutator.Y_ROT.withValue(Quadrant.R90)))));
+        itemModels.itemModelOutput.accept(RelictItems.ROVER_WHEEL.get(), ItemModelUtils.plainModel(modelId));
+    }
+
+    private void registerSolarPanel(BlockModelGenerators blockModels, ItemModelGenerators itemModels,
+            DeferredBlock<SolarPanelBlock> stage, DeferredItem<net.minecraft.world.item.BlockItem> item, String topTextureName) {
+        TextureMapping textures = new TextureMapping()
+                .put(TextureSlot.TOP, wreckTexture(topTextureName))
+                .put(TextureSlot.SIDE, wreckTexture("solar_panel_side"));
+        Identifier modelId = SOLAR_PANEL_TEMPLATE.create(stage.get(), textures, blockModels.modelOutput);
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(stage.get(), variant(modelId)));
+        itemModels.itemModelOutput.accept(item.get(), ItemModelUtils.plainModel(modelId));
+    }
+
+    private void registerLabMast(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+        TextureMapping textures = new TextureMapping()
+                .put(TextureSlot.FRONT, wreckTexture("lab_mast_front"))
+                .put(TextureSlot.BACK, wreckTexture("lab_mast_back"))
+                .put(TextureSlot.TOP, wreckTexture("lab_block"))
+                .put(TextureSlot.SIDE, wreckTexture("lab_mast_side"))
+                .put(TextureSlot.BOTTOM, wreckTexture("lab_mast_back"));
+        Identifier modelId = LAB_MAST_TEMPLATE.create(RelictBlocks.LAB_MAST.get(), textures, blockModels.modelOutput);
+
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(RelictBlocks.LAB_MAST.get())
+                .with(PropertyDispatch.initial(BlockStateProperties.HORIZONTAL_FACING)
+                        .select(Direction.NORTH, variant(modelId))
+                        .select(Direction.EAST, variant(modelId).with(VariantMutator.Y_ROT.withValue(Quadrant.R90)))
+                        .select(Direction.SOUTH, variant(modelId).with(VariantMutator.Y_ROT.withValue(Quadrant.R180)))
+                        .select(Direction.WEST, variant(modelId).with(VariantMutator.Y_ROT.withValue(Quadrant.R270)))));
+        itemModels.itemModelOutput.accept(RelictItems.LAB_MAST.get(), ItemModelUtils.plainModel(modelId));
+    }
+
+    private static MultiVariant variant(Identifier modelId) {
+        return new MultiVariant(WeightedList.of(new Variant(modelId)));
     }
 
     private void generateWeatherglassItem(ItemModelGenerators itemModels) {

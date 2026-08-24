@@ -1,0 +1,6 @@
+{
+  "parent": "relict:block/template_lab_shaft",
+  "textures": {
+    "all": "relict:block/unmanned_wreck/lab_block"
+  }
+}

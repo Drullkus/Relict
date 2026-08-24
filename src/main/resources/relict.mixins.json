@@ -4,6 +4,7 @@
   "package": "us.drullk.relict.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "BrushItemMixin",
     "LevelMixin"
   ],
   "injectors": {

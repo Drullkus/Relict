@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "relict:block/unmanned_wreck/lab_block"
+  }
+}

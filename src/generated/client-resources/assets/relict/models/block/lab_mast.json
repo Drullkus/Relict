@@ -1,0 +1,10 @@
+{
+  "parent": "relict:block/template_lab_mast",
+  "textures": {
+    "back": "relict:block/unmanned_wreck/lab_mast_back",
+    "bottom": "relict:block/unmanned_wreck/lab_mast_back",
+    "front": "relict:block/unmanned_wreck/lab_mast_front",
+    "side": "relict:block/unmanned_wreck/lab_mast_side",
+    "top": "relict:block/unmanned_wreck/lab_block"
+  }
+}

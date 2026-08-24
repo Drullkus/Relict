@@ -49,6 +49,15 @@ public class RelictItems {
     public static final DeferredItem<Item> SEISMIC_LOCATOR = ITEMS.registerItem("seismic_locator", SeismicLocatorItem::new, properties -> properties.stacksTo(1));
     public static final DeferredItem<Item> WEATHERGLASS = ITEMS.registerItem("weatherglass", WeatherglassItem::new, properties -> properties.stacksTo(1));
 
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_BLOCK = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_BLOCK);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_SHAFT = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SHAFT);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_MAST = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_MAST);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> ROVER_WHEEL = ITEMS.registerSimpleBlockItem(RelictBlocks.ROVER_WHEEL);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SPRINKLED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SPRINKLED);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_DUSTED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_DUSTED);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SANDED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SANDED);
+
     private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
         return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));
     }

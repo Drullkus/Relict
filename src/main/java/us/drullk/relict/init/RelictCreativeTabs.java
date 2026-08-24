@@ -21,6 +21,15 @@ public class RelictCreativeTabs {
                 output.accept(RelictItems.RANGING_CAISSON.value());
                 output.accept(RelictItems.RESTLESS_STRIDERS.value());
                 output.accept(RelictItems.GROUNDING_TREADS.value());
+
+                output.accept(RelictItems.LAB_BLOCK.value());
+                output.accept(RelictItems.LAB_SHAFT.value());
+                output.accept(RelictItems.LAB_MAST.value());
+                output.accept(RelictItems.ROVER_WHEEL.value());
+                output.accept(RelictItems.SOLAR_PANEL.value());
+                output.accept(RelictItems.SOLAR_PANEL_SPRINKLED.value());
+                output.accept(RelictItems.SOLAR_PANEL_DUSTED.value());
+                output.accept(RelictItems.SOLAR_PANEL_SANDED.value());
             }).build());
 
 }

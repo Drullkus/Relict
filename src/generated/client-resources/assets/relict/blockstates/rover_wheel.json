@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "relict:block/rover_wheel",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "relict:block/rover_wheel"
+    },
+    "axis=z": {
+      "model": "relict:block/rover_wheel",
+      "x": 90
+    }
+  }
+}

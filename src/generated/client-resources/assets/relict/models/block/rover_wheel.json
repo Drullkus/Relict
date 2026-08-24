@@ -1,0 +1,7 @@
+{
+  "parent": "relict:block/template_rover_wheel",
+  "textures": {
+    "end": "relict:block/unmanned_wreck/rover_wheel_hub",
+    "side": "relict:block/unmanned_wreck/rover_wheel_treads"
+  }
+}

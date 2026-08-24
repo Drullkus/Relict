@@ -1,0 +1,7 @@
+{
+  "parent": "relict:block/template_solar_panel",
+  "textures": {
+    "side": "relict:block/unmanned_wreck/solar_panel_side",
+    "top": "relict:block/unmanned_wreck/solar_panel"
+  }
+}

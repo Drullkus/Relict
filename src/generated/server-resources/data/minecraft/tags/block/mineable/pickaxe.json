@@ -1,0 +1,12 @@
+{
+  "values": [
+    "relict:lab_block",
+    "relict:lab_shaft",
+    "relict:lab_mast",
+    "relict:rover_wheel",
+    "relict:solar_panel",
+    "relict:solar_panel_sprinkled",
+    "relict:solar_panel_dusted",
+    "relict:solar_panel_sanded"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "relict:block/lab_shaft",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "relict:block/lab_shaft"
+    },
+    "axis=z": {
+      "model": "relict:block/lab_shaft",
+      "x": 90
+    }
+  }
+}
