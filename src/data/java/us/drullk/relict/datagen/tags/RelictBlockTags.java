@@ -25,6 +25,8 @@ public class RelictBlockTags extends BlockTagsProvider {
 
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(RelictBlocks.LAB_BLOCK.getKey())
+                .add(RelictBlocks.LAB_SLAB.getKey())
+                .add(RelictBlocks.LAB_STAIRS.getKey())
                 .add(RelictBlocks.LAB_SHAFT.getKey())
                 .add(RelictBlocks.LAB_MAST.getKey())
                 .add(RelictBlocks.ROVER_WHEEL.getKey())

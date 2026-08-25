@@ -1,7 +1,9 @@
 package us.drullk.relict.init;
 
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -46,6 +48,19 @@ public class RelictBlocks {
             .strength(WRECK_HULL_HARDNESS, WRECK_HULL_RESISTANCE)
             .sound(SoundType.METAL)
             .requiresCorrectToolForDrops());
+
+    public static final DeferredBlock<SlabBlock> LAB_SLAB = BLOCKS.registerBlock("lab_slab", SlabBlock::new, properties -> properties
+            .mapColor(MapColor.METAL)
+            .strength(WRECK_HULL_HARDNESS, WRECK_HULL_RESISTANCE)
+            .sound(SoundType.METAL)
+            .requiresCorrectToolForDrops());
+
+    public static final DeferredBlock<StairBlock> LAB_STAIRS = BLOCKS.registerBlock("lab_stairs",
+            properties -> new StairBlock(LAB_BLOCK.get().defaultBlockState(), properties), properties -> properties
+                    .mapColor(MapColor.METAL)
+                    .strength(WRECK_HULL_HARDNESS, WRECK_HULL_RESISTANCE)
+                    .sound(SoundType.METAL)
+                    .requiresCorrectToolForDrops());
 
     public static final DeferredBlock<RotatedPillarBlock> ROVER_WHEEL = BLOCKS.registerBlock("rover_wheel", RotatedPillarBlock::new, properties -> properties
             .mapColor(MapColor.METAL)

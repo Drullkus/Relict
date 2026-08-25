@@ -5,7 +5,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -14,7 +13,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import us.drullk.relict.Relict;
-import us.drullk.relict.init.RelictBlocks;
+import us.drullk.relict.datagen.loottables.wreck.WreckLootTables;
 import us.drullk.relict.init.RelictItems;
 
 import java.util.List;
@@ -46,22 +45,8 @@ public class RelictLootTables extends LootTableProvider {
     }
 
     private static void generateBlockDrops(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> generator) {
-        generator.accept(blockLootKey(RelictBlocks.LAB_BLOCK.get()), selfDrop(RelictBlocks.LAB_BLOCK.get()));
-        generator.accept(blockLootKey(RelictBlocks.LAB_SHAFT.get()), selfDrop(RelictBlocks.LAB_SHAFT.get()));
-        generator.accept(blockLootKey(RelictBlocks.LAB_MAST.get()), selfDrop(RelictBlocks.LAB_MAST.get()));
-        generator.accept(blockLootKey(RelictBlocks.ROVER_WHEEL.get()), selfDrop(RelictBlocks.ROVER_WHEEL.get()));
-        generator.accept(blockLootKey(RelictBlocks.SOLAR_PANEL.get()), selfDrop(RelictBlocks.SOLAR_PANEL.get()));
-        generator.accept(blockLootKey(RelictBlocks.SOLAR_PANEL_SPRINKLED.get()), selfDrop(RelictBlocks.SOLAR_PANEL_SPRINKLED.get()));
-        generator.accept(blockLootKey(RelictBlocks.SOLAR_PANEL_DUSTED.get()), selfDrop(RelictBlocks.SOLAR_PANEL_DUSTED.get()));
-        generator.accept(blockLootKey(RelictBlocks.SOLAR_PANEL_SANDED.get()), selfDrop(RelictBlocks.SOLAR_PANEL_SANDED.get()));
-    }
-
-    private static ResourceKey<LootTable> blockLootKey(Block block) {
-        return block.getLootTable().orElseThrow(() -> new IllegalStateException("Block " + block + " has no loot table key"));
-    }
-
-    private static LootTable.Builder selfDrop(Block block) {
-        return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(block)));
+        WreckLootTables.blockDrops(generator);
+        WreckLootTables.brushDrops(generator);
     }
 
     private static LootTable.Builder locatorLoot() {

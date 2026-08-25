@@ -5,8 +5,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
@@ -18,8 +23,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 public class SolarPanelBlock extends Block implements SimpleWaterloggedBlock {
 
@@ -77,6 +84,16 @@ public class SolarPanelBlock extends Block implements SimpleWaterloggedBlock {
     @Override
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         SolarPanelDecay.tick(this, state, level, pos, random);
+    }
+
+    // For any modded brushes that don't extend BrushItem
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (!stack.canPerformAction(ItemAbilities.BRUSH_BRUSH) || !(level instanceof ServerLevel serverLevel)) {
+            return InteractionResult.PASS;
+        }
+
+        return SolarPanelDecay.brush(serverLevel, pos, state, player, stack) ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
 }

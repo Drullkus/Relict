@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "relict:block/lab_slab"
+    },
+    "type=double": {
+      "model": "relict:block/lab_block"
+    },
+    "type=top": {
+      "model": "relict:block/lab_slab_top"
+    }
+  }
+}

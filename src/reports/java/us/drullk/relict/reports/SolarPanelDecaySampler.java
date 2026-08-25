@@ -1,9 +1,11 @@
-package us.drullk.relict.datagen.wreck;
+package us.drullk.relict.reports;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.storage.loot.LootTable;
 import us.drullk.relict.atmosphere.StormPhase;
 import us.drullk.relict.block.wreck.SolarPanelDecay;
 import us.drullk.relict.init.RelictBlocks;
@@ -13,9 +15,10 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Headless verification for the solar panel decay/brush gate — the wreck block set's equivalent of
- * {@code AtmosphereCurveSampler}. {@link SolarPanelDecay}'s gate math takes no world state beyond the
- * values passed in, so this asserts the four scenarios the order calls for directly, rather than standing
- * up a server world to observe them. Failing an assertion fails the datagen run.
+ * {@code RidgeFieldSampler}. {@link SolarPanelDecay}'s gate math takes no world state beyond the values
+ * passed in, so this asserts four scenarios directly, rather than standing up a live server world to
+ * observe them. Failing an assertion fails the run. A verification instrument, not a datagen provider:
+ * lives in the reports source set, never datagen.
  */
 public final class SolarPanelDecaySampler implements DataProvider {
 
@@ -114,19 +117,24 @@ public final class SolarPanelDecaySampler implements DataProvider {
     // ============================================================================================ (d) brushing
 
     private static void reportBrushTable(StringBuilder report) {
-        report.append("\n=== D. brush drop table (asserting the table, not the RNG) ===\n\n");
+        report.append("\n=== D. brush loot table wiring (asserting the key mapping, not the datagenned table's roll) ===\n\n");
 
-        Optional<Float> sprinkled = SolarPanelDecay.brushSandChance(RelictBlocks.SOLAR_PANEL_SPRINKLED.get());
-        Optional<Float> dusted = SolarPanelDecay.brushSandChance(RelictBlocks.SOLAR_PANEL_DUSTED.get());
-        Optional<Float> sanded = SolarPanelDecay.brushSandChance(RelictBlocks.SOLAR_PANEL_SANDED.get());
-        Optional<Float> clean = SolarPanelDecay.brushSandChance(RelictBlocks.SOLAR_PANEL.get());
+        Optional<ResourceKey<LootTable>> sprinkled = SolarPanelDecay.brushLootTable(RelictBlocks.SOLAR_PANEL_SPRINKLED.get());
+        Optional<ResourceKey<LootTable>> dusted = SolarPanelDecay.brushLootTable(RelictBlocks.SOLAR_PANEL_DUSTED.get());
+        Optional<ResourceKey<LootTable>> sanded = SolarPanelDecay.brushLootTable(RelictBlocks.SOLAR_PANEL_SANDED.get());
+        Optional<ResourceKey<LootTable>> clean = SolarPanelDecay.brushLootTable(RelictBlocks.SOLAR_PANEL.get());
 
-        require(sprinkled.orElseThrow() == 0.01F, "sprinkled red sand chance must be 1%");
-        require(dusted.orElseThrow() == 0.02F, "dusted red sand chance must be 2%");
-        require(sanded.orElseThrow() == 0.05F, "sanded red sand chance must be 5%");
-        require(clean.isEmpty(), "clean must have no brush-drop entry at all (brushing clean is a no-op, not a 0%-chance roll)");
+        require(sprinkled.orElseThrow() == SolarPanelDecay.BRUSH_SOLAR_PANEL_SPRINKLED, "sprinkled must map to its own brush loot table key");
+        require(dusted.orElseThrow() == SolarPanelDecay.BRUSH_SOLAR_PANEL_DUSTED, "dusted must map to its own brush loot table key");
+        require(sanded.orElseThrow() == SolarPanelDecay.BRUSH_SOLAR_PANEL_SANDED, "sanded must map to its own brush loot table key");
+        require(clean.isEmpty(), "clean must have no brush-loot-table entry at all (brushing clean is a no-op, not a 0%-chance roll)");
 
-        report.append("D) PASS — sprinkled=1%, dusted=2%, sanded=5%, clean has no table entry (no-op, not a zero-chance roll).\n");
+        require(sprinkled.get() != dusted.get() && dusted.get() != sanded.get() && sprinkled.get() != sanded.get(),
+                "the three dusty stages must each have their own distinct loot table, one per stage");
+
+        report.append("D) PASS — sprinkled/dusted/sanded each map to their own distinct brush loot table key, clean has none.\n")
+                .append("   The 1%/2%/5% chances live in the datagenned loot table JSON (random_chance conditions), not\n")
+                .append("   in this pure-function mapping; verify those values from the generated tree directly.\n");
     }
 
     private static void require(boolean condition, String message) {

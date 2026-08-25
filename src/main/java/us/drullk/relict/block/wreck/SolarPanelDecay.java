@@ -2,17 +2,24 @@ package us.drullk.relict.block.wreck;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
+import us.drullk.relict.Relict;
 import us.drullk.relict.RelictTags;
 import us.drullk.relict.atmosphere.AtmosphereCurve;
 import us.drullk.relict.atmosphere.AtmosphereCurve.CycleGeometry;
@@ -73,21 +80,33 @@ public final class SolarPanelDecay {
             .put(RelictBlocks.SOLAR_PANEL_DUSTED.get(), RelictBlocks.SOLAR_PANEL_SANDED.get())
             .build());
 
-    /** Red sand drop chance on a successful brush stroke, keyed by the stage being cleaned. Clean has no entry: brushing it is a no-op. */
-    private static final Supplier<Map<Block, Float>> BRUSH_SAND_CHANCE = com.google.common.base.Suppliers.memoize(() -> ImmutableMap.<Block, Float>builder()
-            .put(RelictBlocks.SOLAR_PANEL_SPRINKLED.get(), 0.01F)
-            .put(RelictBlocks.SOLAR_PANEL_DUSTED.get(), 0.02F)
-            .put(RelictBlocks.SOLAR_PANEL_SANDED.get(), 0.05F)
+    /**
+     * The brush's loot table for this stage, keyed by the stage being cleaned. Clean has no entry: brushing
+     * it is a no-op, not a table with a zero-chance roll. Datagen ({@code WreckLootTables}, in the data
+     * source set) generates the loot table JSON these keys point at, using these same key constants.
+     */
+    public static final ResourceKey<LootTable> BRUSH_SOLAR_PANEL_SPRINKLED = brushLootKey("wreck/brush/solar_panel_sprinkled");
+    public static final ResourceKey<LootTable> BRUSH_SOLAR_PANEL_DUSTED = brushLootKey("wreck/brush/solar_panel_dusted");
+    public static final ResourceKey<LootTable> BRUSH_SOLAR_PANEL_SANDED = brushLootKey("wreck/brush/solar_panel_sanded");
+
+    private static final Supplier<Map<Block, ResourceKey<LootTable>>> BRUSH_LOOT_TABLE = com.google.common.base.Suppliers.memoize(() -> ImmutableMap.<Block, ResourceKey<LootTable>>builder()
+            .put(RelictBlocks.SOLAR_PANEL_SPRINKLED.get(), BRUSH_SOLAR_PANEL_SPRINKLED)
+            .put(RelictBlocks.SOLAR_PANEL_DUSTED.get(), BRUSH_SOLAR_PANEL_DUSTED)
+            .put(RelictBlocks.SOLAR_PANEL_SANDED.get(), BRUSH_SOLAR_PANEL_SANDED)
             .build());
+
+    private static ResourceKey<LootTable> brushLootKey(String path) {
+        return ResourceKey.create(Registries.LOOT_TABLE, Relict.id(path));
+    }
 
     /** The next decay stage for this block, if any; SANDED (and any non-panel block) returns empty. */
     public static Optional<Block> next(Block block) {
         return Optional.ofNullable(NEXT_BY_BLOCK.get().get(block));
     }
 
-    /** The brush's red-sand drop chance for this block, if it is a dusty stage. */
-    public static Optional<Float> brushSandChance(Block block) {
-        return Optional.ofNullable(BRUSH_SAND_CHANCE.get().get(block));
+    /** The brush's loot table key for this block, if it is a dusty stage. */
+    public static Optional<ResourceKey<LootTable>> brushLootTable(Block block) {
+        return Optional.ofNullable(BRUSH_LOOT_TABLE.get().get(block));
     }
 
     public static void tick(Block self, BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
@@ -113,16 +132,15 @@ public final class SolarPanelDecay {
     }
 
     /**
-     * Restores any dusty stage to clean in one stroke, costs the brush 1 durability, and rolls the
-     * stage's red sand chance. Brushing an already-clean panel (or any non-panel block) is a no-op.
+     * Restores any dusty stage to clean in one stroke, costs the brush 1 durability, and rolls the stage's
+     * brush loot table (a {@code random_chance}-gated red sand entry). Brushing an already-clean panel (or
+     * any non-panel block) is a no-op.
      *
      * @return true if this call cleaned a panel (for the caller's own bookkeeping; the brush's durability cost is applied here regardless).
      */
     public static boolean brush(ServerLevel level, BlockPos pos, BlockState state, Player player, ItemStack brush) {
-        // FIXME switch to loot table
-
-        Float sandChance = BRUSH_SAND_CHANCE.get().get(state.getBlock());
-        if (sandChance == null) {
+        ResourceKey<LootTable> lootTableKey = BRUSH_LOOT_TABLE.get().get(state.getBlock());
+        if (lootTableKey == null) {
             return false;
         }
 
@@ -132,8 +150,16 @@ public final class SolarPanelDecay {
         EquipmentSlot slot = brush.equals(player.getItemBySlot(EquipmentSlot.OFFHAND)) ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
         brush.hurtAndBreak(1, player, slot);
 
-        if (level.getRandom().nextFloat() < sandChance) {
-            Block.popResource(level, pos, new ItemStack(Items.RED_SAND));
+        LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(lootTableKey);
+        LootParams params = new LootParams.Builder(level)
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+                .withParameter(LootContextParams.BLOCK_STATE, state)
+                .withOptionalParameter(LootContextParams.TOOL, brush)
+                .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
+                .create(LootContextParamSets.BLOCK);
+
+        for (ItemStack drop : lootTable.getRandomItems(params)) {
+            Block.popResource(level, pos, drop);
         }
 
         return true;

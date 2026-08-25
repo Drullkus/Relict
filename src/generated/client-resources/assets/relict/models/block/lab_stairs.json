@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "relict:block/unmanned_wreck/lab_block",
+    "side": "relict:block/unmanned_wreck/lab_block",
+    "top": "relict:block/unmanned_wreck/lab_block"
+  }
+}

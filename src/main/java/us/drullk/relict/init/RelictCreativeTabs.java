@@ -23,6 +23,8 @@ public class RelictCreativeTabs {
                 output.accept(RelictItems.GROUNDING_TREADS.value());
 
                 output.accept(RelictItems.LAB_BLOCK.value());
+                output.accept(RelictItems.LAB_SLAB.value());
+                output.accept(RelictItems.LAB_STAIRS.value());
                 output.accept(RelictItems.LAB_SHAFT.value());
                 output.accept(RelictItems.LAB_MAST.value());
                 output.accept(RelictItems.ROVER_WHEEL.value());

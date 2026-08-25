@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "chance": 0.05,
+              "condition": "minecraft:random_chance"
+            }
+          ],
+          "name": "minecraft:red_sand"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "relict:wreck/brush/solar_panel_sanded"
+}

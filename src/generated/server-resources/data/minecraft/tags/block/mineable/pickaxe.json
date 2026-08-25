@@ -1,6 +1,8 @@
 {
   "values": [
     "relict:lab_block",
+    "relict:lab_slab",
+    "relict:lab_stairs",
     "relict:lab_shaft",
     "relict:lab_mast",
     "relict:rover_wheel",

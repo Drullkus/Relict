@@ -37,15 +37,23 @@ public final class RelictReports {
                 case "voronoi" -> event.addProvider(new VoronoiFieldSampler(output, registries));
                 case "performance" -> event.addProvider(new TerrainPerformanceSampler(output, registries));
                 case "profile" -> event.addProvider(new TerrainFlightProfiler(output, registries));
+                case "solar_panel_decay" -> event.addProvider(new SolarPanelDecaySampler(output, registries));
+                case "atmosphere_curve" -> event.addProvider(new AtmosphereCurveSampler(output, registries));
                 default -> throw new IllegalArgumentException("Unknown relict.reports entry: " + name
-                        + " (expected one of: ridge, voronoi, performance, profile)");
+                        + " (expected one of: ridge, voronoi, performance, profile, solar_panel_decay, atmosphere_curve)");
             }
         }
     }
 
-    /** Comma-separated report names via {@code -Drelict.reports=...}; every report if unset. */
+    /**
+     * Comma-separated report names via {@code -Drelict.reports=...}; every report in this default list if
+     * unset. {@code solar_panel_decay} and {@code atmosphere_curve} are cheap, deterministic assertion
+     * samplers (no live server, no JFR) — same character as ridge/voronoi/performance, so they stay in the
+     * always-on default. {@code profile} stays opt-in only: it is a JFR-capturing profiling run, not an
+     * assertion sampler.
+     */
     private static List<String> selectedReports() {
-        return List.of(System.getProperty("relict.reports", "ridge,voronoi,performance").split(","));
+        return List.of(System.getProperty("relict.reports", "ridge,voronoi,performance,solar_panel_decay,atmosphere_curve").split(","));
     }
 
 }

@@ -1,4 +1,4 @@
-package us.drullk.relict.datagen.atmosphere;
+package us.drullk.relict.reports;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;

@@ -52,6 +52,8 @@ public class RelictItems {
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_BLOCK = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_BLOCK);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_SHAFT = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SHAFT);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_MAST = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_MAST);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_SLAB = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SLAB);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_STAIRS = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_STAIRS);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> ROVER_WHEEL = ITEMS.registerSimpleBlockItem(RelictBlocks.ROVER_WHEEL);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SPRINKLED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SPRINKLED);

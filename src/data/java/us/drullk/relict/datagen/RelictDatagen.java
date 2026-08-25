@@ -10,9 +10,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import us.drullk.relict.Relict;
-import us.drullk.relict.datagen.atmosphere.AtmosphereCurveSampler;
 import us.drullk.relict.datagen.celestial.RelictCelestialSprites;
 import us.drullk.relict.datagen.loottables.RelictLootTables;
+import us.drullk.relict.datagen.models.RelictModels;
 import us.drullk.relict.datagen.tags.RelictBiomeTags;
 import us.drullk.relict.datagen.tags.RelictBlockTags;
 import us.drullk.relict.datagen.tags.RelictDamageTypeTags;
@@ -21,7 +21,6 @@ import us.drullk.relict.datagen.tags.RelictItemTags;
 import us.drullk.relict.datagen.tags.RelictStructureTags;
 import us.drullk.relict.datagen.tags.RelictTimelineTags;
 import us.drullk.relict.datagen.worldgen.*;
-import us.drullk.relict.datagen.wreck.SolarPanelDecaySampler;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 
 import java.util.Set;
@@ -53,9 +52,6 @@ public class RelictDatagen {
 
         event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
         event.addProvider(new RelictLootTables(output, builtinDatapackProvider));
-
-        event.addProvider(new AtmosphereCurveSampler(output, builtinDatapackProvider));
-        event.addProvider(new SolarPanelDecaySampler(output, builtinDatapackProvider));
     }
 
     public static RegistrySetBuilder datapackRegistryEntries() {
