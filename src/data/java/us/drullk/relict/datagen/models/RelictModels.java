@@ -37,6 +37,8 @@ public class RelictModels extends ModelProvider {
         WeatherglassModels.register(itemModels);
 
         WreckModels.register(blockModels, itemModels);
+
+        DustLayerModels.register(blockModels, itemModels);
     }
 
     // FIXME replace nether_portal placeholder for custom

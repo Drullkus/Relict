@@ -23,6 +23,9 @@
   "block.relict.solar_panel_sprinkled": "Sprinkled Solar Panel",
   "block.relict.solar_panel_dusted": "Dusted Solar Panel",
   "block.relict.solar_panel_sanded": "Sanded Solar Panel",
+  "block.relict.dust_layer": "Red Sand Layer",
+  "block.relict.dry_snow": "Dry Snow",
+  "block.relict.dry_snow_layer": "Dry Snow Layer",
 
   "biome.relict.wrinkle_plains": "Wrinkle Plains",
   "biome.relict.rusted_dunes": "Rusted Dunes",

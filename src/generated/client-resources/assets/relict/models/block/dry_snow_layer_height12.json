@@ -1,0 +1,6 @@
+{
+  "parent": "relict:block/template_layer_height12",
+  "textures": {
+    "all": "relict:block/dry_snow"
+  }
+}

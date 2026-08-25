@@ -1,0 +1,6 @@
+{
+  "parent": "relict:block/template_layer_height2",
+  "textures": {
+    "all": "minecraft:block/red_sand"
+  }
+}

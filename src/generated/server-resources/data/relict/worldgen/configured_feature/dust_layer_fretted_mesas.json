@@ -1,0 +1,12 @@
+{
+  "type": "relict:dust_layer",
+  "config": {
+    "coverage_chance": 0.18,
+    "coverage_salt": 11836130286103,
+    "max_layers": 3,
+    "min_layers": 1,
+    "patch_cell_size": 48,
+    "province": "relict:fretted_mesas",
+    "require_dune_crest": false
+  }
+}

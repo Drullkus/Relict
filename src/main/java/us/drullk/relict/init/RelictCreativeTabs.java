@@ -32,6 +32,10 @@ public class RelictCreativeTabs {
                 output.accept(RelictItems.SOLAR_PANEL_SPRINKLED.value());
                 output.accept(RelictItems.SOLAR_PANEL_DUSTED.value());
                 output.accept(RelictItems.SOLAR_PANEL_SANDED.value());
+
+                output.accept(RelictItems.DUST_LAYER.value());
+                output.accept(RelictItems.DRY_SNOW.value());
+                output.accept(RelictItems.DRY_SNOW_LAYER.value());
             }).build());
 
 }

@@ -9,6 +9,8 @@ import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import us.drullk.relict.Relict;
+import us.drullk.relict.block.DrySnowLayerBlock;
+import us.drullk.relict.block.DustLayerBlock;
 import us.drullk.relict.block.RelictPortalBlock;
 import us.drullk.relict.block.wreck.LabMastBlock;
 import us.drullk.relict.block.wreck.LabShaftBlock;
@@ -100,6 +102,32 @@ public class RelictBlocks {
             .sound(SoundType.METAL)
             .noOcclusion()
             .randomTicks()
+            .requiresCorrectToolForDrops());
+
+    private static final float LAYER_HARDNESS = 0.1F;
+    private static final float DRY_SNOW_BLOCK_HARDNESS = 0.2F;
+
+    public static final DeferredBlock<DustLayerBlock> DUST_LAYER = BLOCKS.registerBlock("dust_layer", DustLayerBlock::new, properties -> properties
+            .mapColor(MapColor.TERRACOTTA_ORANGE)
+            .strength(LAYER_HARDNESS)
+            .sound(SoundType.SAND)
+            .noOcclusion()
+            .pushReaction(PushReaction.DESTROY)
+            .randomTicks()
+            .requiresCorrectToolForDrops());
+
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> DRY_SNOW = BLOCKS.registerSimpleBlock("dry_snow", properties -> properties
+            .mapColor(MapColor.SNOW)
+            .strength(DRY_SNOW_BLOCK_HARDNESS)
+            .sound(SoundType.SNOW)
+            .requiresCorrectToolForDrops());
+
+    public static final DeferredBlock<DrySnowLayerBlock> DRY_SNOW_LAYER = BLOCKS.registerBlock("dry_snow_layer", DrySnowLayerBlock::new, properties -> properties
+            .mapColor(MapColor.SNOW)
+            .strength(LAYER_HARDNESS)
+            .sound(SoundType.SNOW)
+            .noOcclusion()
+            .pushReaction(PushReaction.DESTROY)
             .requiresCorrectToolForDrops());
 
 }

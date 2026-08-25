@@ -96,6 +96,8 @@ public class RelictConfiguredFeatureGenerator {
         sulfurCavesConfiguredFeatures(context, configuredFeatures, speleothemReplaceable);
         iceCavesConfiguredFeatures(context, configuredFeatures, speleothemReplaceable);
         igneousPockets(context);
+
+        DustLayerFeatureGenerator.bootstrapConfiguredFeatures(context);
     }
 
     /** Overworld-style andesite/granite/diorite pockets (report §6), shared across all four underground biomes. */

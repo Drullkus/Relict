@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "layers=1,trodden=false": {
+      "model": "relict:block/dust_layer_height2"
+    },
+    "layers=1,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height2"
+    },
+    "layers=2,trodden=false": {
+      "model": "relict:block/dust_layer_height4"
+    },
+    "layers=2,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height4"
+    },
+    "layers=3,trodden=false": {
+      "model": "relict:block/dust_layer_height6"
+    },
+    "layers=3,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height6"
+    },
+    "layers=4,trodden=false": {
+      "model": "relict:block/dust_layer_height8"
+    },
+    "layers=4,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height8"
+    },
+    "layers=5,trodden=false": {
+      "model": "relict:block/dust_layer_height10"
+    },
+    "layers=5,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height10"
+    },
+    "layers=6,trodden=false": {
+      "model": "relict:block/dust_layer_height12"
+    },
+    "layers=6,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height12"
+    },
+    "layers=7,trodden=false": {
+      "model": "relict:block/dust_layer_height14"
+    },
+    "layers=7,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height14"
+    },
+    "layers=8,trodden=false": {
+      "model": "relict:block/dust_layer_height16"
+    },
+    "layers=8,trodden=true": {
+      "model": "relict:block/dust_layer_trodden_height16"
+    }
+  }
+}

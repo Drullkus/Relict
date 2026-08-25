@@ -47,6 +47,11 @@ public class RelictConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> GRANITE_POCKET = create("granite_pocket");
     public static final ResourceKey<ConfiguredFeature<?, ?>> DIORITE_POCKET = create("diorite_pocket");
 
+    // dust layer baseline, one per placed province
+    public static final ResourceKey<ConfiguredFeature<?, ?>> DUST_LAYER_WRINKLE_PLAINS = create("dust_layer_wrinkle_plains");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> DUST_LAYER_RUSTED_DUNES = create("dust_layer_rusted_dunes");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> DUST_LAYER_FRETTED_MESAS = create("dust_layer_fretted_mesas");
+
     private static ResourceKey<ConfiguredFeature<?, ?>> create(String name) {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, Relict.id(name));
     }

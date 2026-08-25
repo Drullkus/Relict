@@ -1,0 +1,8 @@
+{
+  "feature": "relict:dust_layer_rusted_dunes",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -39,8 +39,12 @@ public final class RelictReports {
                 case "profile" -> event.addProvider(new TerrainFlightProfiler(output, registries));
                 case "solar_panel_decay" -> event.addProvider(new SolarPanelDecaySampler(output, registries));
                 case "atmosphere_curve" -> event.addProvider(new AtmosphereCurveSampler(output, registries));
+                case "dust_layer" -> {
+                    event.addProvider(new DustLayerCoverageSampler(output, registries));
+                    event.addProvider(new DustLayerWeatherSampler(output, registries));
+                }
                 default -> throw new IllegalArgumentException("Unknown relict.reports entry: " + name
-                        + " (expected one of: ridge, voronoi, performance, profile, solar_panel_decay, atmosphere_curve)");
+                        + " (expected one of: ridge, voronoi, performance, profile, solar_panel_decay, atmosphere_curve, dust_layer)");
             }
         }
     }

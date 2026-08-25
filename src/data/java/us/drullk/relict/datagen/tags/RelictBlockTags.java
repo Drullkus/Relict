@@ -34,6 +34,11 @@ public class RelictBlockTags extends BlockTagsProvider {
                 .add(RelictBlocks.SOLAR_PANEL_SPRINKLED.getKey())
                 .add(RelictBlocks.SOLAR_PANEL_DUSTED.getKey())
                 .add(RelictBlocks.SOLAR_PANEL_SANDED.getKey());
+
+        this.tag(BlockTags.MINEABLE_WITH_SHOVEL)
+                .add(RelictBlocks.DUST_LAYER.getKey())
+                .add(RelictBlocks.DRY_SNOW.getKey())
+                .add(RelictBlocks.DRY_SNOW_LAYER.getKey());
     }
 
 }

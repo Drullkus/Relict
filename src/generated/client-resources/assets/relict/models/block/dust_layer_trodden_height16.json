@@ -1,0 +1,6 @@
+{
+  "parent": "relict:block/template_layer_height16",
+  "textures": {
+    "all": "relict:block/trodden_red_sand"
+  }
+}

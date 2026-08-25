@@ -30,9 +30,15 @@ public class RelictBiomeGenerator {
         HolderGetter<PlacedFeature> placedFeatures = context.lookup(Registries.PLACED_FEATURE);
         HolderGetter<ConfiguredWorldCarver<?>> carvers = context.lookup(Registries.CONFIGURED_CARVER);
 
-        context.register(RelictBiomes.WRINKLE_PLAINS, surfaceBiome(caves(placedFeatures, carvers).build()));
-        context.register(RelictBiomes.RUSTED_DUNES, surfaceBiome(caves(placedFeatures, carvers).build()));
-        context.register(RelictBiomes.FRETTED_MESAS, surfaceBiome(caves(placedFeatures, carvers).build()));
+        context.register(RelictBiomes.WRINKLE_PLAINS, surfaceBiome(caves(placedFeatures, carvers)
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DUST_LAYER_WRINKLE_PLAINS))
+                .build()));
+        context.register(RelictBiomes.RUSTED_DUNES, surfaceBiome(caves(placedFeatures, carvers)
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DUST_LAYER_RUSTED_DUNES))
+                .build()));
+        context.register(RelictBiomes.FRETTED_MESAS, surfaceBiome(caves(placedFeatures, carvers)
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DUST_LAYER_FRETTED_MESAS))
+                .build()));
         context.register(RelictBiomes.SHATTERED_HIGHLANDS, surfaceBiome(caves(placedFeatures, carvers).build()));
 
         basaltCaves(context, placedFeatures, carvers);

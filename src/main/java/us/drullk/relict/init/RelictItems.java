@@ -60,6 +60,10 @@ public class RelictItems {
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_DUSTED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_DUSTED);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SANDED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SANDED);
 
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> DUST_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DUST_LAYER);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> DRY_SNOW = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> DRY_SNOW_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW_LAYER);
+
     private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
         return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));
     }

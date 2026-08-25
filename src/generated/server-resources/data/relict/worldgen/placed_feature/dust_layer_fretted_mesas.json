@@ -1,0 +1,8 @@
+{
+  "feature": "relict:dust_layer_fretted_mesas",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
