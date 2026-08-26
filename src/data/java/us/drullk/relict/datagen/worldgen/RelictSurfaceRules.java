@@ -11,6 +11,7 @@ import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import us.drullk.relict.Relict;
+import us.drullk.relict.init.RelictBlocks;
 import us.drullk.relict.init.worldgen.RelictBiomes;
 import us.drullk.relict.worldgen.DuneCrestCondition;
 
@@ -106,19 +107,27 @@ public class RelictSurfaceRules {
     }
 
     /**
-     * Dark {@code smooth_basalt} dune bodies with {@code red_sand} confined to the crests. Crest selection
-     * keys off the dune wave field's own local-maximum shape along its wind axis ({@link DuneCrestCondition})
-     * rather than slope — {@code steep()} cannot fire on a dune slip face
+     * {@code basalt_sand} dune bodies with {@code red_sand} confined to the crests, over {@code
+     * smooth_basalt} playing the sandstone role. Crest selection keys off the dune wave field's own
+     * local-maximum shape along its wind axis ({@link DuneCrestCondition}) rather than slope — {@code
+     * steep()} cannot fire on a dune slip face.
+     * <p>
+     * The floor/under-floor/{@code VERY_DEEP_UNDER_FLOOR} shape mirrors vanilla desert's own (
+     * {@code SurfaceRuleData.overworldLike}'s {@code biomesWithSandAndVeryDeepSandstone} branch): sand
+     * through the near-surface band, basalt (sandstone's stand-in) only once stone depth clears the
+     * deep gate — not {@code DEEP_UNDER_FLOOR}, which vanilla reserves for beach/warm-ocean's shallower
+     * sandstone. Runs after the density graph the golden samples, so this is not a re-baseline.
      */
     private static SurfaceRules.RuleSource rustedDunes() {
+        SurfaceRules.RuleSource basaltSand = state(RelictBlocks.BASALT_SAND.get());
         SurfaceRules.RuleSource crestOrBody = SurfaceRules.sequence(
                 SurfaceRules.ifTrue(DuneCrestCondition.INSTANCE, RED_SAND),
-                SMOOTH_BASALT);
+                basaltSand);
 
         return SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.ON_FLOOR, crestOrBody),
-                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SMOOTH_BASALT),
-                SurfaceRules.ifTrue(SurfaceRules.DEEP_UNDER_FLOOR, SMOOTH_BASALT));
+                SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, basaltSand),
+                SurfaceRules.ifTrue(SurfaceRules.VERY_DEEP_UNDER_FLOOR, SMOOTH_BASALT));
     }
 
     /**

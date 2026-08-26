@@ -81,6 +81,16 @@ sourceSets {
         compileClasspath += main.compileClasspath + main.output + data.output
         runtimeClasspath += main.runtimeClasspath + data.output
     }
+    // GameTests are their own module: this compile unit is never referenced by main, client, data, or
+    // reports, and only runGameTestServer below loads it (see the mods{} and runs{} wiring). Dev-only,
+    // same precedent as data/reports, but scoped to one run instead of a family of them -- the pattern a
+    // future dev-only module with a different run-membership matrix (e.g. a client-only capture companion)
+    // would repeat: its own sourceSet here, its own mods{} entry combining main + itself, and only the
+    // run(s) it belongs to pointed at that entry instead of the production one.
+    gametest {
+        compileClasspath += main.compileClasspath + main.output
+        runtimeClasspath += main.runtimeClasspath
+    }
 }
 
 neoForge {
@@ -91,6 +101,7 @@ neoForge {
 
     addModdingDependenciesTo sourceSets.data
     addModdingDependenciesTo sourceSets.reports
+    addModdingDependenciesTo sourceSets.gametest
 
     mods {
         "${mod_id}" {
@@ -113,11 +124,20 @@ neoForge {
             sourceSet(sourceSets.data)
             sourceSet(sourceSets.reports)
         }
+
+        // GameTests only ever load through this entry, and only runGameTestServer below points a run at
+        // it -- no other run's loadedMods references "${mod_id}-gametest", so no other run's classloader
+        // ever sees a gametest class or registers a gametest registry entry (see RelictGameTests).
+        "${mod_id}-gametest" {
+            sourceSet(sourceSets.main)
+            sourceSet(sourceSets.gametest)
+        }
     }
 
     def mainMod = mods."${mod_id}"
     def dataMod = mods."${mod_id}-data"
     def reportsMod = mods."${mod_id}-reports"
+    def gametestMod = mods."${mod_id}-gametest"
 
     // Specify the modid for data generation and where to look for existing resources; each run adds its own
     // --output below.
@@ -143,9 +163,14 @@ neoForge {
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
+        // GameTest code lives in its own source set (see sourceSets.gametest above) and loads only here:
+        // no other run config sets sourceSet/loadedMods to the gametest variants, so no other run ever
+        // compiles or loads a gametest class, and no gametest registry entry ever exists for those runs'
+        // registry sync to choke on.
         gameTestServer {
             type = "gameTestServer"
-            loadedMods = [mainMod]
+            sourceSet = sourceSets.gametest
+            loadedMods = [gametestMod]
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -268,6 +293,17 @@ tasks.register('runStructureTemplates', JavaExec) {
     description = 'Writes grayboxed structure NBT templates'
     classpath = sourceSets.data.runtimeClasspath
     mainClass = 'us.drullk.relict.datagen.tool.RelictStructureTemplates'
+    args file('src/main/resources').getAbsolutePath(), file('src/gametest/resources').getAbsolutePath()
+}
+
+// Deterministic texture derivation (red_sand's grain, smooth_basalt's colors). Same headless JavaExec
+// shape as runStructureTemplates: fixed inputs off the vanilla client jar already on this classpath,
+// byte-identical PNG output, re-runnable for producer re-tunes.
+tasks.register('runBasaltSandTexture', JavaExec) {
+    group = 'relict'
+    description = 'Derives the basalt_sand texture from vanilla red_sand + smooth_basalt'
+    classpath = sourceSets.data.runtimeClasspath
+    mainClass = 'us.drullk.relict.datagen.tool.BasaltSandTexture'
     args file('src/main/resources').getAbsolutePath()
 }
 

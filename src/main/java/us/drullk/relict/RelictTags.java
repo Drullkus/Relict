@@ -1,6 +1,7 @@
 package us.drullk.relict;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.Item;
@@ -32,5 +33,7 @@ public class RelictTags {
     public static final TagKey<Block> DRIPSTONE_REPLACEABLE = TagKey.create(Registries.BLOCK, Relict.id("dripstone_replaceable"));
 
     public static final TagKey<Block> BASE_STONE_MARS = TagKey.create(Registries.BLOCK, Relict.id("base_stone_mars"));
+
+    public static final TagKey<Block> SANDS_BASALT = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "sands/basalt"));
 
 }

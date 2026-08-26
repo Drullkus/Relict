@@ -5,6 +5,7 @@ import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.MultiVariant;
 import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.model.ItemModelUtils;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.renderer.block.dispatch.Variant;
@@ -39,6 +40,8 @@ public class RelictModels extends ModelProvider {
         WreckModels.register(blockModels, itemModels);
 
         DustLayerModels.register(blockModels, itemModels);
+
+        registerBasaltSand(blockModels, itemModels);
     }
 
     // FIXME replace nether_portal placeholder for custom
@@ -47,6 +50,14 @@ public class RelictModels extends ModelProvider {
                 TextureMapping.cube(new Material(Identifier.withDefaultNamespace("block/nether_portal"))), blockModels.modelOutput);
         blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(RelictBlocks.MARS_PORTAL.get(),
                 new MultiVariant(WeightedList.of(new Variant(portalModel)))));
+    }
+
+    private static void registerBasaltSand(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+        Identifier modelId = ModelTemplates.CUBE_ALL.create(RelictBlocks.BASALT_SAND.get(),
+                TextureMapping.cube(new Material(Relict.id("block/basalt_sand"))), blockModels.modelOutput);
+        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(RelictBlocks.BASALT_SAND.get(),
+                BlockModelGenerators.createRotatedVariants(new Variant(modelId))));
+        itemModels.itemModelOutput.accept(RelictItems.BASALT_SAND.get(), ItemModelUtils.plainModel(modelId));
     }
 
 }

@@ -1,5 +1,7 @@
 package us.drullk.relict.init;
 
+import net.minecraft.util.ColorRGBA;
+import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -129,5 +131,14 @@ public class RelictBlocks {
             .noOcclusion()
             .pushReaction(PushReaction.DESTROY)
             .requiresCorrectToolForDrops());
+
+    private static final ColorRGBA BASALT_SAND_DUST_COLOR = new ColorRGBA(0x3D3E47);
+    private static final float SAND_HARDNESS = 0.5F;
+
+    public static final DeferredBlock<ColoredFallingBlock> BASALT_SAND = BLOCKS.registerBlock("basalt_sand",
+            properties -> new ColoredFallingBlock(BASALT_SAND_DUST_COLOR, properties), properties -> properties
+                    .mapColor(MapColor.COLOR_BLACK)
+                    .strength(SAND_HARDNESS)
+                    .sound(SoundType.SAND));
 
 }

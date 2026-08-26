@@ -43,10 +43,11 @@ public class RelictDatagen {
         CompletableFuture<HolderLookup.Provider> builtinDatapackProvider = builtinDatapack.getRegistryProvider();
 
         event.addProvider(new RelictBiomeTags(output, builtinDatapackProvider));
-        event.addProvider(new RelictBlockTags(output, builtinDatapackProvider));
+        RelictBlockTags relictBlockTags = new RelictBlockTags(output, builtinDatapackProvider);
+        event.addProvider(relictBlockTags);
         event.addProvider(new RelictDamageTypeTags(output, builtinDatapackProvider));
         event.addProvider(new RelictDimensionTypeTags(output, builtinDatapackProvider));
-        event.addProvider(new RelictItemTags(output, builtinDatapackProvider));
+        event.addProvider(new RelictItemTags(output, builtinDatapackProvider, relictBlockTags.contentsGetter()));
         event.addProvider(new RelictStructureTags(output, builtinDatapackProvider));
         event.addProvider(new RelictTimelineTags(output, builtinDatapackProvider));
 

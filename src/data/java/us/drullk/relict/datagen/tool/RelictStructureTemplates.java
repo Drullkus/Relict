@@ -27,8 +27,8 @@ public final class RelictStructureTemplates {
     }
 
     static void main(String[] args) {
-        if (args.length < 1) {
-            System.err.println("Usage: RelictStructureTemplates <path to src/main/resources>");
+        if (args.length < 2) {
+            System.err.println("Usage: RelictStructureTemplates <path to src/main/resources> <path to src/gametest/resources>");
             System.exit(2);
         }
 
@@ -46,7 +46,24 @@ public final class RelictStructureTemplates {
         ruinACapA().write(structureDir.resolve("ruin_a/cap_a.nbt"));
         ruinACapB().write(structureDir.resolve("ruin_a/cap_b.nbt"));
 
-        System.out.println("Wrote 10 structure templates under " + structureDir);
+        System.out.println("Wrote 12 structure templates under " + structureDir);
+
+        // Test-only: written under src/gametest/resources, not src/main/resources, so it never ships in
+        // the mod's own datapack/jar -- only runGameTestServer's own gametest source set sees it.
+        Path gametestStructureDir = Path.of(args[1]).resolve("data/relict/structure");
+        gametestBlankVolume().write(gametestStructureDir.resolve("gametest/basalt_sand_fall.nbt"));
+
+        System.out.println("Wrote 1 gametest-only structure template under " + gametestStructureDir);
+    }
+
+    /**
+     * A bare 3x5x3 air volume with no content of its own: {@code minecraft:empty} (the sentinel vanilla
+     * uses for zero-footprint tests like {@code always_pass}) resolves to an actual 0x0x0 template, which
+     * is too small for a test that needs a real floor and a few blocks of fall clearance. This gives that
+     * clearance; the gametest itself places the floor and the falling block.
+     */
+    private static Piece gametestBlankVolume() {
+        return new Piece(3, 5, 3);
     }
 
     private static Piece portalRuinFrame() {

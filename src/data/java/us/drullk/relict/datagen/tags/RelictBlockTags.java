@@ -4,6 +4,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import us.drullk.relict.Relict;
 import us.drullk.relict.RelictTags;
@@ -38,7 +39,13 @@ public class RelictBlockTags extends BlockTagsProvider {
         this.tag(BlockTags.MINEABLE_WITH_SHOVEL)
                 .add(RelictBlocks.DUST_LAYER.getKey())
                 .add(RelictBlocks.DRY_SNOW.getKey())
-                .add(RelictBlocks.DRY_SNOW_LAYER.getKey());
+                .add(RelictBlocks.DRY_SNOW_LAYER.getKey())
+                .add(RelictBlocks.BASALT_SAND.getKey());
+
+
+        this.tag(RelictTags.SANDS_BASALT).add(RelictBlocks.BASALT_SAND.getKey());
+        this.tag(BlockTags.SAND).addTag(RelictTags.SANDS_BASALT);
+        this.tag(Tags.Blocks.SANDS).addTag(RelictTags.SANDS_BASALT);
     }
 
 }

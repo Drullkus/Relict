@@ -515,7 +515,7 @@
                         {
                           "type": "minecraft:block",
                           "result_state": {
-                            "Name": "minecraft:smooth_basalt"
+                            "Name": "relict:basalt_sand"
                           }
                         }
                       ]
@@ -533,7 +533,7 @@
                     "then_run": {
                       "type": "minecraft:block",
                       "result_state": {
-                        "Name": "minecraft:smooth_basalt"
+                        "Name": "relict:basalt_sand"
                       }
                     }
                   },
@@ -543,7 +543,7 @@
                       "type": "minecraft:stone_depth",
                       "add_surface_depth": true,
                       "offset": 0,
-                      "secondary_depth_range": 6,
+                      "secondary_depth_range": 30,
                       "surface_type": "floor"
                     },
                     "then_run": {

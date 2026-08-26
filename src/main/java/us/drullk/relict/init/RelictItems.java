@@ -64,6 +64,8 @@ public class RelictItems {
     public static final DeferredItem<net.minecraft.world.item.BlockItem> DRY_SNOW = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> DRY_SNOW_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW_LAYER);
 
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> BASALT_SAND = ITEMS.registerSimpleBlockItem(RelictBlocks.BASALT_SAND);
+
     private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
         return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));
     }
