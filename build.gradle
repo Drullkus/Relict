@@ -172,6 +172,15 @@ neoForge {
             programArguments.addAll '--output', clientDatagenOutput.getAbsolutePath()
         }
 
+        // Convenience: Runs both client and server datagens in parallel before running the client
+        datagenThenClient {
+            client()
+            loadedMods = [mainMod]
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            taskBefore(tasks.named('runServerData'))
+            taskBefore(tasks.named('runClientData'))
+        }
+
         // The terrain report samplers, split out of serverData: same kind of run, only the report
         // providers registered (see RelictReports), no tag/loot/advancement/registry-JSON providers.
         // Select which reports run with -Drelict.reports=ridge,voronoi,performance; omit it to run all.
