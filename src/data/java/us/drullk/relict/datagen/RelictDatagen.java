@@ -71,6 +71,7 @@ public class RelictDatagen {
                 .add(Registries.PLACED_FEATURE, RelictPlacedFeatureGenerator::bootstrapPlacedFeatures)
                 .add(RelictCustomRegistries.PROVINCE_REGISTRY, RelictProvinceGenerator::bootstrapProvinces)
                 .add(RelictCustomRegistries.VORONOI_SOURCE_REGISTRY, RelictProvinceGenerator::bootstrapVoronoiSources)
+                .add(Registries.PROCESSOR_LIST, RelictStructureProcessorGenerator::bootstrapProcessorLists)
                 .add(Registries.STRUCTURE, RelictStructureGenerator::bootstrapStructures)
                 .add(Registries.STRUCTURE_SET, RelictStructureGenerator::bootstrapStructureSet)
                 .add(Registries.TEMPLATE_POOL, RelictTemplatePoolGenerator::bootstrapTemplatePools)

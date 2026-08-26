@@ -7,6 +7,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -20,6 +21,7 @@ import us.drullk.relict.worldgen.MesaFieldFunction;
 import us.drullk.relict.worldgen.RelictChunkGenerator;
 import us.drullk.relict.worldgen.VoronoiBiomeSource;
 import us.drullk.relict.worldgen.VoronoiParameterFunction;
+import us.drullk.relict.worldgen.SinglePoolElementCustomDelta;
 
 public class RelictWorldgenTypes {
 
@@ -28,6 +30,7 @@ public class RelictWorldgenTypes {
     public static final DeferredRegister<MapCodec<? extends ChunkGenerator>> CHUNK_GENERATORS = DeferredRegister.create(BuiltInRegistries.CHUNK_GENERATOR, Relict.MODID);
     public static final DeferredRegister<MapCodec<? extends SurfaceRules.ConditionSource>> SURFACE_CONDITIONS = DeferredRegister.create(BuiltInRegistries.MATERIAL_CONDITION, Relict.MODID);
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(BuiltInRegistries.FEATURE, Relict.MODID);
+    public static final DeferredRegister<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT_TYPES = DeferredRegister.create(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, Relict.MODID);
 
     public static final DeferredHolder<Feature<?>, DustLayerFeature> DUST_LAYER_FEATURE;
 
@@ -40,6 +43,7 @@ public class RelictWorldgenTypes {
         DENSITY_FUNCTION_TYPES.register("crater_field", () -> CraterFieldFunction.MAP_CODEC);
         SURFACE_CONDITIONS.register("dune_crest", DuneCrestCondition.INSTANCE::codec);
         DUST_LAYER_FEATURE = FEATURES.register("dust_layer", () -> new DustLayerFeature(DustLayerFeatureConfiguration.CODEC));
+        STRUCTURE_POOL_ELEMENT_TYPES.register("wreck_single_pool_element", () -> SinglePoolElementCustomDelta.TYPE);
     }
 
     public static void register(IEventBus modEventBus) {
@@ -48,6 +52,7 @@ public class RelictWorldgenTypes {
         CHUNK_GENERATORS.register(modEventBus);
         SURFACE_CONDITIONS.register(modEventBus);
         FEATURES.register(modEventBus);
+        STRUCTURE_POOL_ELEMENT_TYPES.register(modEventBus);
     }
 
 }

@@ -1,0 +1,85 @@
+{
+  "elements": [
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 3,
+        "location": "relict:unmanned_wreck/bib_rover",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 2,
+        "location": "relict:unmanned_wreck/buggy_rover",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 1,
+        "location": "relict:unmanned_wreck/disc_lander",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 1,
+        "location": "relict:unmanned_wreck/egg_lander_3",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 1,
+        "location": "relict:unmanned_wreck/eight_rover",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 2,
+        "location": "relict:unmanned_wreck/overturned_rover",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 2,
+        "location": "relict:unmanned_wreck/rtg_rover",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    },
+    {
+      "element": {
+        "element_type": "relict:wreck_single_pool_element",
+        "ground_level_delta": 2,
+        "location": "relict:unmanned_wreck/wide_rover",
+        "processors": "relict:unmanned_wreck/solar_panel_decay",
+        "projection": "rigid"
+      },
+      "weight": 1
+    }
+  ],
+  "fallback": "minecraft:empty"
+}

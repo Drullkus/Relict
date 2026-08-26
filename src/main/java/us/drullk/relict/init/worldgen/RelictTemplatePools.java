@@ -9,7 +9,7 @@ public class RelictTemplatePools {
 
     public static final ResourceKey<StructureTemplatePool> PORTAL_RUIN_START = key("mars_portal_ruin/start");
 
-    public static final ResourceKey<StructureTemplatePool> UNMANNED_WRECK_START = key("human_wreck/start");
+    public static final ResourceKey<StructureTemplatePool> UNMANNED_WRECK_START = key("unmanned_wreck/start");
 
     public static final ResourceKey<StructureTemplatePool> RUIN_A_START = key("ruin_a/start");
     public static final ResourceKey<StructureTemplatePool> RUIN_A_MESSAGE_ROOM = key("ruin_a/message_room");

@@ -115,7 +115,7 @@ public final class TerrainPerformanceSampler implements DataProvider {
     private static final int COLUMN_SAMPLES = 64;
     private static final int COLUMN_WARMUP = 8;
 
-    /** The human_wreck placement: {@code random_spread}, 20-chunk spacing, and the vanilla locate radius. */
+    /** The unmanned_wreck placement: {@code random_spread}, 20-chunk spacing, and the vanilla locate radius. */
     private static final int LOCATE_SPACING_CHUNKS = 20;
     private static final int LOCATE_MEASURED_RINGS = 10;
     private static final int LOCATE_FULL_RINGS = 100;

@@ -222,6 +222,18 @@ neoForge {
             systemProperty 'relict.locateProbe', 'true'
         }
 
+        // A dedicated server that generates real Unmanned Wreck instances and checks the ground law
+        // (terrain flush under the jigsaw anchor, no floating/buried solar panels, chest survives with
+        // contents) against the actual placed blocks. The harness is in the reports source set (see
+        // WreckGroundLawProbe); same shape as locateProbe above.
+        wreckGroundLawProbe {
+            server()
+            sourceSet = sourceSets.reports
+            loadedMods = [reportsMod]
+            programArgument '--nogui'
+            systemProperty 'relict.wreckGroundLawProbe', 'true'
+        }
+
         // applies to all the run configs above
         configureEach {
             // Recommended logging data for a userdev environment

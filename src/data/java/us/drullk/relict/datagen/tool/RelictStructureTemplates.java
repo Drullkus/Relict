@@ -36,9 +36,6 @@ public final class RelictStructureTemplates {
 
         portalRuinFrame().write(structureDir.resolve("mars_portal_ruin/frame.nbt"));
 
-        unmannedWreckLander().write(structureDir.resolve("unmanned_wreck/lander.nbt"));
-        unmannedWreckRover().write(structureDir.resolve("unmanned_wreck/rover.nbt"));
-
         ruinAStart().write(structureDir.resolve("ruin_a/start.nbt"));
         ruinAMessageRoom().write(structureDir.resolve("ruin_a/message_room.nbt"));
         ruinACorridorStraight().write(structureDir.resolve("ruin_a/corridor_straight.nbt"));
@@ -49,7 +46,7 @@ public final class RelictStructureTemplates {
         ruinACapA().write(structureDir.resolve("ruin_a/cap_a.nbt"));
         ruinACapB().write(structureDir.resolve("ruin_a/cap_b.nbt"));
 
-        System.out.println("Wrote 12 structure templates under " + structureDir);
+        System.out.println("Wrote 10 structure templates under " + structureDir);
     }
 
     private static Piece portalRuinFrame() {
@@ -71,28 +68,6 @@ public final class RelictStructureTemplates {
         piece.set(1, 2, 5, BASALT);
         piece.chest(3, 1, 5, "north", "relict:chests/portal_ruin");
 
-        return piece;
-    }
-
-    private static Piece unmannedWreckLander() {
-        Piece piece = shell(7, 4, 9, "minecraft:gray_concrete");
-        piece.fillAir(1, 1, 0, 5, 2, 0); // crumpled-open nose
-        piece.set(1, 1, 0, "minecraft:iron_bars");
-        piece.set(5, 2, 0, "minecraft:iron_bars");
-        piece.set(0, 2, 3, "minecraft:glass_pane");
-        piece.set(6, 2, 5, "minecraft:glass_pane");
-        piece.chest(3, 1, 4, "north", "relict:chests/unmanned_wreck");
-        return piece;
-    }
-
-    private static Piece unmannedWreckRover() {
-        Piece piece = shell(5, 4, 7, "minecraft:gray_concrete");
-        piece.fillAir(1, 1, 0, 3, 2, 0); // crumpled-open front
-        piece.set(0, 0, 1, "minecraft:iron_block");
-        piece.set(0, 0, 5, "minecraft:iron_block");
-        piece.set(4, 0, 1, "minecraft:iron_block");
-        piece.set(4, 0, 5, "minecraft:iron_block");
-        piece.chest(2, 1, 3, "north", "relict:chests/unmanned_wreck");
         return piece;
     }
 
