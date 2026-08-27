@@ -44,6 +44,9 @@ public class RelictItemTags extends BlockTagCopyingItemTagProvider {
         this.copy(BlockTags.SAND, ItemTags.SAND);
         this.copy(Tags.Blocks.SANDS, Tags.Items.SANDS);
 
+        // Not a sword or any other melee weapon, so deliberately left out of the primary-items tag
+        // (ItemTags.SWORD_ENCHANTABLE) that would offer Fire Aspect at the enchanting table -- anvil + book only.
+        this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).add(RelictItems.BURNING_GLASS.getKey());
     }
 
 }

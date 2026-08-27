@@ -12,6 +12,8 @@
   "item.relict.weatherglass": "Patient Weatherglass",
   "item.relict.rubbing": "Keypad Rubbing",
   "item.relict.rubbing.tooltip": "A map for a code",
+  "item.relict.burning_glass": "Burning Glass",
+  "item.relict.burning_glass.tooltip": "Smelts blocks in place, held under open sky in daylight",
 
   "block.relict.mars_portal": "Mars Portal",
   "block.relict.cipher_chest": "Cipher Chest",

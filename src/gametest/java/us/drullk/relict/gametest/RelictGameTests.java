@@ -40,6 +40,7 @@ public final class RelictGameTests {
         CipherChestGameTests.register(event, environment);
         RockGameTests.register(event, environment);
         CaveContentGameTests.register(event, environment);
+        BurningGlassGameTests.register(event, environment);
     }
 
 }

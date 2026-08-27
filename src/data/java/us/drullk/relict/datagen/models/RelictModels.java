@@ -36,6 +36,7 @@ public class RelictModels extends ModelProvider {
 
         ServiceArmorModels.register(itemModels);
         itemModels.generateFlatItem(RelictItems.SEISMIC_LOCATOR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(RelictItems.BURNING_GLASS.get(), ModelTemplates.FLAT_ITEM);
         WeatherglassModels.register(itemModels);
 
         WreckModels.register(blockModels, itemModels);

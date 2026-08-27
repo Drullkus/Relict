@@ -42,7 +42,7 @@ public class RelictLootTables extends LootTableProvider {
     private static void generateChestLoot(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> generator) {
         generator.accept(PORTAL_RUIN, kitLoot());
         generator.accept(RUIN_A_KNOWLEDGE, knowledgeLoot());
-        generator.accept(RUIN_A_MATERIAL, kitLoot());
+        generator.accept(RUIN_A_MATERIAL, materialLoot());
         generator.accept(UNMANNED_WRECK, locatorLoot());
     }
 
@@ -80,6 +80,12 @@ public class RelictLootTables extends LootTableProvider {
                 .withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(LootItem.lootTableItem(RelictItems.RUBBING.get())));
+    }
+
+    private static LootTable.Builder materialLoot() {
+        return kitLoot().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .add(LootItem.lootTableItem(RelictItems.BURNING_GLASS.get())));
     }
 
     private static LootTable.Builder kitLoot() {

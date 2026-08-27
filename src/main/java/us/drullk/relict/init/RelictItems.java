@@ -19,6 +19,7 @@ import net.minecraft.world.level.saveddata.maps.MapId;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import us.drullk.relict.Relict;
+import us.drullk.relict.item.BurningGlassItem;
 import us.drullk.relict.item.RubbingItem;
 import us.drullk.relict.item.SeismicLocatorItem;
 import us.drullk.relict.item.StoredCharges;
@@ -54,6 +55,8 @@ public class RelictItems {
 
     public static final DeferredItem<Item> SEISMIC_LOCATOR = ITEMS.registerItem("seismic_locator", SeismicLocatorItem::new, properties -> properties.stacksTo(1));
     public static final DeferredItem<Item> WEATHERGLASS = ITEMS.registerItem("weatherglass", WeatherglassItem::new, properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<Item> BURNING_GLASS = ITEMS.registerItem("burning_glass", BurningGlassItem::new, properties -> properties.stacksTo(1));
 
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_BLOCK = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_BLOCK);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_SHAFT = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SHAFT);
