@@ -1,6 +1,7 @@
 package us.drullk.relict.init;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -9,17 +10,22 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import us.drullk.relict.Relict;
+import us.drullk.relict.item.RubbingItem;
 import us.drullk.relict.item.SeismicLocatorItem;
 import us.drullk.relict.item.StoredCharges;
 import us.drullk.relict.item.VizardItem;
 import us.drullk.relict.item.WeatherglassItem;
 
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class RelictItems {
@@ -59,6 +65,13 @@ public class RelictItems {
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SPRINKLED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SPRINKLED);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_DUSTED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_DUSTED);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SANDED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SANDED);
+    public static final DeferredItem<net.minecraft.world.item.BlockItem> CIPHER_CHEST = ITEMS.registerSimpleBlockItem(RelictBlocks.CIPHER_CHEST);
+
+    public static final DeferredItem<RubbingItem> RUBBING = ITEMS.registerItem("rubbing", RubbingItem::new, properties -> properties
+            .stacksTo(1)
+            .component(DataComponents.MAP_ID, new MapId(0))
+            .component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.MAP_ID, true))
+            .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.relict.rubbing.tooltip")))));
 
     public static final DeferredItem<net.minecraft.world.item.BlockItem> DUST_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DUST_LAYER);
     public static final DeferredItem<net.minecraft.world.item.BlockItem> DRY_SNOW = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW);

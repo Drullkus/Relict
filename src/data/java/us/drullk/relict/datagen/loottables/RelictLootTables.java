@@ -54,6 +54,8 @@ public class RelictLootTables extends LootTableProvider {
         generator.accept(blockLootKey(RelictBlocks.DRY_SNOW.get()), DustLayerLootTables.drySnow());
         generator.accept(blockLootKey(RelictBlocks.DRY_SNOW_LAYER.get()), DustLayerLootTables.drySnowLayer());
         generator.accept(blockLootKey(RelictBlocks.BASALT_SAND.get()), selfDrop(RelictBlocks.BASALT_SAND.get()));
+
+        generator.accept(blockLootKey(RelictBlocks.CIPHER_CHEST.get()), selfDrop(RelictBlocks.CIPHER_CHEST.get()));
     }
 
     private static ResourceKey<LootTable> blockLootKey(Block block) {
@@ -73,8 +75,11 @@ public class RelictLootTables extends LootTableProvider {
 
     private static LootTable.Builder knowledgeLoot() {
         return kitLoot().withPool(LootPool.lootPool()
-                .setRolls(ConstantValue.exactly(1.0F))
-                .add(LootItem.lootTableItem(RelictItems.WEATHERGLASS.get())));
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(RelictItems.WEATHERGLASS.get())))
+                .withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(RelictItems.RUBBING.get())));
     }
 
     private static LootTable.Builder kitLoot() {

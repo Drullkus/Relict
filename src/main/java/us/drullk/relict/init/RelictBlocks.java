@@ -14,6 +14,7 @@ import us.drullk.relict.Relict;
 import us.drullk.relict.block.DrySnowLayerBlock;
 import us.drullk.relict.block.DustLayerBlock;
 import us.drullk.relict.block.RelictPortalBlock;
+import us.drullk.relict.block.cipherchest.CipherChestBlock;
 import us.drullk.relict.block.wreck.LabMastBlock;
 import us.drullk.relict.block.wreck.LabShaftBlock;
 import us.drullk.relict.block.wreck.SolarPanelBlock;
@@ -140,5 +141,15 @@ public class RelictBlocks {
                     .mapColor(MapColor.COLOR_BLACK)
                     .strength(SAND_HARDNESS)
                     .sound(SoundType.SAND));
+
+    private static final float CIPHER_CHEST_HARDNESS = 3.0F;
+    private static final float CIPHER_CHEST_RESISTANCE = 6.0F;
+
+    public static final DeferredBlock<CipherChestBlock> CIPHER_CHEST = BLOCKS.registerBlock("cipher_chest", CipherChestBlock::new, properties -> properties
+            .mapColor(MapColor.STONE)
+            .strength(CIPHER_CHEST_HARDNESS, CIPHER_CHEST_RESISTANCE)
+            .sound(SoundType.STONE)
+            .noOcclusion()
+            .requiresCorrectToolForDrops());
 
 }

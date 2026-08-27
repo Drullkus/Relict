@@ -1,0 +1,376 @@
+package us.drullk.relict.gametest.cipherchest;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.gametest.framework.TestData;
+import net.minecraft.gametest.framework.TestEnvironmentDefinition;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.event.RegisterGameTestsEvent;
+import us.drullk.relict.Relict;
+import us.drullk.relict.block.cipherchest.CipherChestBlock;
+import us.drullk.relict.block.cipherchest.CipherChestBlockEntity;
+import us.drullk.relict.block.cipherchest.CipherChestFaceLayout;
+import us.drullk.relict.block.cipherchest.CipherChestSquare;
+import us.drullk.relict.gametest.RelictFunctionGameTestInstance;
+import us.drullk.relict.gametest.RelictGameTests;
+import us.drullk.relict.init.RelictBlocks;
+
+/**
+ * The Cipher Chest's own GameTest pack -- its own class, one line into {@link RelictGameTests}, per the
+ * Model Generators precedent.
+ * <p>
+ * Every test drives the block through {@link GameTestHelper#useBlock}, the same entry point a real
+ * right-click uses (item-on-block, then {@code useWithoutItem}, exactly like
+ * {@code CipherChestBlock#useWithoutItem}) -- not by calling block-entity methods directly -- so a passing
+ * "menu opens" test is the game itself proving defect #2's fix holds, not a restatement of the code under
+ * test. Click positions are computed from {@link CipherChestFaceLayout}'s own hover-shape functions (the
+ * same functions the block's hit-test and the hover-outline renderer call), so a test aims exactly where
+ * the game itself claims the dial/latch is -- it can't silently drift from the real geometry the way a
+ * hand-typed coordinate could.
+ * <p>
+ * Setup calls {@link CipherChestBlockEntity#randomize} directly with a fixed seed to get a reproducible
+ * puzzle instead of a real (non-deterministic) placement -- that's test scaffolding, not the thing under
+ * test, and {@code randomize} is the same method {@code CipherChestBlock#setPlacedBy} calls.
+ */
+public final class CipherChestGameTests {
+
+    private static final long SEED = 20260825L;
+    private static final long LOOT_SEED = 20260826L;
+    private static final int MAX_TICKS = 200;
+    private static final BlockPos POS = new BlockPos(2, 1, 2);
+    private static final Direction FACING = Direction.NORTH;
+
+    private CipherChestGameTests() {
+    }
+
+    public static void register(RegisterGameTestsEvent event, Holder<TestEnvironmentDefinition<?>> environment) {
+        TestData<Holder<TestEnvironmentDefinition<?>>> data = new TestData<>(environment, RelictGameTests.PLATFORM, MAX_TICKS, 0, true);
+
+        event.registerTest(id("menu_opens_on_correct_code"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::menuOpensOnCorrectCode,
+                Component.literal("Cipher Chest: entering the correct code opens the chest menu"), data));
+        event.registerTest(id("dial_cycling_steps_and_wraps"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::dialCyclingStepsAndWraps,
+                Component.literal("Cipher Chest: a click cycles a dial +1, a sneak-click +5, both wrapping"), data));
+        event.registerTest(id("wrong_code_scrambles_and_locks_out"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::wrongCodeScramblesAndLocksOut,
+                Component.literal("Cipher Chest: a wrong code scrambles the dials and starts the lockout"), data));
+        event.registerTest(id("correct_code_persists_after_reload"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::correctCodePersistsAfterReload,
+                Component.literal("Cipher Chest: the solved state survives a save/reload round trip"), data));
+        event.registerTest(id("side_filter_ignores_other_faces"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::sideFilterIgnoresOtherFaces,
+                Component.literal("Cipher Chest: a click on a non-interactive face never selects a dial or the latch"), data));
+        event.registerTest(id("breakability_locked_structure_placed_is_unbreakable"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::breakabilityLockedStructurePlacedIsUnbreakable,
+                Component.literal("Cipher Chest: locked and structure-placed resists all destroy progress"), data));
+        event.registerTest(id("breakability_player_placed_is_breakable"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::breakabilityPlayerPlacedIsBreakable,
+                Component.literal("Cipher Chest: a player-placed chest is breakable even while locked"), data));
+        event.registerTest(id("breakability_unlocked_is_breakable"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::breakabilityUnlockedIsBreakable,
+                Component.literal("Cipher Chest: an unlocked chest is breakable forever"), data));
+        event.registerTest(id("breakability_flags_survive_reload"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::breakabilityFlagsSurviveReload,
+                Component.literal("Cipher Chest: the player-placed flag survives a save/reload round trip"), data));
+        event.registerTest(id("loot_table_unpacks_on_unlock_and_open"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::lootTableUnpacksOnUnlockAndOpen,
+                Component.literal("Cipher Chest: a LootTable key rolls into real items on first open, then clears"), data));
+        event.registerTest(id("loot_table_reachable_locked_via_container_api"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::lootTableReachableLockedViaContainerApi,
+                Component.literal("Cipher Chest: a locked chest's Container methods (the hopper path) still unpack loot"), data));
+    }
+
+    private static Identifier id(String path) {
+        return Relict.id("cipher_chest/" + path);
+    }
+
+    // --------------------------------------------------------------------------------------------- tests
+
+    private static void menuOpensOnCorrectCode(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        ServerPlayer player = menuCapablePlayer(helper);
+
+        solve(helper, chest, player);
+
+        helper.assertTrue(chest.isSolved(), "the chest should be solved after entering the canon code");
+        helper.assertTrue(player.containerMenu instanceof ChestMenu,
+                "the correct code should open the chest menu through a real useBlock click (defect #2)");
+        helper.succeed();
+    }
+
+    private static void dialCyclingStepsAndWraps(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+        int cell = firstBlankCell(chest);
+        int start = chest.displayValueAt(cell);
+        BlockHitResult dialHit = dialHit(helper, cell);
+
+        helper.useBlock(POS, player, dialHit);
+        int afterClick = chest.displayValueAt(cell);
+        helper.assertTrue(afterClick == CipherChestSquare.wrapValue(start, 1), "a plain click should advance the dial by +1, wrapping");
+
+        player.setShiftKeyDown(true);
+        helper.useBlock(POS, player, dialHit);
+        int afterSneakClick = chest.displayValueAt(cell);
+        helper.assertTrue(afterSneakClick == CipherChestSquare.wrapValue(afterClick, 5), "a sneak-click should advance the dial by +5, wrapping");
+
+        helper.succeed();
+    }
+
+    private static void wrongCodeScramblesAndLocksOut(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+        int cell = firstBlankCell(chest);
+        if (chest.displayValueAt(cell) == CipherChestSquare.valueAt(cell)) {
+            // Guarantee at least one wrong dial regardless of what the fixed seed happened to start it at.
+            helper.useBlock(POS, player, dialHit(helper, cell));
+        }
+        helper.useBlock(POS, player, latchHit(helper));
+
+        long gameTime = helper.getLevel().getGameTime();
+        helper.assertTrue(!chest.isSolved(), "a wrong code must not solve the chest");
+        helper.assertTrue(chest.isLockedOut(gameTime), "a wrong code must start the lockout the blink rides on");
+        helper.succeed();
+    }
+
+    private static void correctCodePersistsAfterReload(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        ServerPlayer player = menuCapablePlayer(helper);
+        solve(helper, chest, player);
+
+        CipherChestBlockEntity reloaded = reload(helper, chest);
+        helper.assertTrue(reloaded.isSolved(), "the solved state must survive a save/reload round trip");
+        helper.succeed();
+    }
+
+    private static void sideFilterIgnoresOtherFaces(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+        int cell = firstBlankCell(chest);
+        int before = chest.displayValueAt(cell);
+        boolean lockedBefore = chest.isLockedOut(helper.getLevel().getGameTime());
+
+        // The back face (opposite the latch): neither isLatchHit (wrong face) nor cellIndexFromHit (wrong
+        // face, not UP) can accept a hit here, so a click must be a complete no-op. Catches mirror-click problems
+        helper.useBlock(POS, player, hitAt(helper, FACING.getOpposite(), 0.5, 0.5, 0.5));
+
+        helper.assertTrue(chest.displayValueAt(cell) == before, "a click on a non-interactive face must not move a dial");
+        helper.assertTrue(chest.isLockedOut(helper.getLevel().getGameTime()) == lockedBefore,
+                "a click on a non-interactive face must not trigger the latch");
+        helper.assertTrue(!chest.isSolved(), "a click on a non-interactive face must not solve the chest");
+        helper.succeed();
+    }
+
+    private static void breakabilityLockedStructurePlacedIsUnbreakable(GameTestHelper helper) {
+        place(helper, false); // fresh block entity, never randomize()'d through setPlacedBy -> playerPlaced stays false
+        Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+        float progress = destroyProgress(helper, player);
+        helper.assertTrue(progress <= 0.0F, "a locked, structure-placed chest must be unbreakable (zero destroy progress)");
+        helper.succeed();
+    }
+
+    private static void breakabilityPlayerPlacedIsBreakable(GameTestHelper helper) {
+        place(helper, true);
+        Player player = helper.makeMockServerPlayer(GameType.SURVIVAL);
+
+        float progress = destroyProgress(helper, player);
+        helper.assertTrue(progress > 0.0F, "a player-placed chest must be breakable even while locked");
+        helper.succeed();
+    }
+
+    private static void breakabilityUnlockedIsBreakable(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        ServerPlayer player = menuCapablePlayer(helper);
+        solve(helper, chest, player);
+
+        float progress = destroyProgress(helper, player);
+        helper.assertTrue(progress > 0.0F, "an unlocked chest must be breakable forever, structure-placed or not");
+        helper.succeed();
+    }
+
+    private static void breakabilityFlagsSurviveReload(GameTestHelper helper) {
+        place(helper, true);
+        CipherChestBlockEntity chest = chestAt(helper);
+
+        CipherChestBlockEntity reloaded = reload(helper, chest);
+        helper.assertTrue(reloaded.isPlayerPlaced(), "the player-placed flag must survive a save/reload round trip");
+        helper.assertTrue(reloaded.isBreakable(), "a reloaded player-placed chest must still read as breakable");
+        helper.succeed();
+    }
+
+    private static void lootTableUnpacksOnUnlockAndOpen(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        chest.setLootTable(BuiltInLootTables.SIMPLE_DUNGEON, LOOT_SEED);
+        ServerPlayer player = menuCapablePlayer(helper);
+
+        helper.assertTrue(chest.getLootTable() != null, "the loot table key should still be set before the chest is ever opened");
+
+        solve(helper, chest, player);
+
+        helper.assertTrue(chest.isSolved(), "the chest should be solved after entering the canon code");
+        helper.assertTrue(player.containerMenu instanceof ChestMenu, "the correct code should open the chest menu");
+        helper.assertTrue(chest.getLootTable() == null,
+                "opening the menu must unpack the loot table and clear the key (RandomizableContainer semantics)");
+        helper.assertTrue(anySlotFilled(chest), "the unpacked loot table should have placed at least one item in the chest");
+        helper.succeed();
+    }
+
+    /**
+     * {@code CipherChestBlockEntity} has no lock gate on the plain {@link net.minecraft.world.Container}
+     * methods -- only {@code useWithoutItem} (the right-click puzzle) checks {@code isSolved()}. A hopper
+     * reaches a container through {@code Container#getItem}/{@code removeItem}, not through a block
+     * right-click, so it can pull from -- and unpack the loot table of -- a chest that was never solved.
+     * This test records that finding with a direct {@code getItem} call (what a hopper's extraction
+     * ultimately bottoms out in) rather than gating it -- whether automation should be able to reach
+     * a locked chest's contents at all is a producer call this test only documents, not makes.
+     */
+    private static void lootTableReachableLockedViaContainerApi(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        chest.setLootTable(BuiltInLootTables.SIMPLE_DUNGEON, LOOT_SEED);
+
+        helper.assertTrue(!chest.isSolved(), "sanity: the chest must still be locked for this finding to mean anything");
+
+        ItemStack ignored = chest.getItem(0);
+
+        helper.assertTrue(chest.getLootTable() == null,
+                "a locked chest's loot table unpacks on any Container access -- the hopper path is not gated by the puzzle");
+        helper.assertTrue(anySlotFilled(chest), "the unpacked loot table should have placed at least one item, even while locked");
+        helper.assertTrue(!chest.isSolved(), "unpacking loot through the Container path must not solve the puzzle");
+        helper.succeed();
+    }
+
+    // ------------------------------------------------------------------------------------------- helpers
+
+    private static void place(GameTestHelper helper, boolean playerPlaced) {
+        helper.setBlock(POS, RelictBlocks.CIPHER_CHEST.get().defaultBlockState().setValue(CipherChestBlock.FACING, FACING));
+        chestAt(helper).randomize(RandomSource.create(SEED), playerPlaced);
+    }
+
+    /**
+     * {@link GameTestHelper#makeMockServerPlayer} leaves {@code ServerPlayer.connection} null, which is
+     * fine for most tests but crashes {@code ServerPlayer#openMenu} (it sends a packet over that
+     * connection) -- exactly the call this order needs exercised to prove defect #2 dead. Only
+     * {@code makeMockServerPlayerInLevel} wires a real (loopback) connection via
+     * {@code PlayerList#placeNewPlayer}, so any test that needs the chest menu to actually open uses it
+     * instead. It is {@code @Deprecated(forRemoval = true)} in the decompiled 26.2.0.64 sources with no
+     * non-deprecated replacement that provides a working connection; flagged here as a fragile dependency
+     * for a future MC version to watch.
+     */
+    private static ServerPlayer menuCapablePlayer(GameTestHelper helper) {
+        return helper.makeMockServerPlayerInLevel();
+    }
+
+    private static CipherChestBlockEntity chestAt(GameTestHelper helper) {
+        if (helper.getBlockEntity(POS, CipherChestBlockEntity.class) instanceof CipherChestBlockEntity chest) {
+            return chest;
+        }
+        throw new IllegalStateException("No CipherChestBlockEntity at " + POS);
+    }
+
+    private static int firstBlankCell(CipherChestBlockEntity chest) {
+        for (int cell = 0; cell < CipherChestSquare.CELL_COUNT; cell++) {
+            if (chest.isBlank(cell)) {
+                return cell;
+            }
+        }
+        throw new IllegalStateException("No blank cell -- CipherChestBlockEntity.DEFAULT_BLANK_COUNT should be >= 1");
+    }
+
+    /** Dials every blank cell to its canon value via real clicks, then clicks the latch. */
+    private static void solve(GameTestHelper helper, CipherChestBlockEntity chest, Player player) {
+        for (int cell = 0; cell < CipherChestSquare.CELL_COUNT; cell++) {
+            if (!chest.isBlank(cell)) {
+                continue;
+            }
+            int target = CipherChestSquare.valueAt(cell);
+            BlockHitResult dialHit = dialHit(helper, cell);
+            int guard = 0;
+            while (chest.displayValueAt(cell) != target && guard++ <= CipherChestSquare.MAX_VALUE) {
+                helper.useBlock(POS, player, dialHit);
+            }
+            helper.assertTrue(chest.displayValueAt(cell) == target, "dial at cell " + cell + " should reach its canon value");
+        }
+        helper.useBlock(POS, player, latchHit(helper));
+    }
+
+    private static boolean anySlotFilled(CipherChestBlockEntity chest) {
+        for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+            if (!chest.getItem(slot).isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static float destroyProgress(GameTestHelper helper, Player player) {
+        BlockState state = helper.getBlockState(POS);
+        return state.getDestroyProgress(player, helper.getLevel(), helper.absolutePos(POS));
+    }
+
+    private static CipherChestBlockEntity reload(GameTestHelper helper, CipherChestBlockEntity chest) {
+        Provider registries = helper.getLevel().registryAccess();
+        // loadStatic needs the "id" field to know which BlockEntityType to construct -- saveWithoutMetadata
+        // (what CipherChestBlockEntity#getUpdateTag uses for client sync) deliberately omits it, since the
+        // client already knows the type from context. saveWithFullMetadata writes it (plus x/y/z, unused
+        // here) for exactly this kind of standalone round trip.
+        CompoundTag tag = chest.saveWithFullMetadata(registries);
+        BlockPos absolutePos = helper.absolutePos(POS);
+        BlockState state = helper.getLevel().getBlockState(absolutePos);
+        BlockEntity reloaded = BlockEntity.loadStatic(absolutePos, state, tag, registries);
+        if (reloaded instanceof CipherChestBlockEntity reloadedChest) {
+            return reloadedChest;
+        }
+        throw helper.assertionException("reload round-trip did not produce a CipherChestBlockEntity");
+    }
+
+    private static BlockHitResult dialHit(GameTestHelper helper, int cellIndex) {
+        AABB box = CipherChestFaceLayout.dialHoverShape(FACING, cellIndex).bounds();
+        return hitAt(helper, Direction.UP, center(box.minX, box.maxX), center(box.minY, box.maxY), center(box.minZ, box.maxZ));
+    }
+
+    private static BlockHitResult latchHit(GameTestHelper helper) {
+        AABB box = CipherChestFaceLayout.latchHoverShape(FACING).bounds();
+        return hitAt(helper, FACING, center(box.minX, box.maxX), center(box.minY, box.maxY), center(box.minZ, box.maxZ));
+    }
+
+    private static BlockHitResult hitAt(GameTestHelper helper, Direction face, double localX, double localY, double localZ) {
+        BlockPos absolutePos = helper.absolutePos(POS);
+        Vec3 location = Vec3.atLowerCornerOf(absolutePos).add(localX, localY, localZ);
+        return new BlockHitResult(location, face, absolutePos, false);
+    }
+
+    private static double center(double min, double max) {
+        return (min + max) / 2.0;
+    }
+
+}

@@ -37,6 +37,9 @@ public class RelictCreativeTabs {
                 output.accept(RelictItems.DRY_SNOW.value());
                 output.accept(RelictItems.DRY_SNOW_LAYER.value());
                 output.accept(RelictItems.BASALT_SAND.value());
+
+                output.accept(RelictItems.CIPHER_CHEST.value());
+                output.accept(RelictItems.RUBBING.value());
             }).build());
 
 }

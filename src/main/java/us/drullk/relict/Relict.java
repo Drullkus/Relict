@@ -15,6 +15,7 @@ import us.drullk.relict.atmosphere.AtmosphereSyncPayload;
 import us.drullk.relict.atmosphere.RelictAtmosphereServer;
 import us.drullk.relict.atmosphere.RelictStormCommand;
 import us.drullk.relict.init.RelictAttributes;
+import us.drullk.relict.init.RelictBlockEntities;
 import us.drullk.relict.init.RelictBlocks;
 import us.drullk.relict.init.RelictCreativeTabs;
 import us.drullk.relict.init.RelictDataComponents;
@@ -32,6 +33,7 @@ public class Relict {
 
     public Relict(IEventBus modEventBus, ModContainer modContainer) {
         RelictBlocks.BLOCKS.register(modEventBus);
+        RelictBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
         RelictItems.ITEMS.register(modEventBus);
         RelictCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
         RelictAttributes.register(modEventBus);

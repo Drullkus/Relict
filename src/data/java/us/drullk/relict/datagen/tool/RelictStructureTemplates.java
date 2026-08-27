@@ -52,8 +52,9 @@ public final class RelictStructureTemplates {
         // the mod's own datapack/jar -- only runGameTestServer's own gametest source set sees it.
         Path gametestStructureDir = Path.of(args[1]).resolve("data/relict/structure");
         gametestBlankVolume().write(gametestStructureDir.resolve("gametest/basalt_sand_fall.nbt"));
+        gametestPlatform().write(gametestStructureDir.resolve("gametest/platform.nbt"));
 
-        System.out.println("Wrote 1 gametest-only structure template under " + gametestStructureDir);
+        System.out.println("Wrote 2 gametest-only structure templates under " + gametestStructureDir);
     }
 
     /**
@@ -64,6 +65,20 @@ public final class RelictStructureTemplates {
      */
     private static Piece gametestBlankVolume() {
         return new Piece(3, 5, 3);
+    }
+
+    /**
+     * A bare stone floor with headroom above, shared by every GameTest that just needs somewhere to place a
+     * block and a player -- see {@code us.drullk.relict.gametest.RelictGameTests.PLATFORM}. Every position
+     * in the volume is explicitly listed (floor stone, everything above explicit air), matching this tool's
+     * own convention (see {@link #shell}): GameTest resets the structure between attempts by re-applying it,
+     * so an unlisted position wouldn't reliably clear stale blocks from a previous attempt.
+     */
+    private static Piece gametestPlatform() {
+        Piece piece = new Piece(5, 3, 5);
+        piece.fill(0, 0, 0, 4, 0, 4, "minecraft:stone");
+        piece.fill(0, 1, 0, 4, 2, 4, "minecraft:air");
+        return piece;
     }
 
     private static Piece portalRuinFrame() {

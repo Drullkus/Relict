@@ -10,8 +10,11 @@
   "item.relict.seismic_locator": "Seismic Locator",
   "item.relict.seismic_locator.no_signal": "FIXME no seismic signal in range",
   "item.relict.weatherglass": "Patient Weatherglass",
+  "item.relict.rubbing": "Keypad Rubbing",
+  "item.relict.rubbing.tooltip": "A map for a code",
 
   "block.relict.mars_portal": "Mars Portal",
+  "block.relict.cipher_chest": "Cipher Chest",
 
   "block.relict.lab_block": "Lab Block",
   "block.relict.lab_slab": "Lab Slab",

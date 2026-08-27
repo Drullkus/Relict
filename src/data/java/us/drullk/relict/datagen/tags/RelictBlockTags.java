@@ -25,6 +25,7 @@ public class RelictBlockTags extends BlockTagsProvider {
         this.tag(RelictTags.BASE_STONE_MARS).add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key());
 
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
+                .add(RelictBlocks.CIPHER_CHEST.getKey())
                 .add(RelictBlocks.LAB_BLOCK.getKey())
                 .add(RelictBlocks.LAB_SLAB.getKey())
                 .add(RelictBlocks.LAB_STAIRS.getKey())

@@ -73,6 +73,15 @@
         }
       ],
       "rolls": 1.0
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "relict:rubbing"
+        }
+      ],
+      "rolls": 1.0
     }
   ],
   "random_sequence": "relict:ruin_a/knowledge"

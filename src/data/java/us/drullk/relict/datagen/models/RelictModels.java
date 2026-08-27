@@ -14,6 +14,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.WeightedList;
 import us.drullk.relict.Relict;
+import us.drullk.relict.datagen.cipherchest.CipherChestModelGenerator;
 import us.drullk.relict.init.RelictBlocks;
 import us.drullk.relict.init.RelictItems;
 
@@ -42,6 +43,8 @@ public class RelictModels extends ModelProvider {
         DustLayerModels.register(blockModels, itemModels);
 
         registerBasaltSand(blockModels, itemModels);
+
+        CipherChestModelGenerator.bootstrap(blockModels, itemModels);
     }
 
     // FIXME replace nether_portal placeholder for custom

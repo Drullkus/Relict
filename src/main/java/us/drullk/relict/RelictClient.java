@@ -15,6 +15,7 @@ import us.drullk.relict.client.atmosphere.RelictStormVisuals;
 import us.drullk.relict.client.item.WeatherglassCountdownProperty;
 import us.drullk.relict.client.item.WeatherglassFaceProperty;
 import us.drullk.relict.client.renderer.RelictSkyRenderers;
+import us.drullk.relict.client.renderer.cipherchest.RelictCipherChestRenderers;
 import us.drullk.relict.client.renderer.vizard.VizardRenderers;
 
 @Mod(value = Relict.MODID, dist = Dist.CLIENT)
@@ -27,6 +28,7 @@ public class RelictClient {
         modEventBus.addListener(RelictClient::registerRangeSelectItemModelProperty);
         RelictSkyRenderers.register(modEventBus);
         VizardRenderers.register(modEventBus);
+        RelictCipherChestRenderers.register(modEventBus);
 
         NeoForge.EVENT_BUS.addListener(RelictStormVisuals::onComputeFogColor);
         NeoForge.EVENT_BUS.addListener(RelictStormVisuals::onRenderFog);

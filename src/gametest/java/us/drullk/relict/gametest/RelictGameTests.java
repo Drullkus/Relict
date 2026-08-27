@@ -8,6 +8,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
 import us.drullk.relict.Relict;
+import us.drullk.relict.gametest.cipherchest.CipherChestGameTests;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ public final class RelictGameTests {
         Holder<TestEnvironmentDefinition<?>> environment = event.registerEnvironment(Relict.id("default"), new AllOf(List.of()));
 
         BasaltSandGameTests.register(event, environment);
+        CipherChestGameTests.register(event, environment);
     }
 
 }
