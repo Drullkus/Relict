@@ -1,14 +1,126 @@
 {
-  "type": "minecraft:simple_block",
+  "type": "minecraft:simple_random_selector",
   "config": {
-    "to_place": {
-      "type": "minecraft:simple_state_provider",
-      "state": {
-        "Name": "minecraft:snow",
-        "Properties": {
-          "layers": "1"
-        }
+    "features": [
+      {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "config": {
+            "to_place": {
+              "type": "minecraft:simple_state_provider",
+              "state": {
+                "Name": "relict:dry_snow_layer",
+                "Properties": {
+                  "layers": "1"
+                }
+              }
+            }
+          }
+        },
+        "placement": []
+      },
+      {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "config": {
+            "to_place": {
+              "type": "minecraft:simple_state_provider",
+              "state": {
+                "Name": "relict:dry_snow_layer",
+                "Properties": {
+                  "layers": "1"
+                }
+              }
+            }
+          }
+        },
+        "placement": []
+      },
+      {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "config": {
+            "to_place": {
+              "type": "minecraft:simple_state_provider",
+              "state": {
+                "Name": "relict:dry_snow_layer",
+                "Properties": {
+                  "layers": "1"
+                }
+              }
+            }
+          }
+        },
+        "placement": []
+      },
+      {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "config": {
+            "to_place": {
+              "type": "minecraft:simple_state_provider",
+              "state": {
+                "Name": "relict:dry_snow_layer",
+                "Properties": {
+                  "layers": "1"
+                }
+              }
+            }
+          }
+        },
+        "placement": []
+      },
+      {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "config": {
+            "to_place": {
+              "type": "minecraft:simple_state_provider",
+              "state": {
+                "Name": "relict:dry_snow_layer",
+                "Properties": {
+                  "layers": "2"
+                }
+              }
+            }
+          }
+        },
+        "placement": []
+      },
+      {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "config": {
+            "to_place": {
+              "type": "minecraft:simple_state_provider",
+              "state": {
+                "Name": "relict:dry_snow_layer",
+                "Properties": {
+                  "layers": "2"
+                }
+              }
+            }
+          }
+        },
+        "placement": []
+      },
+      {
+        "feature": {
+          "type": "minecraft:simple_block",
+          "config": {
+            "to_place": {
+              "type": "minecraft:simple_state_provider",
+              "state": {
+                "Name": "relict:dry_snow_layer",
+                "Properties": {
+                  "layers": "3"
+                }
+              }
+            }
+          }
+        },
+        "placement": []
       }
-    }
+    ]
   }
 }

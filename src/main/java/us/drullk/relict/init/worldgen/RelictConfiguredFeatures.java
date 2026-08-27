@@ -33,6 +33,7 @@ public class RelictConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> SULFUR_SPIKE = create("sulfur_spike");
     public static final ResourceKey<ConfiguredFeature<?, ?>> SULFUR_POOL = create("sulfur_pool");
     public static final ResourceKey<ConfiguredFeature<?, ?>> SULFUR_GEYSER = create("sulfur_geyser");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> SULFUR_DEEP_LAKE = create("sulfur_deep_lake");
 
     // ice_caves
     public static final ResourceKey<ConfiguredFeature<?, ?>> PACKED_ICE_LENS = create("packed_ice_lens");

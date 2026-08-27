@@ -39,6 +39,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.SpeleothemConfi
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
+import net.minecraft.world.level.levelgen.placement.CountPlacement;
 import net.minecraft.world.level.levelgen.placement.EnvironmentScanPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.RandomOffsetPlacement;
@@ -47,8 +48,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.minecraft.world.level.material.Fluids;
 import us.drullk.relict.RelictTags;
+import us.drullk.relict.block.AbstractRelictLayerBlock;
+import us.drullk.relict.init.RelictBlocks;
 import us.drullk.relict.init.worldgen.RelictConfiguredFeatures;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RelictConfiguredFeatureGenerator {
@@ -62,6 +67,12 @@ public class RelictConfiguredFeatureGenerator {
     private static final int ICE_LENS_RIM_SIZE = 12;
     private static final int ICE_WALL_POCKET_SIZE = 4;
     private static final int CAVE_SURFACE_SCAN = 12;
+
+    private static final int SULFUR_LAKE_FLOOR_SCAN_DEPTH = 4;
+    private static final int SULFUR_DEEP_LAKE_INTERIOR_SPREAD = 6;
+
+    /** Index 0 = layers 1, index 1 = layers 2, index 2 = layers 3 — dusted, not carpeted. */
+    private static final int[] FROST_FLOOR_LAYER_WEIGHTS = {4, 2, 1};
 
     private static final float SPELEOTHEM_TALLER_CHANCE = 0.2F;
     private static final float SPELEOTHEM_DIRECTIONAL_SPREAD = 0.7F;
@@ -141,16 +152,31 @@ public class RelictConfiguredFeatureGenerator {
         register(context, RelictConfiguredFeatures.SULFUR_SPIKE_CLUSTER, Feature.SPELEOTHEM_CLUSTER, new SpeleothemClusterConfiguration(Blocks.SULFUR.defaultBlockState(), Blocks.SULFUR_SPIKE.defaultBlockState(), speleothemReplaceable, 12, UniformInt.of(1, 4), UniformInt.of(2, 8), 1, 3, UniformInt.of(2, 4), UniformFloat.of(0.3F, 0.7F), ConstantFloat.ZERO, 0.1F, 3, 8));
         register(context, RelictConfiguredFeatures.SULFUR_SPIKE, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(speleothemDirection(Direction.DOWN, Blocks.SULFUR.defaultBlockState(), Blocks.SULFUR_SPIKE.defaultBlockState(), speleothemReplaceable), speleothemDirection(Direction.UP, Blocks.SULFUR.defaultBlockState(), Blocks.SULFUR_SPIKE.defaultBlockState(), speleothemReplaceable))));
 
-        register(context, RelictConfiguredFeatures.SULFUR_POOL, Feature.SEQUENCE, new CompositeFeatureConfiguration(HolderSet.direct(PlacementUtils.inlinePlaced(Feature.LAKE, new LakeFeature.Configuration(BlockStateProvider.simple(Blocks.WATER.defaultBlockState()), BlockStateProvider.simple(Blocks.SULFUR.defaultBlockState()), BlockPredicate.not(BlockPredicate.matchesBlocks(Blocks.SULFUR_SPIKE)), BlockPredicate.not(BlockPredicate.matchesTag(BlockTags.FEATURES_CANNOT_REPLACE)), BlockPredicate.not(BlockPredicate.matchesTag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE)))), PlacementUtils.inlinePlaced(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.POTENT_SULFUR.defaultBlockState().setValue(PotentSulfurBlock.STATE, PotentSulfurState.WET))), EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.allOf(BlockPredicate.solid(), BlockPredicate.matchesFluids(Direction.UP.getUnitVec3i(), Fluids.WATER)), 4)))));
+        register(context, RelictConfiguredFeatures.SULFUR_POOL, Feature.SEQUENCE, new CompositeFeatureConfiguration(HolderSet.direct(PlacementUtils.inlinePlaced(Feature.LAKE, sulfurLakeConfiguration()), PlacementUtils.inlinePlaced(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.POTENT_SULFUR.defaultBlockState().setValue(PotentSulfurBlock.STATE, PotentSulfurState.WET))), EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.allOf(BlockPredicate.solid(), BlockPredicate.matchesFluids(Direction.UP.getUnitVec3i(), Fluids.WATER)), SULFUR_LAKE_FLOOR_SCAN_DEPTH)))));
 
         register(context, RelictConfiguredFeatures.SULFUR_GEYSER, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.POTENT_SULFUR.defaultBlockState())));
+
+        // Same lake composition the sulfur cave rounds established for SULFUR_POOL (barrier=sulfur,
+        // fluid=water), scattered scan attempts for the in-lake Potent Sulfur instead of one guaranteed
+        // placement under the origin — RelictPlacedFeatureGenerator triples the attempt count over
+        // SULFUR_GEYSER's ambient range.
+        register(context, RelictConfiguredFeatures.SULFUR_DEEP_LAKE, Feature.SEQUENCE, new CompositeFeatureConfiguration(HolderSet.direct(PlacementUtils.inlinePlaced(Feature.LAKE, sulfurLakeConfiguration()), PlacementUtils.inlinePlaced(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.POTENT_SULFUR.defaultBlockState().setValue(PotentSulfurBlock.STATE, PotentSulfurState.WET))), CountPlacement.of(RelictPlacedFeatureGenerator.SULFUR_DEEP_LAKE_INTERIOR_ATTEMPTS), RandomOffsetPlacement.of(UniformInt.of(-SULFUR_DEEP_LAKE_INTERIOR_SPREAD, SULFUR_DEEP_LAKE_INTERIOR_SPREAD), ConstantInt.of(0)), EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.allOf(BlockPredicate.solid(), BlockPredicate.matchesFluids(Direction.UP.getUnitVec3i(), Fluids.WATER)), SULFUR_LAKE_FLOOR_SCAN_DEPTH)))));
+    }
+
+    /** [VANILLACOPY, pattern] identical composition to what the sulfur cave rounds established for SULFUR_POOL. */
+    private static LakeFeature.Configuration sulfurLakeConfiguration() {
+        return new LakeFeature.Configuration(BlockStateProvider.simple(Blocks.WATER.defaultBlockState()), BlockStateProvider.simple(Blocks.SULFUR.defaultBlockState()),
+                BlockPredicate.not(BlockPredicate.matchesBlocks(Blocks.SULFUR_SPIKE)), BlockPredicate.not(BlockPredicate.matchesTag(BlockTags.FEATURES_CANNOT_REPLACE)),
+                BlockPredicate.not(BlockPredicate.matchesTag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE)));
     }
 
     private static void iceCavesConfiguredFeatures(BootstrapContext<ConfiguredFeature<?, ?>> context, HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures, HolderSet<Block> speleothemReplaceable) {
         register(context, RelictConfiguredFeatures.PACKED_ICE_LENS, Feature.DISK, new DiskConfiguration(BlockStateProvider.simple(Blocks.PACKED_ICE), BlockPredicate.matchesBlocks(Blocks.SMOOTH_BASALT), UniformInt.of(3, 6), 2));
         register(context, RelictConfiguredFeatures.ICE_MARGIN, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.ICE.defaultBlockState(), 10));
         register(context, RelictConfiguredFeatures.BLUE_ICE_CORE, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.BLUE_ICE.defaultBlockState(), 6));
-        register(context, RelictConfiguredFeatures.FROST_FLOOR, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SNOW.defaultBlockState())));
+
+        register(context, RelictConfiguredFeatures.FROST_FLOOR, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(
+                drySnowLayerOptions(FROST_FLOOR_LAYER_WEIGHTS))));
 
         register(context, RelictConfiguredFeatures.ICE_LENS_RIM, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(
                 caveSkinOfIce(Direction.DOWN, PACKED_ICE, Blocks.PACKED_ICE, ICE_LENS_RIM_SIZE),
@@ -159,6 +185,17 @@ public class RelictConfiguredFeatureGenerator {
         register(context, RelictConfiguredFeatures.ICE_WALL_POCKET, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(
                 caveSkinOfIce(Direction.DOWN, SMOOTH_BASALT, Blocks.SMOOTH_BASALT, ICE_WALL_POCKET_SIZE),
                 caveSkinOfIce(Direction.UP, SMOOTH_BASALT, Blocks.SMOOTH_BASALT, ICE_WALL_POCKET_SIZE))));
+    }
+
+    private static List<Holder<PlacedFeature>> drySnowLayerOptions(int[] weightByLayerCount) {
+        List<Holder<PlacedFeature>> options = new ArrayList<>();
+        for (int index = 0; index < weightByLayerCount.length; index++) {
+            int layers = index + 1;
+            Holder<PlacedFeature> option = PlacementUtils.inlinePlaced(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(
+                    BlockStateProvider.simple(RelictBlocks.DRY_SNOW_LAYER.get().defaultBlockState().setValue(AbstractRelictLayerBlock.LAYERS, layers))));
+            options.addAll(Collections.nCopies(weightByLayerCount[index], option));
+        }
+        return options;
     }
 
     private static Holder<PlacedFeature> caveSkinOfIce(Direction scan, RuleTest host, Block hostBlock, int size) {
