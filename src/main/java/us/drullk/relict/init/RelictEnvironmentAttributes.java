@@ -15,13 +15,14 @@ import us.drullk.relict.Relict;
  * later without touching the renderer.
  * <ul>
  *     <li><em>angle</em> — where it sits along its arc, the direct analogue of vanilla's {@code sun_angle}.
- *     <li><em>inclination</em> — how far its plane is rolled off the sun's. Constant today, a single
- *         keyframe. Walking it through zero is what a transit season would be.
+ *     <li><em>inclination</em> — how far its plane is rolled off the sun's. Deimos holds one value, a
+ *         single keyframe; Phobos's rocks between a shallow and a steep extreme over several sols. Walking
+ *         it through zero, rather than rocking short of it, is what a transit season would be.
  *     <li><em>scale</em> — apparent size, which for a moon this close to Mars really does change across a
  *         crossing: the observer's distance to Phobos varies by half again between rising and zenith.
  * </ul>
  *
- * @see us.drullk.relict.init.worldgen.RelictDimension#PHOBOS_INCLINATION
+ * @see us.drullk.relict.init.worldgen.RelictDimension#PHOBOS_ROCK_SOLS
  */
 public class RelictEnvironmentAttributes {
 

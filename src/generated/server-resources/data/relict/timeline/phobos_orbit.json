@@ -14,14 +14,6 @@
         }
       ]
     },
-    "relict:visual/phobos_inclination": {
-      "keyframes": [
-        {
-          "ticks": 0,
-          "value": 15.0
-        }
-      ]
-    },
     "relict:visual/phobos_scale": {
       "keyframes": [
         {

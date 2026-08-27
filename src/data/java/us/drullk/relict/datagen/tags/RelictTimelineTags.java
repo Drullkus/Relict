@@ -24,6 +24,7 @@ public class RelictTimelineTags extends TagsProvider<Timeline> {
                 .add(RelictDimension.MARS_SOL)
                 .add(RelictDimension.PHOBOS_ORBIT)
                 .add(RelictDimension.DEIMOS_ORBIT)
+                .add(RelictDimension.PHOBOS_ROCK)
                 .add(RelictDimension.PHOBOS_TRANSIT)
         ;
     }

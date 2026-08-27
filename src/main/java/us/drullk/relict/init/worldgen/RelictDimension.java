@@ -29,6 +29,7 @@ public class RelictDimension {
     public static final ResourceKey<Timeline> MARS_SOL = ResourceKey.create(Registries.TIMELINE, Relict.id("mars_sol"));
     public static final ResourceKey<Timeline> PHOBOS_ORBIT = ResourceKey.create(Registries.TIMELINE, Relict.id("phobos_orbit"));
     public static final ResourceKey<Timeline> DEIMOS_ORBIT = ResourceKey.create(Registries.TIMELINE, Relict.id("deimos_orbit"));
+    public static final ResourceKey<Timeline> PHOBOS_ROCK = ResourceKey.create(Registries.TIMELINE, Relict.id("phobos_rock"));
     public static final ResourceKey<Timeline> PHOBOS_TRANSIT = ResourceKey.create(Registries.TIMELINE, Relict.id("phobos_transit"));
 
     public static final TagKey<Timeline> MARS_TIMELINES = TagKey.create(Registries.TIMELINE, Relict.id("in_mars"));
@@ -69,10 +70,28 @@ public class RelictDimension {
      * The separation at a conjunction occurring at sky angle {@code a} satisfies
      * {@code cos s = 1 - (1 - cos i) * sin^2 a}, so the discs overlap only for conjunctions within some
      * distance of the zenith, and a larger inclination narrows that window. See
-     * {@code RelictTimelineGenerator}, which solves for the actual transit ticks and reports whether the
+     * {@code OrbitTransitSolver}, which solves for the actual transit ticks and reports whether the
      * current values produce any.
+     * <p>
+     * Deimos holds one value. Phobos instead rocks between {@link #PHOBOS_INCLINATION_LOW} and
+     * {@link #PHOBOS_INCLINATION_HIGH} over {@link #PHOBOS_ROCK_SOLS} sols: shallow enough at the trough
+     * for a daylight conjunction to bring the discs together for a total eclipse, steep enough at the
+     * crest to clear them by a wide margin the rest of the time. An integer sol count keeps the rock
+     * commensurate with the sol, so the whole inclination-plus-transit pattern repeats exactly and stays
+     * keyframeable — {@code OrbitTransitSolver} builds the curve and reports where the eclipses land in
+     * it rather than this being hand-derived.
      */
-    public static final float PHOBOS_INCLINATION = 15.0F;
+    public static final int PHOBOS_ROCK_SOLS = 10;
+    public static final float PHOBOS_INCLINATION_LOW = -15.0F;
+    public static final float PHOBOS_INCLINATION_HIGH = 15.0F;
+
+    /**
+     * Shifts the rock's curve earlier or later in ticks, so its trough can be lined up against a fixed
+     * daylight conjunction tick instead of landing wherever a phase of zero happens to put it. Tuned from
+     * {@code OrbitTransitSolver}'s report, not derived by hand.
+     */
+    public static final int PHOBOS_ROCK_PHASE_TICKS = 0;
+
     public static final float DEIMOS_INCLINATION = -25.0F;
 
     /**
