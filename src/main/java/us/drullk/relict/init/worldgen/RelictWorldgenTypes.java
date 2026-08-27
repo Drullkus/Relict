@@ -17,6 +17,8 @@ import us.drullk.relict.worldgen.DuneCrestCondition;
 import us.drullk.relict.worldgen.DuneWaveFunction;
 import us.drullk.relict.worldgen.DustLayerFeature;
 import us.drullk.relict.worldgen.DustLayerFeatureConfiguration;
+import us.drullk.relict.worldgen.RockFeature;
+import us.drullk.relict.worldgen.RockFeatureConfiguration;
 import us.drullk.relict.worldgen.MesaFieldFunction;
 import us.drullk.relict.worldgen.RelictChunkGenerator;
 import us.drullk.relict.worldgen.VoronoiBiomeSource;
@@ -33,6 +35,7 @@ public class RelictWorldgenTypes {
     public static final DeferredRegister<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT_TYPES = DeferredRegister.create(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, Relict.MODID);
 
     public static final DeferredHolder<Feature<?>, DustLayerFeature> DUST_LAYER_FEATURE;
+    public static final DeferredHolder<Feature<?>, RockFeature> ROCK_FEATURE;
 
     static {
         BIOME_SOURCES.register("voronoi", () -> VoronoiBiomeSource.CODEC);
@@ -43,6 +46,7 @@ public class RelictWorldgenTypes {
         DENSITY_FUNCTION_TYPES.register("crater_field", () -> CraterFieldFunction.MAP_CODEC);
         SURFACE_CONDITIONS.register("dune_crest", DuneCrestCondition.INSTANCE::codec);
         DUST_LAYER_FEATURE = FEATURES.register("dust_layer", () -> new DustLayerFeature(DustLayerFeatureConfiguration.CODEC));
+        ROCK_FEATURE = FEATURES.register("rock", () -> new RockFeature(RockFeatureConfiguration.CODEC));
         STRUCTURE_POOL_ELEMENT_TYPES.register("wreck_single_pool_element", () -> SinglePoolElementCustomDelta.TYPE);
     }
 

@@ -38,6 +38,7 @@ public final class RelictGameTests {
 
         BasaltSandGameTests.register(event, environment);
         CipherChestGameTests.register(event, environment);
+        RockGameTests.register(event, environment);
     }
 
 }

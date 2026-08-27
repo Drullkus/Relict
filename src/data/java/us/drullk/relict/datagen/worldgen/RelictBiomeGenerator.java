@@ -31,12 +31,20 @@ public class RelictBiomeGenerator {
         HolderGetter<ConfiguredWorldCarver<?>> carvers = context.lookup(Registries.CONFIGURED_CARVER);
 
         context.register(RelictBiomes.WRINKLE_PLAINS, surfaceBiome(caves(placedFeatures, carvers)
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_WRINKLE_PLAINS_S))
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_WRINKLE_PLAINS_RIDGE_M))
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_WRINKLE_PLAINS_EJECTA_L))
                 .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DUST_LAYER_WRINKLE_PLAINS))
                 .build()));
         context.register(RelictBiomes.RUSTED_DUNES, surfaceBiome(caves(placedFeatures, carvers)
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_RUSTED_DUNES_S))
                 .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DUST_LAYER_RUSTED_DUNES))
                 .build()));
         context.register(RelictBiomes.FRETTED_MESAS, surfaceBiome(caves(placedFeatures, carvers)
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_FRETTED_MESAS_TALUS_S))
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_FRETTED_MESAS_TALUS_M))
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_FRETTED_MESAS_CAP_S))
+                .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.ROCK_FRETTED_MESAS_FLOOR_S))
                 .addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placedFeatures.getOrThrow(RelictPlacedFeatures.DUST_LAYER_FRETTED_MESAS))
                 .build()));
         context.register(RelictBiomes.SHATTERED_HIGHLANDS, surfaceBiome(caves(placedFeatures, carvers).build()));

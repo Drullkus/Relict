@@ -1,0 +1,11 @@
+{
+  "type": "relict:rock",
+  "config": {
+    "placement_rule": "valley_floor",
+    "primary_block": "minecraft:granite",
+    "province": "relict:fretted_mesas",
+    "secondary_block": "minecraft:tuff",
+    "secondary_chance": 0.35,
+    "shape": "single"
+  }
+}

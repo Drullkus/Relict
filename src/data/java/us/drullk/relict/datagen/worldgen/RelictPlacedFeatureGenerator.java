@@ -54,6 +54,7 @@ public class RelictPlacedFeatureGenerator {
         igneousPocketsPlacedFeatures(context, features);
 
         DustLayerFeatureGenerator.bootstrapPlacedFeatures(context, features);
+        RockFeatureGenerator.bootstrapPlacedFeatures(context, features);
     }
 
     private static void igneousPocketsPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {

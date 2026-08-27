@@ -52,6 +52,16 @@ public class RelictConfiguredFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> DUST_LAYER_RUSTED_DUNES = create("dust_layer_rusted_dunes");
     public static final ResourceKey<ConfiguredFeature<?, ?>> DUST_LAYER_FRETTED_MESAS = create("dust_layer_fretted_mesas");
 
+    // rocks, one configured feature per size per placed province
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_WRINKLE_PLAINS_S = create("rock_wrinkle_plains_s");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_WRINKLE_PLAINS_RIDGE_M = create("rock_wrinkle_plains_ridge_m");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_WRINKLE_PLAINS_EJECTA_L = create("rock_wrinkle_plains_ejecta_l");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_RUSTED_DUNES_S = create("rock_rusted_dunes_s");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_FRETTED_MESAS_TALUS_S = create("rock_fretted_mesas_talus_s");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_FRETTED_MESAS_TALUS_M = create("rock_fretted_mesas_talus_m");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_FRETTED_MESAS_CAP_S = create("rock_fretted_mesas_cap_s");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ROCK_FRETTED_MESAS_FLOOR_S = create("rock_fretted_mesas_floor_s");
+
     private static ResourceKey<ConfiguredFeature<?, ?>> create(String name) {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, Relict.id(name));
     }

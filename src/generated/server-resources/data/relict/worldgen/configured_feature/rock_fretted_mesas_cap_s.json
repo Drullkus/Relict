@@ -1,0 +1,11 @@
+{
+  "type": "relict:rock",
+  "config": {
+    "placement_rule": "cap",
+    "primary_block": "minecraft:smooth_basalt",
+    "province": "relict:fretted_mesas",
+    "secondary_block": "minecraft:smooth_basalt",
+    "secondary_chance": 0.0,
+    "shape": "single"
+  }
+}

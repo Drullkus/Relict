@@ -1,0 +1,11 @@
+{
+  "type": "relict:rock",
+  "config": {
+    "placement_rule": "interdune_floor",
+    "primary_block": "minecraft:smooth_basalt",
+    "province": "relict:rusted_dunes",
+    "secondary_block": "minecraft:andesite",
+    "secondary_chance": 0.3,
+    "shape": "single"
+  }
+}

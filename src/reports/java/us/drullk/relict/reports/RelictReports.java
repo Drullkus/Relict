@@ -43,8 +43,9 @@ public final class RelictReports {
                     event.addProvider(new DustLayerCoverageSampler(output, registries));
                     event.addProvider(new DustLayerWeatherSampler(output, registries));
                 }
+                case "rock" -> event.addProvider(new RockCoverageSampler(output, registries));
                 default -> throw new IllegalArgumentException("Unknown relict.reports entry: " + name
-                        + " (expected one of: ridge, voronoi, performance, profile, solar_panel_decay, atmosphere_curve, dust_layer)");
+                        + " (expected one of: ridge, voronoi, performance, profile, solar_panel_decay, atmosphere_curve, dust_layer, rock)");
             }
         }
     }
