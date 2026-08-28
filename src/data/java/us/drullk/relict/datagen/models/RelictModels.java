@@ -41,6 +41,8 @@ public class RelictModels extends ModelProvider {
 
         WreckModels.register(blockModels, itemModels);
 
+        RuinPaletteModels.register(blockModels, itemModels);
+
         DustLayerModels.register(blockModels, itemModels);
 
         registerBasaltSand(blockModels, itemModels);

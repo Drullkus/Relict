@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "relict:block/serpentine",
+    "side": "relict:block/serpentine",
+    "top": "relict:block/serpentine"
+  }
+}

@@ -40,6 +40,23 @@ public class RelictCreativeTabs {
 
                 output.accept(RelictItems.CIPHER_CHEST.value());
                 output.accept(RelictItems.RUBBING.value());
+
+                output.accept(RelictItems.OCHRE.value());
+                output.accept(RelictItems.OCHRE_SLAB.value());
+                output.accept(RelictItems.OCHRE_STAIRS.value());
+                output.accept(RelictItems.OCHRE_WALL.value());
+                output.accept(RelictItems.POLISHED_OCHRE.value());
+                output.accept(RelictItems.POLISHED_OCHRE_SLAB.value());
+                output.accept(RelictItems.POLISHED_OCHRE_STAIRS.value());
+                output.accept(RelictItems.POLISHED_OCHRE_WALL.value());
+                output.accept(RelictItems.SERPENTINE.value());
+                output.accept(RelictItems.SERPENTINE_SLAB.value());
+                output.accept(RelictItems.SERPENTINE_STAIRS.value());
+                output.accept(RelictItems.SERPENTINE_WALL.value());
+                output.accept(RelictItems.POLISHED_SERPENTINE.value());
+                output.accept(RelictItems.POLISHED_SERPENTINE_SLAB.value());
+                output.accept(RelictItems.POLISHED_SERPENTINE_STAIRS.value());
+                output.accept(RelictItems.POLISHED_SERPENTINE_WALL.value());
             }).build());
 
 }

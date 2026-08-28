@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "relict:block/ochre_slab"
+    },
+    "type=double": {
+      "model": "relict:block/ochre"
+    },
+    "type=top": {
+      "model": "relict:block/ochre_slab_top"
+    }
+  }
+}

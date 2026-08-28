@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "relict:serpentine",
+  "result": {
+    "id": "relict:serpentine_stairs"
+  }
+}

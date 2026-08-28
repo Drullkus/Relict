@@ -10,6 +10,22 @@
     "relict:solar_panel",
     "relict:solar_panel_sprinkled",
     "relict:solar_panel_dusted",
-    "relict:solar_panel_sanded"
+    "relict:solar_panel_sanded",
+    "relict:ochre",
+    "relict:ochre_slab",
+    "relict:ochre_stairs",
+    "relict:ochre_wall",
+    "relict:polished_ochre",
+    "relict:polished_ochre_slab",
+    "relict:polished_ochre_stairs",
+    "relict:polished_ochre_wall",
+    "relict:serpentine",
+    "relict:serpentine_slab",
+    "relict:serpentine_stairs",
+    "relict:serpentine_wall",
+    "relict:polished_serpentine",
+    "relict:polished_serpentine_slab",
+    "relict:polished_serpentine_stairs",
+    "relict:polished_serpentine_wall"
   ]
 }

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "relict:block/polished_serpentine",
+    "side": "relict:block/polished_serpentine",
+    "top": "relict:block/polished_serpentine"
+  }
+}

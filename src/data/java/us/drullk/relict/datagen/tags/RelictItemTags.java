@@ -21,6 +21,9 @@ public class RelictItemTags extends BlockTagCopyingItemTagProvider {
 
     private static final TagKey<Item> SANDS_BASALT = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "sands/basalt"));
 
+    private static final TagKey<Item> ITEM_SLABS = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("slabs"));
+    private static final TagKey<Item> ITEM_STAIRS = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("stairs"));
+
     public RelictItemTags(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagLookup<Block>> blockTags) {
         super(output, lookupProvider, blockTags, Relict.MODID);
     }
@@ -43,6 +46,11 @@ public class RelictItemTags extends BlockTagCopyingItemTagProvider {
         this.tag(ItemTags.SMELTS_TO_GLASS).addTag(SANDS_BASALT);
         this.copy(BlockTags.SAND, ItemTags.SAND);
         this.copy(Tags.Blocks.SANDS, Tags.Items.SANDS);
+
+        this.copy(BlockTags.SLABS, ITEM_SLABS);
+        this.copy(BlockTags.STAIRS, ITEM_STAIRS);
+        this.copy(BlockTags.WALLS, ItemTags.WALLS);
+        this.copy(Tags.Blocks.STONES, Tags.Items.STONES);
 
         // Not a sword or any other melee weapon, so deliberately left out of the primary-items tag
         // (ItemTags.SWORD_ENCHANTABLE) that would offer Fire Aspect at the enchanting table -- anvil + book only.

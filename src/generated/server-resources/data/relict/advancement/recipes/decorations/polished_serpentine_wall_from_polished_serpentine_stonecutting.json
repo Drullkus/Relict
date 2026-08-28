@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_polished_serpentine": {
+      "conditions": {
+        "items": [
+          {
+            "items": "relict:polished_serpentine"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "relict:polished_serpentine_wall_from_polished_serpentine_stonecutting"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_polished_serpentine"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "relict:polished_serpentine_wall_from_polished_serpentine_stonecutting"
+    ]
+  }
+}

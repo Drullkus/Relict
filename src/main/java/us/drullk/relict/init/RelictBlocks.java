@@ -1,11 +1,14 @@
 package us.drullk.relict.init;
 
 import net.minecraft.util.ColorRGBA;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ColoredFallingBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -18,6 +21,8 @@ import us.drullk.relict.block.cipherchest.CipherChestBlock;
 import us.drullk.relict.block.wreck.LabMastBlock;
 import us.drullk.relict.block.wreck.LabShaftBlock;
 import us.drullk.relict.block.wreck.SolarPanelBlock;
+
+import java.util.function.UnaryOperator;
 
 public class RelictBlocks {
 
@@ -151,5 +156,42 @@ public class RelictBlocks {
             .sound(SoundType.STONE)
             .noOcclusion()
             .requiresCorrectToolForDrops());
+
+    // Stone-class strength, matching vanilla stone (1.5/6.0) uniformly across block/slab/stairs/wall --
+    // vanilla itself varies this slightly per shape (e.g. smooth_stone_slab is 2.0); a reasonable, tunable default.
+    private static final float RUIN_STONE_HARDNESS = 1.5F;
+    private static final float RUIN_STONE_RESISTANCE = 6.0F;
+
+    private static UnaryOperator<BlockBehaviour.Properties> ruinStone(MapColor mapColor) {
+        return properties -> properties
+                .mapColor(mapColor)
+                .strength(RUIN_STONE_HARDNESS, RUIN_STONE_RESISTANCE)
+                .sound(SoundType.STONE)
+                .requiresCorrectToolForDrops();
+    }
+
+    public static final DeferredBlock<Block> OCHRE = BLOCKS.registerSimpleBlock("ochre", ruinStone(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<SlabBlock> OCHRE_SLAB = BLOCKS.registerBlock("ochre_slab", SlabBlock::new, ruinStone(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<StairBlock> OCHRE_STAIRS = BLOCKS.registerBlock("ochre_stairs",
+            properties -> new StairBlock(OCHRE.get().defaultBlockState(), properties), ruinStone(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<WallBlock> OCHRE_WALL = BLOCKS.registerBlock("ochre_wall", WallBlock::new, ruinStone(MapColor.COLOR_ORANGE));
+
+    public static final DeferredBlock<Block> POLISHED_OCHRE = BLOCKS.registerSimpleBlock("polished_ochre", ruinStone(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<SlabBlock> POLISHED_OCHRE_SLAB = BLOCKS.registerBlock("polished_ochre_slab", SlabBlock::new, ruinStone(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<StairBlock> POLISHED_OCHRE_STAIRS = BLOCKS.registerBlock("polished_ochre_stairs",
+            properties -> new StairBlock(POLISHED_OCHRE.get().defaultBlockState(), properties), ruinStone(MapColor.COLOR_ORANGE));
+    public static final DeferredBlock<WallBlock> POLISHED_OCHRE_WALL = BLOCKS.registerBlock("polished_ochre_wall", WallBlock::new, ruinStone(MapColor.COLOR_ORANGE));
+
+    public static final DeferredBlock<Block> SERPENTINE = BLOCKS.registerSimpleBlock("serpentine", ruinStone(MapColor.COLOR_GREEN));
+    public static final DeferredBlock<SlabBlock> SERPENTINE_SLAB = BLOCKS.registerBlock("serpentine_slab", SlabBlock::new, ruinStone(MapColor.COLOR_GREEN));
+    public static final DeferredBlock<StairBlock> SERPENTINE_STAIRS = BLOCKS.registerBlock("serpentine_stairs",
+            properties -> new StairBlock(SERPENTINE.get().defaultBlockState(), properties), ruinStone(MapColor.COLOR_GREEN));
+    public static final DeferredBlock<WallBlock> SERPENTINE_WALL = BLOCKS.registerBlock("serpentine_wall", WallBlock::new, ruinStone(MapColor.COLOR_GREEN));
+
+    public static final DeferredBlock<Block> POLISHED_SERPENTINE = BLOCKS.registerSimpleBlock("polished_serpentine", ruinStone(MapColor.COLOR_GREEN));
+    public static final DeferredBlock<SlabBlock> POLISHED_SERPENTINE_SLAB = BLOCKS.registerBlock("polished_serpentine_slab", SlabBlock::new, ruinStone(MapColor.COLOR_GREEN));
+    public static final DeferredBlock<StairBlock> POLISHED_SERPENTINE_STAIRS = BLOCKS.registerBlock("polished_serpentine_stairs",
+            properties -> new StairBlock(POLISHED_SERPENTINE.get().defaultBlockState(), properties), ruinStone(MapColor.COLOR_GREEN));
+    public static final DeferredBlock<WallBlock> POLISHED_SERPENTINE_WALL = BLOCKS.registerBlock("polished_serpentine_wall", WallBlock::new, ruinStone(MapColor.COLOR_GREEN));
 
 }

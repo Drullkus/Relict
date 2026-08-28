@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "relict:block/polished_ochre",
+    "side": "relict:block/polished_ochre",
+    "top": "relict:block/polished_ochre"
+  }
+}

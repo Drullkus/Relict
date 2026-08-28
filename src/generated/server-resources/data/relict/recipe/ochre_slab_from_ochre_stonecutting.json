@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "relict:ochre",
+  "result": {
+    "count": 2,
+    "id": "relict:ochre_slab"
+  }
+}

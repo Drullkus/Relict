@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_polished_ochre": {
+      "conditions": {
+        "items": [
+          {
+            "items": "relict:polished_ochre"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "relict:polished_ochre_stairs"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_polished_ochre"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "relict:polished_ochre_stairs"
+    ]
+  }
+}

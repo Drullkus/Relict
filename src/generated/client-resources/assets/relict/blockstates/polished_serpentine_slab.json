@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "relict:block/polished_serpentine_slab"
+    },
+    "type=double": {
+      "model": "relict:block/polished_serpentine"
+    },
+    "type=top": {
+      "model": "relict:block/polished_serpentine_slab_top"
+    }
+  }
+}

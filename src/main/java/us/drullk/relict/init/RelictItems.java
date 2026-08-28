@@ -8,6 +8,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemLore;
@@ -58,17 +59,18 @@ public class RelictItems {
 
     public static final DeferredItem<Item> BURNING_GLASS = ITEMS.registerItem("burning_glass", BurningGlassItem::new, properties -> properties.stacksTo(1));
 
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_BLOCK = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_BLOCK);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_SHAFT = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SHAFT);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_MAST = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_MAST);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_SLAB = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SLAB);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> LAB_STAIRS = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_STAIRS);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> ROVER_WHEEL = ITEMS.registerSimpleBlockItem(RelictBlocks.ROVER_WHEEL);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SPRINKLED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SPRINKLED);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_DUSTED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_DUSTED);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> SOLAR_PANEL_SANDED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SANDED);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> CIPHER_CHEST = ITEMS.registerSimpleBlockItem(RelictBlocks.CIPHER_CHEST);
+    public static final DeferredItem<BlockItem> LAB_BLOCK = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_BLOCK);
+    public static final DeferredItem<BlockItem> LAB_SHAFT = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SHAFT);
+    public static final DeferredItem<BlockItem> LAB_MAST = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_MAST);
+    public static final DeferredItem<BlockItem> LAB_SLAB = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_SLAB);
+    public static final DeferredItem<BlockItem> LAB_STAIRS = ITEMS.registerSimpleBlockItem(RelictBlocks.LAB_STAIRS);
+    public static final DeferredItem<BlockItem> ROVER_WHEEL = ITEMS.registerSimpleBlockItem(RelictBlocks.ROVER_WHEEL);
+    public static final DeferredItem<BlockItem> SOLAR_PANEL = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL);
+    public static final DeferredItem<BlockItem> SOLAR_PANEL_SPRINKLED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SPRINKLED);
+    public static final DeferredItem<BlockItem> SOLAR_PANEL_DUSTED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_DUSTED);
+    public static final DeferredItem<BlockItem> SOLAR_PANEL_SANDED = ITEMS.registerSimpleBlockItem(RelictBlocks.SOLAR_PANEL_SANDED);
+
+    public static final DeferredItem<BlockItem> CIPHER_CHEST = ITEMS.registerSimpleBlockItem(RelictBlocks.CIPHER_CHEST);
 
     public static final DeferredItem<RubbingItem> RUBBING = ITEMS.registerItem("rubbing", RubbingItem::new, properties -> properties
             .stacksTo(1)
@@ -76,11 +78,28 @@ public class RelictItems {
             .component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.MAP_ID, true))
             .component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.relict.rubbing.tooltip")))));
 
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> DUST_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DUST_LAYER);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> DRY_SNOW = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW);
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> DRY_SNOW_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW_LAYER);
+    public static final DeferredItem<BlockItem> DUST_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DUST_LAYER);
+    public static final DeferredItem<BlockItem> DRY_SNOW = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW);
+    public static final DeferredItem<BlockItem> DRY_SNOW_LAYER = ITEMS.registerSimpleBlockItem(RelictBlocks.DRY_SNOW_LAYER);
 
-    public static final DeferredItem<net.minecraft.world.item.BlockItem> BASALT_SAND = ITEMS.registerSimpleBlockItem(RelictBlocks.BASALT_SAND);
+    public static final DeferredItem<BlockItem> BASALT_SAND = ITEMS.registerSimpleBlockItem(RelictBlocks.BASALT_SAND);
+
+    public static final DeferredItem<BlockItem> OCHRE = ITEMS.registerSimpleBlockItem(RelictBlocks.OCHRE);
+    public static final DeferredItem<BlockItem> OCHRE_SLAB = ITEMS.registerSimpleBlockItem(RelictBlocks.OCHRE_SLAB);
+    public static final DeferredItem<BlockItem> OCHRE_STAIRS = ITEMS.registerSimpleBlockItem(RelictBlocks.OCHRE_STAIRS);
+    public static final DeferredItem<BlockItem> OCHRE_WALL = ITEMS.registerSimpleBlockItem(RelictBlocks.OCHRE_WALL);
+    public static final DeferredItem<BlockItem> POLISHED_OCHRE = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_OCHRE);
+    public static final DeferredItem<BlockItem> POLISHED_OCHRE_SLAB = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_OCHRE_SLAB);
+    public static final DeferredItem<BlockItem> POLISHED_OCHRE_STAIRS = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_OCHRE_STAIRS);
+    public static final DeferredItem<BlockItem> POLISHED_OCHRE_WALL = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_OCHRE_WALL);
+    public static final DeferredItem<BlockItem> SERPENTINE = ITEMS.registerSimpleBlockItem(RelictBlocks.SERPENTINE);
+    public static final DeferredItem<BlockItem> SERPENTINE_SLAB = ITEMS.registerSimpleBlockItem(RelictBlocks.SERPENTINE_SLAB);
+    public static final DeferredItem<BlockItem> SERPENTINE_STAIRS = ITEMS.registerSimpleBlockItem(RelictBlocks.SERPENTINE_STAIRS);
+    public static final DeferredItem<BlockItem> SERPENTINE_WALL = ITEMS.registerSimpleBlockItem(RelictBlocks.SERPENTINE_WALL);
+    public static final DeferredItem<BlockItem> POLISHED_SERPENTINE = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_SERPENTINE);
+    public static final DeferredItem<BlockItem> POLISHED_SERPENTINE_SLAB = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_SERPENTINE_SLAB);
+    public static final DeferredItem<BlockItem> POLISHED_SERPENTINE_STAIRS = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_SERPENTINE_STAIRS);
+    public static final DeferredItem<BlockItem> POLISHED_SERPENTINE_WALL = ITEMS.registerSimpleBlockItem(RelictBlocks.POLISHED_SERPENTINE_WALL);
 
     private static Item.Properties serviceArmor(Item.Properties properties, ArmorType type, UnaryOperator<ItemAttributeModifiers> extras) {
         return properties.humanoidArmor(RelictArmorMaterials.SERVICE, type).attributes(extras.apply(RelictArmorMaterials.SERVICE.createAttributes(type)));

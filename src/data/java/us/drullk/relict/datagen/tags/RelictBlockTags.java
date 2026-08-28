@@ -35,7 +35,47 @@ public class RelictBlockTags extends BlockTagsProvider {
                 .add(RelictBlocks.SOLAR_PANEL.getKey())
                 .add(RelictBlocks.SOLAR_PANEL_SPRINKLED.getKey())
                 .add(RelictBlocks.SOLAR_PANEL_DUSTED.getKey())
-                .add(RelictBlocks.SOLAR_PANEL_SANDED.getKey());
+                .add(RelictBlocks.SOLAR_PANEL_SANDED.getKey())
+                .add(RelictBlocks.OCHRE.getKey())
+                .add(RelictBlocks.OCHRE_SLAB.getKey())
+                .add(RelictBlocks.OCHRE_STAIRS.getKey())
+                .add(RelictBlocks.OCHRE_WALL.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE_SLAB.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE_STAIRS.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE_WALL.getKey())
+                .add(RelictBlocks.SERPENTINE.getKey())
+                .add(RelictBlocks.SERPENTINE_SLAB.getKey())
+                .add(RelictBlocks.SERPENTINE_STAIRS.getKey())
+                .add(RelictBlocks.SERPENTINE_WALL.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE_SLAB.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE_STAIRS.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE_WALL.getKey());
+
+        this.tag(BlockTags.SLABS)
+                .add(RelictBlocks.OCHRE_SLAB.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE_SLAB.getKey())
+                .add(RelictBlocks.SERPENTINE_SLAB.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE_SLAB.getKey());
+
+        this.tag(BlockTags.STAIRS)
+                .add(RelictBlocks.OCHRE_STAIRS.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE_STAIRS.getKey())
+                .add(RelictBlocks.SERPENTINE_STAIRS.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE_STAIRS.getKey());
+
+        this.tag(BlockTags.WALLS)
+                .add(RelictBlocks.OCHRE_WALL.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE_WALL.getKey())
+                .add(RelictBlocks.SERPENTINE_WALL.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE_WALL.getKey());
+
+        this.tag(Tags.Blocks.STONES)
+                .add(RelictBlocks.OCHRE.getKey())
+                .add(RelictBlocks.POLISHED_OCHRE.getKey())
+                .add(RelictBlocks.SERPENTINE.getKey())
+                .add(RelictBlocks.POLISHED_SERPENTINE.getKey());
 
         this.tag(BlockTags.MINEABLE_WITH_SHOVEL)
                 .add(RelictBlocks.DUST_LAYER.getKey())

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "relict:polished_ochre",
+  "result": {
+    "id": "relict:polished_ochre_stairs"
+  }
+}

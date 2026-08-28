@@ -54,6 +54,7 @@ public class RelictDatagen {
 
         event.addProvider(new RelictAdvancements(output, builtinDatapackProvider));
         event.addProvider(new RelictLootTables(output, builtinDatapackProvider));
+        event.addProvider(new RelictRecipes.Runner(output, lookupProvider));
 
         event.addProvider(new CipherChestRubbingProvider(output));
     }

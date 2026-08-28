@@ -50,6 +50,8 @@ public class RelictLootTables extends LootTableProvider {
         WreckLootTables.blockDrops(generator);
         WreckLootTables.brushDrops(generator);
 
+        RuinPaletteLootTables.blockDrops(generator);
+
         generator.accept(blockLootKey(RelictBlocks.DUST_LAYER.get()), DustLayerLootTables.dustLayer());
         generator.accept(blockLootKey(RelictBlocks.DRY_SNOW.get()), DustLayerLootTables.drySnow());
         generator.accept(blockLootKey(RelictBlocks.DRY_SNOW_LAYER.get()), DustLayerLootTables.drySnowLayer());
