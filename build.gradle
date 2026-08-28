@@ -91,6 +91,13 @@ sourceSets {
         compileClasspath += main.compileClasspath + main.output
         runtimeClasspath += main.runtimeClasspath
     }
+    // The other half of the gametest module's own forward comment: a client-only dev module. Never
+    // referenced by main, data, reports, or gametest, and the ONLY run pointed at its mods{} entry below
+    // is the shared `client` run -- every other run (including gameTestServer) stays on its own entry.
+    companion {
+        compileClasspath += main.compileClasspath + main.output
+        runtimeClasspath += main.runtimeClasspath
+    }
 }
 
 neoForge {
@@ -102,6 +109,7 @@ neoForge {
     addModdingDependenciesTo sourceSets.data
     addModdingDependenciesTo sourceSets.reports
     addModdingDependenciesTo sourceSets.gametest
+    addModdingDependenciesTo sourceSets.companion
 
     mods {
         "${mod_id}" {
@@ -132,12 +140,24 @@ neoForge {
             sourceSet(sourceSets.main)
             sourceSet(sourceSets.gametest)
         }
+
+        // Dev-client capture tooling only ever loads through this entry, and only the shared `client` run
+        // below is repointed at it (never ships -- `jar tf` on the assembled jar carries no `companion`
+        // content, since `assemble` builds off `sourceSets.main` alone, unaffected by which run-time
+        // mods{} entry `client` happens to load). `main` is included alongside `companion` so the
+        // companion keeps full normal mod functionality (blocks/items/dimension/etc.) plus its own verbs
+        // -- a strict superset of `mainMod`, same shape as `gametestMod` above.
+        "${mod_id}-companion" {
+            sourceSet(sourceSets.main)
+            sourceSet(sourceSets.companion)
+        }
     }
 
     def mainMod = mods."${mod_id}"
     def dataMod = mods."${mod_id}-data"
     def reportsMod = mods."${mod_id}-reports"
     def gametestMod = mods."${mod_id}-gametest"
+    def companionMod = mods."${mod_id}-companion"
 
     // Specify the modid for data generation and where to look for existing resources; each run adds its own
     // --output below.
@@ -147,9 +167,13 @@ neoForge {
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
+        // Loads the capture-companion module (see the mods{} comment above and the `companion` source
+        // set): the dev client always carries the companion's file-bridge verbs now, in dev only. This is
+        // the "a shared run gains a second, dev-only mod entry" shape, as opposed to the gametest
+        // module's own "dedicated run repointed outright" shape above.
         client {
             client()
-            loadedMods = [mainMod]
+            loadedMods = [companionMod]
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
