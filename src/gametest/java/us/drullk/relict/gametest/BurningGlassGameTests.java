@@ -2,6 +2,7 @@ package us.drullk.relict.gametest;
 
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -12,6 +13,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.attribute.EnvironmentAttributeSystem;
 import net.minecraft.world.clock.WorldClock;
 import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -26,12 +28,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.timeline.Timeline;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
 import us.drullk.relict.Relict;
 import us.drullk.relict.atmosphere.RelictAtmosphereServer;
 import us.drullk.relict.atmosphere.StormPhase;
 import us.drullk.relict.block.wreck.SolarPanelDecay;
 import us.drullk.relict.init.RelictItems;
+import us.drullk.relict.init.worldgen.RelictDimension;
 import us.drullk.relict.item.BurningGlassItem;
 
 import java.util.List;
@@ -56,12 +60,30 @@ import java.util.function.Consumer;
  * the one thing that IS reachable and IS the actual contract: the item classifies a storm phase as dimming
  * through {@link SolarPanelDecay#isStormDepositingDust}, the exact function the solar panels already gate on
  * -- no second definition of "storm-dimmed" exists to test separately.
+ * <p>
+ * <strong>Known pre-existing flake, not touched here (see the impl report):</strong> {@code
+ * sandBecomesGlass}, {@code droppedStackCooksWhole} and {@code droppedStackBurnsWhole} fail intermittently
+ * under this same harness on unmodified {@code main} too. Instrumented live: the sun gate itself reads open
+ * and the raycast reports a BLOCK hit when it fails, yet the target is still unconverted afterward, and the
+ * failure does not clear even given 60+ retried ticks -- so it is not the day/night or light-engine timing
+ * this file's other gates already guard against. Root cause unresolved; left as-is rather than shipping an
+ * unverified band-aid.
  */
 public final class BurningGlassGameTests {
 
     private static final Identifier EMPTY_STRUCTURE = Identifier.withDefaultNamespace("empty");
     private static final BlockPos TARGET = new BlockPos(1, 2, 1);
     private static final BlockPos EYE = new BlockPos(1, 2, 3);
+
+    /**
+     * The Mars clock's own total-tick values for one of the datagen-computed total-eclipse events (see
+     * {@code OrbitTransitSolver}'s schedule report from {@code runServerData}): totality peaks at 64044,
+     * and the transit's tracked coverage has fully cleared by 64248, so 64249 is one tick past egress. Not
+     * derived at runtime because nothing here needs to re-scan the schedule -- these two ticks are enough
+     * to prove the gate closes for totality and reopens right after.
+     */
+    private static final long MARS_TOTALITY_TICK = 64044L;
+    private static final long MARS_EGRESS_TICK = 64249L;
 
     private BurningGlassGameTests() {
     }
@@ -92,6 +114,7 @@ public final class BurningGlassGameTests {
         Holder<TestEnvironmentDefinition<?>> isolatedClockEnvironment = event.registerEnvironment(Relict.id("burning_glass_time_sensitive"), new TestEnvironmentDefinition.AllOf(List.of()));
         test(event, isolatedClockEnvironment, "burning_glass_night_blocks_completion", "Burning Glass: night target does not convert", BurningGlassGameTests::nightBlocksCompletion);
         test(event, isolatedClockEnvironment, "burning_glass_gated_attempt_no_charge", "Burning Glass: gated use() never starts the hold", BurningGlassGameTests::gatedAttemptDoesNotStartCharge);
+        test(event, isolatedClockEnvironment, "burning_glass_eclipse_totality_blocks_then_reopens", "Burning Glass: eclipse totality gates it shut, egress reopens it", BurningGlassGameTests::eclipseGatesBurningGlass);
     }
 
     private static void test(RegisterGameTestsEvent event, Holder<TestEnvironmentDefinition<?>> environment, String id, String description, Consumer<GameTestHelper> function) {
@@ -162,11 +185,19 @@ public final class BurningGlassGameTests {
      * {@code canSeeSky} this tick. {@link GameTestHelper#runAfterDelay} gives the engine a handful of real
      * ticks to catch up before the hold is attempted, the same way a real player's roof would only start
      * gating the tool once the world had actually finished re-lighting under it.
+     * <p>
+     * The roof sits above {@code TARGET.relative(SOUTH)}, not above {@code TARGET} itself: {@link
+     * #sightedPlayer} looks at {@code TARGET} from due south at the same height, so the raycast lands on
+     * {@code TARGET}'s south face and {@link BurningGlassItem#targetPos} -- which keys the sun gate off the
+     * position the hit face looks out onto, not the block that was hit -- resolves to the south neighbor.
+     * A roof placed directly over {@code TARGET} sits one column away from anything the gate ever samples,
+     * which is why this test previously passed for the wrong reason: the roof never blocked anything the
+     * gate read, but the target still failed to convert, until the position was corrected here.
      */
     private static void noSkyAccessBlocksCompletion(GameTestHelper helper) {
         ServerLevel level = daylitLevel(helper);
         helper.setBlock(TARGET, Blocks.SAND);
-        helper.setBlock(TARGET.above(), Blocks.STONE);
+        helper.setBlock(TARGET.relative(Direction.SOUTH).above(), Blocks.STONE);
 
         helper.runAfterDelay(20, () -> {
             holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
@@ -229,6 +260,60 @@ public final class BurningGlassGameTests {
         }
 
         helper.assertBlockPresent(Blocks.SAND, TARGET);
+        helper.succeed();
+    }
+
+    /**
+     * Reproduces the real Mars transit end to end rather than testing a reused boundary: {@code mars_sol}
+     * and {@code phobos_transit} -- the actual registered timelines {@code OrbitTransitSolver} writes --
+     * are layered onto this gametest level's own attribute system on top of its default layers, so
+     * {@link BurningGlassItem#isSunGateOpen} runs its real {@code isBrightOutside} check against the real
+     * eclipse dip. {@code ServerLevel#setEnvironmentAttributes} is the same swap-and-restore the vanilla
+     * {@code TestEnvironmentDefinition.Timelines} environment uses; it is done here directly instead of
+     * through that declarative environment because the timeline holders it needs are only resolvable once
+     * the level's registries are up, which is after environment registration runs.
+     */
+    private static void eclipseGatesBurningGlass(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        helper.setBlock(TARGET, Blocks.SAND);
+        setTimeOfDay(level, 6000);
+
+        Holder<WorldClock> marsClock = level.registryAccess().lookupOrThrow(Registries.WORLD_CLOCK).getOrThrow(RelictDimension.MARS_CLOCK);
+        Holder<Timeline> marsSol = level.registryAccess().lookupOrThrow(Registries.TIMELINE).getOrThrow(RelictDimension.MARS_SOL);
+        Holder<Timeline> phobosTransit = level.registryAccess().lookupOrThrow(Registries.TIMELINE).getOrThrow(RelictDimension.PHOBOS_TRANSIT);
+        long originalMarsTicks = level.getServer().clockManager().getTotalTicks(marsClock);
+
+        EnvironmentAttributeSystem original = level.setEnvironmentAttributes(EnvironmentAttributeSystem.builder()
+                .addDefaultLayers(level)
+                .addTimelineLayer(marsSol, level.clockManager())
+                .addTimelineLayer(phobosTransit, level.clockManager())
+                .build());
+
+        try {
+            Player player = sightedPlayer(helper);
+            Item item = RelictItems.BURNING_GLASS.get();
+
+            level.getServer().clockManager().setTotalTicks(marsClock, MARS_TOTALITY_TICK);
+            level.updateSkyBrightness();
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
+            InteractionResult duringTotality = item.use(level, player, InteractionHand.MAIN_HAND);
+            helper.assertTrue(!player.isUsingItem(), "totality must not let the hold start");
+            helper.assertTrue(duringTotality != InteractionResult.CONSUME, "a totality attempt must not return CONSUME");
+            helper.assertBlockPresent(Blocks.SAND, TARGET);
+
+            level.getServer().clockManager().setTotalTicks(marsClock, MARS_EGRESS_TICK);
+            level.updateSkyBrightness();
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
+            InteractionResult afterEgress = item.use(level, player, InteractionHand.MAIN_HAND);
+            helper.assertTrue(player.isUsingItem(), "one tick past egress the gate should let the hold start");
+            helper.assertTrue(afterEgress == InteractionResult.CONSUME, "one tick past egress use() should return CONSUME");
+            player.stopUsingItem();
+        } finally {
+            level.setEnvironmentAttributes(original);
+            level.getServer().clockManager().setTotalTicks(marsClock, originalMarsTicks);
+        }
+
+        setTimeOfDay(level, 6000);
         helper.succeed();
     }
 

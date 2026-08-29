@@ -4,10 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.EasingType;
-import net.minecraft.util.Keyframe;
-import net.minecraft.util.KeyframeTrack;
-import net.minecraft.util.KeyframeTrackSampler;
+import net.minecraft.util.*;
 import net.minecraft.world.attribute.EnvironmentAttribute;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.attribute.LerpFunction;
@@ -285,6 +282,8 @@ public class OrbitTransitSolver {
                 .setPeriodTicks(periodTicks)
                 .addModifierTrack(EnvironmentAttributes.SKY_LIGHT_LEVEL, FloatModifier.MULTIPLY,
                         track -> dips.forEach(track::addKeyframe))
+                .addModifierTrack(RelictEnvironmentAttributes.ECLIPSE_DARKEN, FloatModifier.MULTIPLY,
+                        track -> dips.forEach((ticks, value) -> track.addKeyframe(ticks, Mth.lerp(value, 0.67f, 1.0f))))
                 .build());
     }
 

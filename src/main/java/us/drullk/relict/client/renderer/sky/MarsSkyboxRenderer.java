@@ -35,6 +35,7 @@ import org.jspecify.annotations.Nullable;
 import us.drullk.relict.Relict;
 import us.drullk.relict.client.atmosphere.RelictAtmosphere;
 import us.drullk.relict.client.renderer.RelictRenderPipelines;
+import us.drullk.relict.init.RelictEnvironmentAttributes;
 import us.drullk.relict.init.worldgen.RelictDimension;
 
 import java.util.Optional;
@@ -103,7 +104,7 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
      * A record so the storm parameters can join it later without rethreading anything: note 12 derives
      * audio from a shared {@code tau}, and note 09 wants the same value darkening this sky.
      */
-    public record MarsSkyState(float[] angles, float[] inclinations, float[] scales) {
+    public record MarsSkyState(float[] angles, float[] inclinations, float[] scales, float eclipseDarken) {
 
         public float angle(MarsMoons moon) {
             return this.angles[moon.ordinal()];
@@ -143,7 +144,8 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
             scales[moon.ordinal()] = probe.getValue(moon.scale(), partialTicks);
         }
 
-        renderState.setRenderData(SKY_STATE, new MarsSkyState(angles, inclinations, scales));
+        float eclipseDarken = probe.getValue(RelictEnvironmentAttributes.ECLIPSE_DARKEN, partialTicks);
+        renderState.setRenderData(SKY_STATE, new MarsSkyState(angles, inclinations, scales, eclipseDarken));
     }
 
     @Override
@@ -174,10 +176,11 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
 
         float pressure = RelictAtmosphere.clientPressure();
         float tau = RelictAtmosphere.clientTau();
+        float eclipseDarken = state.eclipseDarken();
 
         RenderTarget layer = this.celestialLayer(main);
         setupFog.run();
-        vanilla.renderSkyDisc(stormSkyColor(skyRenderState.skyColor, pressure, tau));
+        vanilla.renderSkyDisc(ARGB.scaleRGB(stormSkyColor(skyRenderState.skyColor, pressure, tau), eclipseDarken));
 
         PoseStack poseStack = new PoseStack();
         vanilla.renderSunriseAndSunset(poseStack, skyRenderState.sunAngle, skyRenderState.sunriseAndSunsetColor);
@@ -195,7 +198,9 @@ public class MarsSkyboxRenderer implements CustomSkyboxRenderer {
 
         // Dust dims the sun to a pale disc rather than erasing it; the moons ride on top untouched, so
         // occlusion behind thick dust falls out of the same layer-composite this renderer already does.
-        float sunBrightness = 1.0F - Mth.clamp(tau, 0.0F, 1.0F) * STORM_SUN_DIM_MAX;
+        // A transit rides the same brightness, so the sun visibly fades toward the moon's silhouette
+        // rather than staying full strength behind it.
+        float sunBrightness = (1.0F - Mth.clamp(tau, 0.0F, 1.0F) * STORM_SUN_DIM_MAX) * eclipseDarken;
         orient(poseStack, 0.0F, sunAngleDegrees);
         drawQuad(layerView, "Mars sun", RenderPipelines.CELESTIAL, resources.celestials(), resources.sunBuffer(), 0,
                 poseStack, RelictDimension.SUN_QUAD_EXTENT,

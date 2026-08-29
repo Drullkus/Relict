@@ -36,6 +36,8 @@ public class RelictEnvironmentAttributes {
     public static final EnvironmentAttribute<Float> DEIMOS_INCLINATION = angle();
     public static final EnvironmentAttribute<Float> DEIMOS_SCALE = scale();
 
+    public static final EnvironmentAttribute<Float> ECLIPSE_DARKEN = scale();
+
     static {
         ENVIRONMENT_ATTRIBUTES.register("visual/phobos_angle", () -> PHOBOS_ANGLE);
         ENVIRONMENT_ATTRIBUTES.register("visual/phobos_inclination", () -> PHOBOS_INCLINATION);
@@ -43,6 +45,7 @@ public class RelictEnvironmentAttributes {
         ENVIRONMENT_ATTRIBUTES.register("visual/deimos_angle", () -> DEIMOS_ANGLE);
         ENVIRONMENT_ATTRIBUTES.register("visual/deimos_inclination", () -> DEIMOS_INCLINATION);
         ENVIRONMENT_ATTRIBUTES.register("visual/deimos_scale", () -> DEIMOS_SCALE);
+        ENVIRONMENT_ATTRIBUTES.register("visual/eclipse_darken", () -> ECLIPSE_DARKEN);
     }
 
     /**
