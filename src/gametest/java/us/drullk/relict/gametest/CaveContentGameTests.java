@@ -71,7 +71,8 @@ public final class CaveContentGameTests {
     private static final double RATIO_TOLERANCE_LOW = 1.8;
     private static final double RATIO_TOLERANCE_HIGH = 4.5;
 
-    private static final int FROST_FLOOR_SCAN_DEPTH = 12;
+    // Mirrors RelictPlacedFeatureGenerator.FROST_FLOOR_SCAN_STEPS
+    private static final int FROST_FLOOR_SCAN_DEPTH = 24;
     private static final int FROST_FLOOR_TRIALS = 100;
     private static final int HEIGHT_BAND_SAMPLES = 4000;
 

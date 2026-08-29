@@ -45,7 +45,8 @@ public class RelictPlacedFeatureGenerator {
 
     private static final int SULFUR_DEEP_LAKE_RARITY = 256;
 
-    private static final UniformInt FROST_FLOOR_ATTEMPTS = UniformInt.of(48, 96);
+    private static final UniformInt FROST_FLOOR_ATTEMPTS = UniformInt.of(96, 160);
+    private static final int FROST_FLOOR_SCAN_STEPS = 24;
 
     private static final PlacementModifier NOT_NEAR_LAVA = BlockPredicateFilter.forPredicate(BlockPredicate.allOf(
             Stream.of(Direction.values())
@@ -109,7 +110,7 @@ public class RelictPlacedFeatureGenerator {
         register(context, RelictPlacedFeatures.PACKED_ICE_LENS, features.getOrThrow(RelictConfiguredFeatures.PACKED_ICE_LENS), CountPlacement.of(UniformInt.of(3, 6)), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.ICE_MARGIN, features.getOrThrow(RelictConfiguredFeatures.ICE_MARGIN), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.BLUE_ICE_CORE, features.getOrThrow(RelictConfiguredFeatures.BLUE_ICE_CORE), RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), SHALLOW_BAND, NOT_NEAR_LAVA, BiomeFilter.biome());
-        register(context, RelictPlacedFeatures.FROST_FLOOR, features.getOrThrow(RelictConfiguredFeatures.FROST_FLOOR), CountPlacement.of(FROST_FLOOR_ATTEMPTS), InSquarePlacement.spread(), SHALLOW_BAND, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(1)), NOT_NEAR_LAVA, BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.FROST_FLOOR, features.getOrThrow(RelictConfiguredFeatures.FROST_FLOOR), CountPlacement.of(FROST_FLOOR_ATTEMPTS), InSquarePlacement.spread(), SHALLOW_BAND, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, FROST_FLOOR_SCAN_STEPS), RandomOffsetPlacement.vertical(ConstantInt.of(1)), NOT_NEAR_LAVA, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.ICE_LENS_RIM, features.getOrThrow(RelictConfiguredFeatures.ICE_LENS_RIM), CountPlacement.of(CAVE_SURFACE_ATTEMPTS), InSquarePlacement.spread(), SHALLOW_BAND, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.ICE_WALL_POCKET, features.getOrThrow(RelictConfiguredFeatures.ICE_WALL_POCKET), CountPlacement.of(UniformInt.of(12, 24)), InSquarePlacement.spread(), SHALLOW_BAND, BiomeFilter.biome());
     }

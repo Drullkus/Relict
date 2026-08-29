@@ -176,7 +176,7 @@ public class RelictConfiguredFeatureGenerator {
         register(context, RelictConfiguredFeatures.BLUE_ICE_CORE, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.BLUE_ICE.defaultBlockState(), 6));
 
         register(context, RelictConfiguredFeatures.FROST_FLOOR, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(
-                drySnowLayerOptions(FROST_FLOOR_LAYER_WEIGHTS))));
+                snowLayerOptions(FROST_FLOOR_LAYER_WEIGHTS))));
 
         register(context, RelictConfiguredFeatures.ICE_LENS_RIM, Feature.SIMPLE_RANDOM_SELECTOR, new CompositeFeatureConfiguration(HolderSet.direct(
                 caveSkinOfIce(Direction.DOWN, PACKED_ICE, Blocks.PACKED_ICE, ICE_LENS_RIM_SIZE),
@@ -187,12 +187,12 @@ public class RelictConfiguredFeatureGenerator {
                 caveSkinOfIce(Direction.UP, SMOOTH_BASALT, Blocks.SMOOTH_BASALT, ICE_WALL_POCKET_SIZE))));
     }
 
-    private static List<Holder<PlacedFeature>> drySnowLayerOptions(int[] weightByLayerCount) {
+    private static List<Holder<PlacedFeature>> snowLayerOptions(int[] weightByLayerCount) {
         List<Holder<PlacedFeature>> options = new ArrayList<>();
         for (int index = 0; index < weightByLayerCount.length; index++) {
             int layers = index + 1;
             Holder<PlacedFeature> option = PlacementUtils.inlinePlaced(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(
-                    BlockStateProvider.simple(RelictBlocks.DRY_SNOW_LAYER.get().defaultBlockState().setValue(AbstractRelictLayerBlock.LAYERS, layers))));
+                    BlockStateProvider.simple(Blocks.SNOW.defaultBlockState().setValue(AbstractRelictLayerBlock.LAYERS, layers))));
             options.addAll(Collections.nCopies(weightByLayerCount[index], option));
         }
         return options;
