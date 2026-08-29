@@ -10,7 +10,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.ContainerUser;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -170,6 +172,50 @@ public class CipherChestBlockEntity extends ChestBlockEntity {
 
         this.setChanged();
         return correct;
+    }
+
+    // Every automation route (hopper, dropper, hopper minecart) reaches a target purely through the plain
+    // Container interface -- HopperBlockEntity#getBlockContainer resolves it via `blockEntity instanceof
+    // Container`, no capability lookup involved, and RandomizableContainerBlockEntity's own
+    // getItem/removeItem/isEmpty/setItem all unpack this chest's loot table as a side effect of being called
+    // at all, correct guess or not. Gating every one of these six methods on isSolved() closes the
+    // extraction route, the insertion route, and the unpack-by-merely-reading route in one place; once
+    // solved, each delegates straight through to the vanilla chest behavior it already had.
+    @Override
+    public boolean isEmpty() {
+        return !this.solved || super.isEmpty();
+    }
+
+    @Override
+    public ItemStack getItem(int slot) {
+        return this.solved ? super.getItem(slot) : ItemStack.EMPTY;
+    }
+
+    @Override
+    public ItemStack removeItem(int slot, int count) {
+        return this.solved ? super.removeItem(slot, count) : ItemStack.EMPTY;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot) {
+        return this.solved ? super.removeItemNoUpdate(slot) : ItemStack.EMPTY;
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack itemStack) {
+        if (this.solved) {
+            super.setItem(slot, itemStack);
+        }
+    }
+
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack itemStack) {
+        return this.solved && super.canPlaceItem(slot, itemStack);
+    }
+
+    @Override
+    public boolean canTakeItem(Container into, int slot, ItemStack itemStack) {
+        return this.solved && super.canTakeItem(into, slot, itemStack);
     }
 
     @Override

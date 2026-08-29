@@ -15,8 +15,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.AABB;
@@ -57,6 +61,9 @@ public final class CipherChestGameTests {
     private static final BlockPos POS = new BlockPos(2, 1, 2);
     private static final Direction FACING = Direction.NORTH;
 
+    /** Well past a hopper's 8-tick cooldown, so a blocked hopper has had many chances to prove it, not one. */
+    private static final long HOPPER_TICK_BUDGET = 60L;
+
     private CipherChestGameTests() {
     }
 
@@ -93,9 +100,21 @@ public final class CipherChestGameTests {
         event.registerTest(id("loot_table_unpacks_on_unlock_and_open"), new RelictFunctionGameTestInstance(
                 CipherChestGameTests::lootTableUnpacksOnUnlockAndOpen,
                 Component.literal("Cipher Chest: a LootTable key rolls into real items on first open, then clears"), data));
-        event.registerTest(id("loot_table_reachable_locked_via_container_api"), new RelictFunctionGameTestInstance(
-                CipherChestGameTests::lootTableReachableLockedViaContainerApi,
-                Component.literal("Cipher Chest: a locked chest's Container methods (the hopper path) still unpack loot"), data));
+        event.registerTest(id("container_api_denies_access_while_locked"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::containerApiDeniesAccessWhileLocked,
+                Component.literal("Cipher Chest: a locked chest's Container methods refuse access and never unpack loot"), data));
+        event.registerTest(id("hopper_cannot_extract_from_locked_chest"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::hopperCannotExtractFromLockedChest,
+                Component.literal("Cipher Chest: a real hopper below a locked chest extracts nothing over time"), data));
+        event.registerTest(id("hopper_cannot_insert_into_locked_chest"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::hopperCannotInsertIntoLockedChest,
+                Component.literal("Cipher Chest: a real hopper above a locked chest never manages to push its item in"), data));
+        event.registerTest(id("hopper_cannot_extract_during_lockout_window"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::hopperCannotExtractDuringLockoutWindow,
+                Component.literal("Cipher Chest: the wrong-guess lockout window rejects a hopper the same as never-solved"), data));
+        event.registerTest(id("hopper_routes_resume_once_unlocked"), new RelictFunctionGameTestInstance(
+                CipherChestGameTests::hopperRoutesResumeOnceUnlocked,
+                Component.literal("Cipher Chest: once solved, hopper extraction and insertion both behave vanilla-normal"), data));
     }
 
     private static Identifier id(String path) {
@@ -245,28 +264,113 @@ public final class CipherChestGameTests {
     }
 
     /**
-     * {@code CipherChestBlockEntity} has no lock gate on the plain {@link net.minecraft.world.Container}
-     * methods -- only {@code useWithoutItem} (the right-click puzzle) checks {@code isSolved()}. A hopper
-     * reaches a container through {@code Container#getItem}/{@code removeItem}, not through a block
-     * right-click, so it can pull from -- and unpack the loot table of -- a chest that was never solved.
-     * This test records that finding with a direct {@code getItem} call (what a hopper's extraction
-     * ultimately bottoms out in) rather than gating it -- whether automation should be able to reach
-     * a locked chest's contents at all is a producer call this test only documents, not makes.
+     * Direct, per-method proof that every {@link net.minecraft.world.Container} entry point -- not just the
+     * emergent hopper behavior the tests below drive -- refuses access while locked: {@code getItem} and
+     * {@code removeItem} return empty without unpacking the loot table, {@code setItem} is a no-op, and
+     * {@code canPlaceItem}/{@code canTakeItem} both refuse. This is what a hopper, dropper, or hopper
+     * minecart ultimately bottoms out in (see {@code HopperBlockEntity#getBlockContainer}, which resolves a
+     * target purely via {@code instanceof Container} -- no capability lookup involved), so gating it here
+     * gates all of them at once.
      */
-    private static void lootTableReachableLockedViaContainerApi(GameTestHelper helper) {
+    private static void containerApiDeniesAccessWhileLocked(GameTestHelper helper) {
         place(helper, false);
         CipherChestBlockEntity chest = chestAt(helper);
         chest.setLootTable(BuiltInLootTables.SIMPLE_DUNGEON, LOOT_SEED);
+        ItemStack probe = new ItemStack(Items.DIAMOND);
 
-        helper.assertTrue(!chest.isSolved(), "sanity: the chest must still be locked for this finding to mean anything");
+        helper.assertTrue(!chest.isSolved(), "sanity: the chest must still be locked for this test to mean anything");
+        helper.assertTrue(chest.getItem(0).isEmpty(), "a locked chest must present every slot as empty to a direct Container#getItem call");
+        helper.assertTrue(chest.removeItem(0, 1).isEmpty(), "a locked chest must have nothing for Container#removeItem to take");
+        helper.assertTrue(!chest.canTakeItem(chest, 0, probe), "a locked chest must refuse extraction through Container#canTakeItem");
+        helper.assertTrue(!chest.canPlaceItem(0, probe), "a locked chest must refuse insertion through Container#canPlaceItem");
 
-        ItemStack ignored = chest.getItem(0);
-
-        helper.assertTrue(chest.getLootTable() == null,
-                "a locked chest's loot table unpacks on any Container access -- the hopper path is not gated by the puzzle");
-        helper.assertTrue(anySlotFilled(chest), "the unpacked loot table should have placed at least one item, even while locked");
-        helper.assertTrue(!chest.isSolved(), "unpacking loot through the Container path must not solve the puzzle");
+        chest.setItem(0, probe);
+        helper.assertTrue(chest.getItem(0).isEmpty(), "a direct Container#setItem call must not be able to plant an item in a locked chest");
+        helper.assertTrue(chest.getLootTable() != null, "a locked chest's loot table must not unpack via any direct Container-interface call");
         helper.succeed();
+    }
+
+    private static void hopperCannotExtractFromLockedChest(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        chest.setLootTable(BuiltInLootTables.SIMPLE_DUNGEON, LOOT_SEED);
+        BlockPos hopperPos = POS.below();
+        helper.setBlock(hopperPos, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.DOWN));
+
+        helper.runAtTickTime(HOPPER_TICK_BUDGET, () -> {
+            helper.assertTrue(chest.getLootTable() != null,
+                    "a locked chest's loot table must survive a real hopper ticking beneath it for a generous window");
+            helper.assertTrue(hopperIsEmpty(helper, hopperPos), "a hopper below a locked chest must never extract anything");
+            helper.succeed();
+        });
+    }
+
+    private static void hopperCannotInsertIntoLockedChest(GameTestHelper helper) {
+        place(helper, false);
+        BlockPos hopperPos = POS.above();
+        helper.setBlock(hopperPos, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.DOWN));
+        HopperBlockEntity hopper = helper.getBlockEntity(hopperPos, HopperBlockEntity.class);
+        hopper.setItem(0, new ItemStack(Items.DIAMOND));
+
+        helper.runAtTickTime(HOPPER_TICK_BUDGET, () -> {
+            ItemStack stillHeld = hopper.getItem(0);
+            helper.assertTrue(!stillHeld.isEmpty() && stillHeld.getCount() == 1,
+                    "a hopper feeding a locked chest must still hold its own item -- a successful push would have consumed it");
+            helper.succeed();
+        });
+    }
+
+    private static void hopperCannotExtractDuringLockoutWindow(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        Player dialer = helper.makeMockServerPlayer(GameType.SURVIVAL);
+        int cell = firstBlankCell(chest);
+        if (chest.displayValueAt(cell) == CipherChestSquare.valueAt(cell)) {
+            helper.useBlock(POS, dialer, dialHit(helper, cell));
+        }
+        helper.useBlock(POS, dialer, latchHit(helper)); // a wrong guess: scrambles the dials, starts the lockout
+
+        long gameTime = helper.getLevel().getGameTime();
+        helper.assertTrue(!chest.isSolved() && chest.isLockedOut(gameTime), "sanity: the chest must be in its wrong-guess lockout window");
+
+        chest.setLootTable(BuiltInLootTables.SIMPLE_DUNGEON, LOOT_SEED);
+        BlockPos hopperPos = POS.below();
+        helper.setBlock(hopperPos, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.DOWN));
+
+        // Strictly inside CipherChestBlockEntity.LOCKOUT_TICKS (60), not just "still unsolved" some time
+        // after it lapsed -- generous enough for several hopper cooldown cycles either way.
+        long checkTick = CipherChestBlockEntity.LOCKOUT_TICKS / 2;
+        helper.runAtTickTime(checkTick, () -> {
+            helper.assertTrue(chest.isLockedOut(helper.getLevel().getGameTime()), "sanity: the check must still land inside the lockout window");
+            helper.assertTrue(chest.getLootTable() != null,
+                    "the lockout window is still an unsolved chest -- a hopper must not unpack or extract during it either");
+            helper.assertTrue(hopperIsEmpty(helper, hopperPos), "a hopper below a lockout-window chest must never extract anything");
+            helper.succeed();
+        });
+    }
+
+    private static void hopperRoutesResumeOnceUnlocked(GameTestHelper helper) {
+        place(helper, false);
+        CipherChestBlockEntity chest = chestAt(helper);
+        chest.setLootTable(BuiltInLootTables.SIMPLE_DUNGEON, LOOT_SEED);
+        ServerPlayer player = menuCapablePlayer(helper);
+        solve(helper, chest, player);
+        helper.assertTrue(chest.isSolved() && anySlotFilled(chest), "sanity: the chest should be solved and loot-filled before the hopper checks");
+
+        BlockPos extractHopperPos = POS.below();
+        helper.setBlock(extractHopperPos, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.DOWN));
+
+        BlockPos insertHopperPos = POS.east();
+        helper.setBlock(insertHopperPos, Blocks.HOPPER.defaultBlockState().setValue(HopperBlock.FACING, Direction.WEST));
+        HopperBlockEntity insertHopper = helper.getBlockEntity(insertHopperPos, HopperBlockEntity.class);
+        insertHopper.setItem(0, new ItemStack(Items.EMERALD));
+
+        helper.runAtTickTime(HOPPER_TICK_BUDGET, () -> {
+            helper.assertTrue(!hopperIsEmpty(helper, extractHopperPos), "an unlocked chest must feed a hopper below it exactly like a vanilla chest");
+            helper.assertTrue(hopperIsEmpty(helper, insertHopperPos),
+                    "an unlocked chest must accept a hopper's push exactly like a vanilla chest (the emerald should have moved in)");
+            helper.succeed();
+        });
     }
 
     // ------------------------------------------------------------------------------------------- helpers
@@ -321,6 +425,11 @@ public final class CipherChestGameTests {
             helper.assertTrue(chest.displayValueAt(cell) == target, "dial at cell " + cell + " should reach its canon value");
         }
         helper.useBlock(POS, player, latchHit(helper));
+    }
+
+    private static boolean hopperIsEmpty(GameTestHelper helper, BlockPos hopperPos) {
+        HopperBlockEntity hopper = helper.getBlockEntity(hopperPos, HopperBlockEntity.class);
+        return hopper.isEmpty();
     }
 
     private static boolean anySlotFilled(CipherChestBlockEntity chest) {
