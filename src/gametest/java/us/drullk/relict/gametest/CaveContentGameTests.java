@@ -243,14 +243,14 @@ public final class CaveContentGameTests {
             scanningFrostFloor.place(level, generator, random, origin);
 
             BlockState landing = helper.getBlockState(landingRel);
-            if (landing.is(RelictBlocks.DRY_SNOW_LAYER.get())) {
+            if (landing.is(Blocks.SNOW)) {
                 landedOnFloor++;
                 int layers = landing.getValue(AbstractRelictLayerBlock.LAYERS);
                 helper.assertTrue(layers >= 1 && layers <= 3, "frost_floor placed " + layers + " layers, expected 1-3");
                 layerCounts.merge(layers, 1, Integer::sum);
                 helper.assertTrue(helper.getBlockState(floorRel).isSolidRender(), "landing floor is missing under a placed layer");
             }
-            helper.assertTrue(!helper.getBlockState(ceilingRel.below()).is(RelictBlocks.DRY_SNOW_LAYER.get()), "a snow layer reached the ceiling side");
+            helper.assertTrue(!helper.getBlockState(ceilingRel.below()).is(Blocks.SNOW), "a snow layer reached the ceiling side");
         }
 
         System.out.printf("=== frost_floor floor/layer probe === trials=%d landed_on_floor=%d layers1=%d layers2=%d layers3=%d%n",
@@ -259,9 +259,9 @@ public final class CaveContentGameTests {
         helper.assertTrue(layerCounts.getOrDefault(1, 0) >= layerCounts.getOrDefault(3, 0), "layers=1 was not at least as common as layers=3 — weighting looks inverted");
 
         // No-floating law, checked independently of the feature: an unsupported layer must self-remove.
-        helper.setBlock(landingRel, RelictBlocks.DRY_SNOW_LAYER.get().defaultBlockState());
+        helper.setBlock(landingRel, Blocks.SNOW.defaultBlockState());
         helper.setBlock(floorRel, Blocks.AIR);
-        helper.assertTrue(helper.getBlockState(landingRel).isAir(), "a dry_snow_layer block survived with its support removed (detached solid)");
+        helper.assertTrue(helper.getBlockState(landingRel).isAir(), "a snow block survived with its support removed (detached solid)");
 
         helper.succeed();
     }
