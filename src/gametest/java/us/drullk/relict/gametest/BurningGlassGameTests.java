@@ -61,13 +61,17 @@ import java.util.function.Consumer;
  * through {@link SolarPanelDecay#isStormDepositingDust}, the exact function the solar panels already gate on
  * -- no second definition of "storm-dimmed" exists to test separately.
  * <p>
- * <strong>Known pre-existing flake, not touched here (see the impl report):</strong> {@code
- * sandBecomesGlass}, {@code droppedStackCooksWhole} and {@code droppedStackBurnsWhole} fail intermittently
- * under this same harness on unmodified {@code main} too. Instrumented live: the sun gate itself reads open
- * and the raycast reports a BLOCK hit when it fails, yet the target is still unconverted afterward, and the
- * failure does not clear even given 60+ retried ticks -- so it is not the day/night or light-engine timing
- * this file's other gates already guard against. Root cause unresolved; left as-is rather than shipping an
- * unverified band-aid.
+ * <strong>The shared arena is cleared to air before every test, not left to the dimension's own terrain.</strong>
+ * The {@code empty} test structure both this class and {@link #EMPTY_STRUCTURE} use is a single air block,
+ * not a prepared room -- everything outside that one block, including the ground the mock player stands on
+ * and the line of sight between {@link #EYE} and {@link #TARGET}, is whatever the GameTest dimension's own
+ * (decorated) terrain happens to be at that spot, which shifts with the random per-run world offset every
+ * {@code runGameTestServer} invocation logs. {@link #clearArena} removes that dependency instead of hoping
+ * the draw lands on air: a raycast that starts or passes through un-cleared real terrain returns whatever
+ * solid block it clips first, which reads exactly like "the sun gate is open yet the target never converts"
+ * -- the gate was never the thing failing. {@link #afterSettling} closes the remaining gap: even over
+ * guaranteed-air terrain, a raycast fired the instant the target is staged can still miss it, so every
+ * conversion/gate test raycasts a couple of real ticks after staging, not the same tick.
  */
 public final class BurningGlassGameTests {
 
@@ -128,42 +132,50 @@ public final class BurningGlassGameTests {
         ServerLevel level = daylitLevel(helper);
         helper.setBlock(TARGET, Blocks.SAND);
 
-        holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
+        afterSettling(helper, () -> {
+            holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertBlockPresent(Blocks.GLASS, TARGET);
-        helper.succeed();
+            helper.assertBlockPresent(Blocks.GLASS, TARGET);
+            helper.succeed();
+        });
     }
 
     private static void clayBecomesTerracotta(GameTestHelper helper) {
         ServerLevel level = daylitLevel(helper);
         helper.setBlock(TARGET, Blocks.CLAY);
 
-        holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
+        afterSettling(helper, () -> {
+            holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertBlockPresent(Blocks.TERRACOTTA, TARGET);
-        helper.succeed();
+            helper.assertBlockPresent(Blocks.TERRACOTTA, TARGET);
+            helper.succeed();
+        });
     }
 
     private static void logBecomesCharcoalDrop(GameTestHelper helper) {
         ServerLevel level = daylitLevel(helper);
         helper.setBlock(TARGET, Blocks.OAK_LOG);
 
-        holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
+        afterSettling(helper, () -> {
+            holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertBlockPresent(Blocks.AIR, TARGET);
-        assertDroppedItem(helper, level, Items.CHARCOAL, "log conversion should drop charcoal");
-        helper.succeed();
+            helper.assertBlockPresent(Blocks.AIR, TARGET);
+            assertDroppedItem(helper, level, Items.CHARCOAL, "log conversion should drop charcoal");
+            helper.succeed();
+        });
     }
 
     private static void oreBecomesIngotDrop(GameTestHelper helper) {
         ServerLevel level = daylitLevel(helper);
         helper.setBlock(TARGET, Blocks.IRON_ORE);
 
-        holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
+        afterSettling(helper, () -> {
+            holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertBlockPresent(Blocks.AIR, TARGET);
-        assertDroppedItem(helper, level, Items.IRON_INGOT, "iron ore conversion should drop an iron ingot");
-        helper.succeed();
+            helper.assertBlockPresent(Blocks.AIR, TARGET);
+            assertDroppedItem(helper, level, Items.IRON_INGOT, "iron ore conversion should drop an iron ingot");
+            helper.succeed();
+        });
     }
 
     private static void unmappedBlockUnaffected(GameTestHelper helper) {
@@ -208,15 +220,21 @@ public final class BurningGlassGameTests {
     }
 
     private static void nightBlocksCompletion(GameTestHelper helper) {
+        clearArena(helper);
         ServerLevel level = helper.getLevel();
         helper.setBlock(TARGET, Blocks.SAND);
-        setTimeOfDay(level, 18000);
 
-        holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
+        // setTimeOfDay happens inside the settled callback, not before it: the forced clock override
+        // doesn't survive a real tick elapsing (see afterSettling) -- a normal level tick recomputes
+        // skyDarken from the clock's own progression, undoing the override before the gate ever reads it.
+        afterSettling(helper, () -> {
+            setTimeOfDay(level, 18000);
+            holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertBlockPresent(Blocks.SAND, TARGET);
-        setTimeOfDay(level, 6000);
-        helper.succeed();
+            helper.assertBlockPresent(Blocks.SAND, TARGET);
+            setTimeOfDay(level, 6000);
+            helper.succeed();
+        });
     }
 
     /**
@@ -225,23 +243,27 @@ public final class BurningGlassGameTests {
      * completion -- a doomed 20-second hold is never started.
      */
     private static void gatedAttemptDoesNotStartCharge(GameTestHelper helper) {
+        clearArena(helper);
         ServerLevel level = helper.getLevel();
         helper.setBlock(TARGET, Blocks.SAND);
-        setTimeOfDay(level, 18000);
 
-        Player player = sightedPlayer(helper);
-        Item item = RelictItems.BURNING_GLASS.get();
-        ItemStack stack = new ItemStack(item);
-        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        // See nightBlocksCompletion: setTimeOfDay must happen after the settle delay, not before it.
+        afterSettling(helper, () -> {
+            setTimeOfDay(level, 18000);
+            Player player = sightedPlayer(helper);
+            Item item = RelictItems.BURNING_GLASS.get();
+            ItemStack stack = new ItemStack(item);
+            player.setItemInHand(InteractionHand.MAIN_HAND, stack);
 
-        InteractionResult result = item.use(level, player, InteractionHand.MAIN_HAND);
+            InteractionResult result = item.use(level, player, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(!player.isUsingItem(), "a gated attempt must not start the hold");
-        helper.assertTrue(result != InteractionResult.CONSUME, "a gated attempt must not return CONSUME");
-        helper.assertBlockPresent(Blocks.SAND, TARGET);
+            helper.assertTrue(!player.isUsingItem(), "a gated attempt must not start the hold");
+            helper.assertTrue(result != InteractionResult.CONSUME, "a gated attempt must not return CONSUME");
+            helper.assertBlockPresent(Blocks.SAND, TARGET);
 
-        setTimeOfDay(level, 6000);
-        helper.succeed();
+            setTimeOfDay(level, 6000);
+            helper.succeed();
+        });
     }
 
     private static void earlyReleaseHasNoEffect(GameTestHelper helper) {
@@ -274,6 +296,7 @@ public final class BurningGlassGameTests {
      * the level's registries are up, which is after environment registration runs.
      */
     private static void eclipseGatesBurningGlass(GameTestHelper helper) {
+        clearArena(helper);
         ServerLevel level = helper.getLevel();
         helper.setBlock(TARGET, Blocks.SAND);
         setTimeOfDay(level, 6000);
@@ -289,32 +312,34 @@ public final class BurningGlassGameTests {
                 .addTimelineLayer(phobosTransit, level.clockManager())
                 .build());
 
-        try {
-            Player player = sightedPlayer(helper);
-            Item item = RelictItems.BURNING_GLASS.get();
+        afterSettling(helper, () -> {
+            try {
+                Player player = sightedPlayer(helper);
+                Item item = RelictItems.BURNING_GLASS.get();
 
-            level.getServer().clockManager().setTotalTicks(marsClock, MARS_TOTALITY_TICK);
-            level.updateSkyBrightness();
-            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
-            InteractionResult duringTotality = item.use(level, player, InteractionHand.MAIN_HAND);
-            helper.assertTrue(!player.isUsingItem(), "totality must not let the hold start");
-            helper.assertTrue(duringTotality != InteractionResult.CONSUME, "a totality attempt must not return CONSUME");
-            helper.assertBlockPresent(Blocks.SAND, TARGET);
+                level.getServer().clockManager().setTotalTicks(marsClock, MARS_TOTALITY_TICK);
+                level.updateSkyBrightness();
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
+                InteractionResult duringTotality = item.use(level, player, InteractionHand.MAIN_HAND);
+                helper.assertTrue(!player.isUsingItem(), "totality must not let the hold start");
+                helper.assertTrue(duringTotality != InteractionResult.CONSUME, "a totality attempt must not return CONSUME");
+                helper.assertBlockPresent(Blocks.SAND, TARGET);
 
-            level.getServer().clockManager().setTotalTicks(marsClock, MARS_EGRESS_TICK);
-            level.updateSkyBrightness();
-            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
-            InteractionResult afterEgress = item.use(level, player, InteractionHand.MAIN_HAND);
-            helper.assertTrue(player.isUsingItem(), "one tick past egress the gate should let the hold start");
-            helper.assertTrue(afterEgress == InteractionResult.CONSUME, "one tick past egress use() should return CONSUME");
-            player.stopUsingItem();
-        } finally {
-            level.setEnvironmentAttributes(original);
-            level.getServer().clockManager().setTotalTicks(marsClock, originalMarsTicks);
-        }
+                level.getServer().clockManager().setTotalTicks(marsClock, MARS_EGRESS_TICK);
+                level.updateSkyBrightness();
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
+                InteractionResult afterEgress = item.use(level, player, InteractionHand.MAIN_HAND);
+                helper.assertTrue(player.isUsingItem(), "one tick past egress the gate should let the hold start");
+                helper.assertTrue(afterEgress == InteractionResult.CONSUME, "one tick past egress use() should return CONSUME");
+                player.stopUsingItem();
+            } finally {
+                level.setEnvironmentAttributes(original);
+                level.getServer().clockManager().setTotalTicks(marsClock, originalMarsTicks);
+            }
 
-        setTimeOfDay(level, 6000);
-        helper.succeed();
+            setTimeOfDay(level, 6000);
+            helper.succeed();
+        });
     }
 
     // --------------------------------------------------------------------------------------- use duration
@@ -350,12 +375,14 @@ public final class BurningGlassGameTests {
         ItemEntity dropped = helper.spawnItem(Items.SAND, Vec3.atCenterOf(TARGET));
         dropped.setItem(new ItemStack(Items.SAND, 5));
 
-        holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
+        afterSettling(helper, () -> {
+            holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertTrue(dropped.isAlive(), "the entity itself should survive a cook, only its stack changes");
-        ItemStack result = dropped.getItem();
-        helper.assertTrue(result.is(Items.GLASS) && result.getCount() == 5, "the whole 5-sand stack should cook to 5 glass, got " + result);
-        helper.succeed();
+            helper.assertTrue(dropped.isAlive(), "the entity itself should survive a cook, only its stack changes");
+            ItemStack result = dropped.getItem();
+            helper.assertTrue(result.is(Items.GLASS) && result.getCount() == 5, "the whole 5-sand stack should cook to 5 glass, got " + result);
+            helper.succeed();
+        });
     }
 
     private static void droppedStackBurnsWhole(GameTestHelper helper) {
@@ -363,10 +390,12 @@ public final class BurningGlassGameTests {
         ItemEntity dropped = helper.spawnItem(Items.DIRT, Vec3.atCenterOf(TARGET));
         dropped.setItem(new ItemStack(Items.DIRT, 5));
 
-        holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
+        afterSettling(helper, () -> {
+            holdFullDuration(level, sightedPlayer(helper), new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertTrue(!dropped.isAlive(), "a non-smeltable dropped stack should be destroyed entirely");
-        helper.succeed();
+            helper.assertTrue(!dropped.isAlive(), "a non-smeltable dropped stack should be destroyed entirely");
+            helper.succeed();
+        });
     }
 
     /**
@@ -389,11 +418,13 @@ public final class BurningGlassGameTests {
         dropped.setDeltaMovement(Vec3.ZERO);
         level.addFreshEntity(dropped);
 
-        holdFullDuration(level, player, new ItemStack(RelictItems.BURNING_GLASS.get()));
+        afterSettling(helper, () -> {
+            holdFullDuration(level, player, new ItemStack(RelictItems.BURNING_GLASS.get()));
 
-        helper.assertBlockPresent(Blocks.SAND, TARGET);
-        helper.assertTrue(dropped.getItem().is(Items.GLASS), "the nearer dropped item should have been cooked instead of the farther block");
-        helper.succeed();
+            helper.assertBlockPresent(Blocks.SAND, TARGET);
+            helper.assertTrue(dropped.getItem().is(Items.GLASS), "the nearer dropped item should have been cooked instead of the farther block");
+            helper.succeed();
+        });
     }
 
     // ------------------------------------------------------------------------------------------------ storm gate
@@ -416,9 +447,46 @@ public final class BurningGlassGameTests {
     // ----------------------------------------------------------------------------------------------- helpers
 
     private static ServerLevel daylitLevel(GameTestHelper helper) {
+        clearArena(helper);
         ServerLevel level = helper.getLevel();
         setTimeOfDay(level, 6000);
         return level;
+    }
+
+    /**
+     * Levels the box every conversion/gate test shares -- {@link #EYE}, {@link #TARGET}, the sightline
+     * between them, and enough margin (one block short past {@code TARGET}, headroom above {@code EYE}) that
+     * a raycast which finds no target at all still clips nothing but this box -- before any test-specific
+     * block or entity goes in. See the class doc: skipping this left every test that didn't happen to
+     * overwrite its own footprint at the mercy of whatever real terrain the GameTest dimension generated
+     * there.
+     * <p>
+     * The floor one below {@code TARGET}'s own layer is stone, not air: a gravity block like
+     * {@link Blocks#SAND} sitting over nothing falls into a {@code FallingBlockEntity} a tick or two after
+     * it's placed, turning a just-set target back to air out from under a test that hasn't looked at it yet.
+     */
+    private static void clearArena(GameTestHelper helper) {
+        for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(0, 1, 0), new BlockPos(2, 1, 4))) {
+            helper.setBlock(pos, Blocks.STONE);
+        }
+        for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(0, 2, 0), new BlockPos(2, 5, 4))) {
+            helper.setBlock(pos, Blocks.AIR);
+        }
+    }
+
+    /**
+     * A short, fixed run of real ticks between staging the arena/target/dropped item and actually
+     * raycasting at it. Clearing the terrain (above) removes the failure this class used to describe as
+     * unexplained, but a residual gap remained even over guaranteed-air terrain: a raycast fired the same
+     * tick the batch's structures, block updates, and freshly spawned entities are still settling can miss
+     * a target that's provably there a couple of ticks later -- the same shape of race
+     * {@link #noSkyAccessBlocksCompletion} already works around for the light engine specifically, just
+     * shorter, since nothing here needs that system's own multi-tick real-time catch-up. One tick closed
+     * most of the gap; two ticks held clean across 30+ repeated full-suite runs, so this stays a fixed
+     * settle rather than a retry loop -- it either resolves by tick 2 or it's a different bug to chase.
+     */
+    private static void afterSettling(GameTestHelper helper, Runnable body) {
+        helper.runAfterDelay(2, body);
     }
 
     /**
