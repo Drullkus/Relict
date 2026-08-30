@@ -12,6 +12,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import us.drullk.relict.Relict;
 import us.drullk.relict.datagen.celestial.RelictCelestialSprites;
 import us.drullk.relict.datagen.cipherchest.CipherChestRubbingProvider;
+import us.drullk.relict.datagen.lang.RelictLanguageProvider;
 import us.drullk.relict.datagen.loottables.RelictLootTables;
 import us.drullk.relict.datagen.models.RelictModels;
 import us.drullk.relict.datagen.tags.RelictBiomeTags;
@@ -91,6 +92,7 @@ public class RelictDatagen {
         event.addProvider(new RelictCelestialSprites(output));
         event.addProvider(new RelictEquipmentAssets(output));
         event.addProvider(new RelictModels(output));
+        event.addProvider(new RelictLanguageProvider(output));
     }
 
 }
