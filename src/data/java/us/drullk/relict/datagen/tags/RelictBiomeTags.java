@@ -32,7 +32,7 @@ public class RelictBiomeTags extends BiomeTagsProvider {
                 .add(RelictBiomes.FRETTED_MESAS)
                 .add(RelictBiomes.SHATTERED_HIGHLANDS);
 
-        this.tag(RelictTags.HAS_STRUCTURE_RUIN_A)
+        this.tag(RelictTags.HAS_STRUCTURE_OVERCAST_MOORING)
                 .add(RelictBiomes.BASALT_CAVES)
                 .add(RelictBiomes.CALCITE_CAVES)
                 .add(RelictBiomes.ICE_CAVES)

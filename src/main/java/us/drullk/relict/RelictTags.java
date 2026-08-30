@@ -26,7 +26,7 @@ public class RelictTags {
 
     public static final TagKey<Biome> HAS_STRUCTURE_UNMANNED_WRECK = TagKey.create(Registries.BIOME, Relict.id("has_structure/unmanned_wreck"));
 
-    public static final TagKey<Biome> HAS_STRUCTURE_RUIN_A = TagKey.create(Registries.BIOME, Relict.id("has_structure/ruin_a"));
+    public static final TagKey<Biome> HAS_STRUCTURE_OVERCAST_MOORING = TagKey.create(Registries.BIOME, Relict.id("has_structure/overcast_mooring"));
 
     public static final TagKey<Structure> SEISMIC_LOCATED = TagKey.create(Registries.STRUCTURE, Relict.id("locators/seismic"));
 

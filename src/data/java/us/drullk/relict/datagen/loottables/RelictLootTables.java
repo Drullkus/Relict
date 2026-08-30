@@ -27,8 +27,8 @@ public class RelictLootTables extends LootTableProvider {
 
     public static final ResourceKey<LootTable> PORTAL_RUIN = key("chests/portal_ruin");
 
-    public static final ResourceKey<LootTable> RUIN_A_KNOWLEDGE = key("ruin_a/knowledge");
-    public static final ResourceKey<LootTable> RUIN_A_MATERIAL = key("ruin_a/material");
+    public static final ResourceKey<LootTable> OVERCAST_MOORING_DECK = key("chests/overcast_mooring/deck");
+    public static final ResourceKey<LootTable> OVERCAST_MOORING_SHUTTLE = key("chests/overcast_mooring/shuttle");
 
     public static final ResourceKey<LootTable> UNMANNED_WRECK = key("chests/unmanned_wreck");
 
@@ -41,8 +41,8 @@ public class RelictLootTables extends LootTableProvider {
 
     private static void generateChestLoot(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> generator) {
         generator.accept(PORTAL_RUIN, kitLoot());
-        generator.accept(RUIN_A_KNOWLEDGE, knowledgeLoot());
-        generator.accept(RUIN_A_MATERIAL, materialLoot());
+        generator.accept(OVERCAST_MOORING_DECK, deckLoot());
+        generator.accept(OVERCAST_MOORING_SHUTTLE, shuttleLoot());
         generator.accept(UNMANNED_WRECK, locatorLoot());
     }
 
@@ -75,16 +75,17 @@ public class RelictLootTables extends LootTableProvider {
                         .add(LootItem.lootTableItem(RelictItems.SEISMIC_LOCATOR.get())));
     }
 
-    private static LootTable.Builder knowledgeLoot() {
-        return kitLoot().withPool(LootPool.lootPool()
+    private static LootTable.Builder deckLoot() {
+        return LootTable.lootTable().withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(LootItem.lootTableItem(RelictItems.WEATHERGLASS.get())))
+                ;/* TODO add once Cipher Chest is in worldgen
                 .withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
-                        .add(LootItem.lootTableItem(RelictItems.RUBBING.get())));
+                        .add(LootItem.lootTableItem(RelictItems.RUBBING.get())));*/
     }
 
-    private static LootTable.Builder materialLoot() {
+    private static LootTable.Builder shuttleLoot() {
         return kitLoot().withPool(LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1.0F))
                 .add(LootItem.lootTableItem(RelictItems.BURNING_GLASS.get())));

@@ -73,7 +73,16 @@
         }
       ],
       "rolls": 1.0
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "value": "relict:chests/portal_ruin"
+        }
+      ],
+      "rolls": 1.0
     }
   ],
-  "random_sequence": "relict:ruin_a/material"
+  "random_sequence": "relict:chests/overcast_mooring/shuttle"
 }

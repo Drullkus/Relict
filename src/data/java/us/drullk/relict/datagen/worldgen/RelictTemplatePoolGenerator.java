@@ -65,57 +65,15 @@ public class RelictTemplatePoolGenerator {
                 Projection.RIGID
         ));
 
-        context.register(RelictTemplatePools.RUIN_A_START, new StructureTemplatePool(
+        context.register(RelictTemplatePools.OVERCAST_MOORING_START, new StructureTemplatePool(
                 empty,
-                ImmutableList.of(Pair.of(StructurePoolElement.single("relict:ruin_a/start"), 1)),
+                ImmutableList.of(Pair.of(StructurePoolElement.single("relict:overcast_mooring/upper"), 1)),
                 Projection.RIGID
         ));
 
-        context.register(RelictTemplatePools.RUIN_A_MESSAGE_ROOM, new StructureTemplatePool(
+        context.register(RelictTemplatePools.OVERCAST_MOORING_DEPOT, new StructureTemplatePool(
                 empty,
-                ImmutableList.of(Pair.of(StructurePoolElement.single("relict:ruin_a/message_room"), 1)),
-                Projection.RIGID
-        ));
-
-        context.register(RelictTemplatePools.RUIN_A_CORRIDORS, new StructureTemplatePool(
-                empty,
-                ImmutableList.of(
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/corridor_straight"), 1),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/corridor_turn"), 1)
-                ),
-                Projection.RIGID
-        ));
-
-        context.register(RelictTemplatePools.RUIN_A_ROOMS, new StructureTemplatePool(
-                empty,
-                ImmutableList.of(
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/room_a"), 1),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/room_b"), 1),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/room_c"), 1)
-                ),
-                Projection.RIGID
-        ));
-
-        context.register(RelictTemplatePools.RUIN_A_CAPS, new StructureTemplatePool(
-                empty,
-                ImmutableList.of(
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/cap_a"), 1),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/cap_b"), 1)
-                ),
-                Projection.RIGID
-        ));
-
-        context.register(RelictTemplatePools.RUIN_A_NEXT, new StructureTemplatePool(
-                empty,
-                ImmutableList.of(
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/corridor_straight"), 3),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/corridor_turn"), 3),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/room_a"), 2),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/room_b"), 2),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/room_c"), 2),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/cap_a"), 1),
-                        Pair.of(StructurePoolElement.single("relict:ruin_a/cap_b"), 1)
-                ),
+                ImmutableList.of(Pair.of(StructurePoolElement.single("relict:overcast_mooring/lower"), 1)),
                 Projection.RIGID
         ));
     }

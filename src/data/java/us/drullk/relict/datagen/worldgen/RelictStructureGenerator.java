@@ -48,13 +48,13 @@ public class RelictStructureGenerator {
                 Heightmap.Types.WORLD_SURFACE_WG
         ));
 
-        context.register(RelictStructures.RUIN_A, new JigsawStructure(
-                new Structure.StructureSettings.Builder(biomes.getOrThrow(RelictTags.HAS_STRUCTURE_RUIN_A))
+        context.register(RelictStructures.OVERCAST_MOORING, new JigsawStructure(
+                new Structure.StructureSettings.Builder(biomes.getOrThrow(RelictTags.HAS_STRUCTURE_OVERCAST_MOORING))
                         .generationStep(GenerationStep.Decoration.UNDERGROUND_STRUCTURES)
-                        .terrainAdapation(TerrainAdjustment.BEARD_BOX)
+                        .terrainAdapation(TerrainAdjustment.BURY)
                         .build(),
-                pools.getOrThrow(RelictTemplatePools.RUIN_A_START),
-                5,
+                pools.getOrThrow(RelictTemplatePools.OVERCAST_MOORING_START),
+                1,
                 ConstantHeight.of(VerticalAnchor.absolute(20)),
                 false
         ));
@@ -73,8 +73,8 @@ public class RelictStructureGenerator {
                 new RandomSpreadStructurePlacement(20, 12, RandomSpreadType.LINEAR, 841005)
         ));
 
-        context.register(RelictStructures.RUIN_A_SET, new StructureSet(
-                structures.getOrThrow(RelictStructures.RUIN_A),
+        context.register(RelictStructures.OVERCAST_MOORING_SET, new StructureSet(
+                structures.getOrThrow(RelictStructures.OVERCAST_MOORING),
                 new RandomSpreadStructurePlacement(24, 8, RandomSpreadType.LINEAR, 841006)
         ));
     }

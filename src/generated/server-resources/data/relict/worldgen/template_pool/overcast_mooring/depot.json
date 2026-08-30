@@ -3,7 +3,7 @@
     {
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "relict:ruin_a/message_room",
+        "location": "relict:overcast_mooring/lower",
         "processors": {
           "processors": []
         },

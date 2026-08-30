@@ -16,7 +16,7 @@ public class RelictStructureTags extends StructureTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        this.tag(RelictTags.SEISMIC_LOCATED).add(RelictStructures.RUIN_A);
+        this.tag(RelictTags.SEISMIC_LOCATED).add(RelictStructures.OVERCAST_MOORING);
     }
 
 }
