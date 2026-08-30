@@ -76,6 +76,11 @@ public final class CaveContentGameTests {
     private static final int FROST_FLOOR_TRIALS = 100;
     private static final int HEIGHT_BAND_SAMPLES = 4000;
 
+    // Mirrors RelictPlacedFeatureGenerator.ON_CAVE_FLOOR / ON_CAVE_CEILING max_steps
+    private static final int BASALT_SPIKE_SCAN_DEPTH = 32;
+    private static final int BASALT_SPIKE_TRIALS = 150;
+    private static final int BASALT_SPIKE_MAX_HEIGHT = 3;
+
     private CaveContentGameTests() {
     }
 
@@ -90,6 +95,12 @@ public final class CaveContentGameTests {
                 new TestData<>(environment, empty, 200, 0, true)));
         event.registerTest(Relict.id("ice_cave_snow_floor_only_no_floating"), new RelictFunctionGameTestInstance(
                 CaveContentGameTests::snowFloorOnlyNoFloating, Component.literal("Ice cave floor dusting: floor only, layers 1-3, no floating"),
+                new TestData<>(environment, empty, 200, 0, true)));
+        event.registerTest(Relict.id("basalt_stalagmite_floor_only_no_floating"), new RelictFunctionGameTestInstance(
+                CaveContentGameTests::stalagmiteFloorOnlyNoFloating, Component.literal("Basalt stalagmite: floor only, 1-3 tall, no floating"),
+                new TestData<>(environment, empty, 200, 0, true)));
+        event.registerTest(Relict.id("basalt_stalactite_ceiling_only_no_floating"), new RelictFunctionGameTestInstance(
+                CaveContentGameTests::stalactiteCeilingOnlyNoFloating, Component.literal("Basalt stalactite: ceiling only, 1-3 tall, no floating"),
                 new TestData<>(environment, empty, 200, 0, true)));
     }
 
@@ -264,6 +275,125 @@ public final class CaveContentGameTests {
         helper.assertTrue(helper.getBlockState(landingRel).isAir(), "a snow block survived with its support removed (detached solid)");
 
         helper.succeed();
+    }
+
+    /**
+     * Chains BASALT_STALAGMITE onto the production scan/offset (floor-only). Every Basalt block found must
+     * trace an unbroken chain back to the floor, and every observed spike must be 1-{@value #BASALT_SPIKE_MAX_HEIGHT} tall.
+     */
+    private static void stalagmiteFloorOnlyNoFloating(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ChunkGenerator generator = level.getChunkSource().getGenerator();
+        RandomSource random = RandomSource.create(SEED);
+
+        BlockPos originRel = new BlockPos(8, 7, 8);
+        BlockPos floorRel = originRel.offset(0, -2, 0);
+        BlockPos ceilingRel = originRel.offset(0, 3, 0);
+        helper.setBlock(floorRel, Blocks.SMOOTH_BASALT);
+        helper.setBlock(ceilingRel, Blocks.SMOOTH_BASALT);
+
+        Holder<ConfiguredFeature<?, ?>> stalagmiteHolder = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).getOrThrow(RelictConfiguredFeatures.BASALT_STALAGMITE);
+        PlacedFeature scanningStalagmite = new PlacedFeature(stalagmiteHolder, List.of(
+                EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, BASALT_SPIKE_SCAN_DEPTH),
+                RandomOffsetPlacement.vertical(ConstantInt.of(1))));
+
+        BlockPos origin = helper.absolutePos(originRel);
+        int spikesSeen = 0;
+
+        for (int trial = 0; trial < BASALT_SPIKE_TRIALS; trial++) {
+            clearFootprint(helper, floorRel, ceilingRel);
+            scanningStalagmite.place(level, generator, random, origin);
+
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    int height = 0;
+                    for (int y = floorRel.getY() + 1; y <= ceilingRel.getY() - 1; y++) {
+                        BlockPos pos = new BlockPos(floorRel.getX() + dx, y, floorRel.getZ() + dz);
+                        if (!helper.getBlockState(pos).is(Blocks.BASALT)) {
+                            break;
+                        }
+                        BlockPos below = pos.below();
+                        helper.assertTrue(below.equals(new BlockPos(floorRel.getX() + dx, floorRel.getY(), floorRel.getZ() + dz)) || helper.getBlockState(below).is(Blocks.BASALT),
+                                "detached basalt stalagmite block at relative " + pos);
+                        height++;
+                    }
+                    if (height > 0) {
+                        spikesSeen++;
+                        helper.assertTrue(height <= BASALT_SPIKE_MAX_HEIGHT, "basalt_stalagmite grew " + height + " blocks, expected 1-" + BASALT_SPIKE_MAX_HEIGHT);
+                    }
+                }
+            }
+            helper.assertTrue(!helper.getBlockState(ceilingRel.below()).is(Blocks.BASALT), "a stalagmite reached the ceiling side");
+        }
+
+        System.out.printf("=== basalt_stalagmite floor probe === trials=%d spikes_seen=%d%n", BASALT_SPIKE_TRIALS, spikesSeen);
+        helper.assertTrue(spikesSeen > 0, "basalt_stalagmite never placed a spike over " + BASALT_SPIKE_TRIALS + " trials");
+        helper.succeed();
+    }
+
+    /**
+     * Mirrors {@link #stalagmiteFloorOnlyNoFloating}: the registered BASALT_STALACTITE configured feature
+     * chained onto Direction.UP scan / -1 offset, so growth can only start on the ceiling and hang downward.
+     */
+    private static void stalactiteCeilingOnlyNoFloating(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ChunkGenerator generator = level.getChunkSource().getGenerator();
+        RandomSource random = RandomSource.create(SEED);
+
+        BlockPos originRel = new BlockPos(8, 7, 8);
+        BlockPos floorRel = originRel.offset(0, -2, 0);
+        BlockPos ceilingRel = originRel.offset(0, 3, 0);
+        helper.setBlock(floorRel, Blocks.SMOOTH_BASALT);
+        helper.setBlock(ceilingRel, Blocks.SMOOTH_BASALT);
+
+        Holder<ConfiguredFeature<?, ?>> stalactiteHolder = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).getOrThrow(RelictConfiguredFeatures.BASALT_STALACTITE);
+        PlacedFeature scanningStalactite = new PlacedFeature(stalactiteHolder, List.of(
+                EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, BASALT_SPIKE_SCAN_DEPTH),
+                RandomOffsetPlacement.vertical(ConstantInt.of(-1))));
+
+        BlockPos origin = helper.absolutePos(originRel);
+        int spikesSeen = 0;
+
+        for (int trial = 0; trial < BASALT_SPIKE_TRIALS; trial++) {
+            clearFootprint(helper, floorRel, ceilingRel);
+            scanningStalactite.place(level, generator, random, origin);
+
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    int height = 0;
+                    for (int y = ceilingRel.getY() - 1; y >= floorRel.getY() + 1; y--) {
+                        BlockPos pos = new BlockPos(floorRel.getX() + dx, y, floorRel.getZ() + dz);
+                        if (!helper.getBlockState(pos).is(Blocks.BASALT)) {
+                            break;
+                        }
+                        BlockPos above = pos.above();
+                        helper.assertTrue(above.equals(new BlockPos(floorRel.getX() + dx, ceilingRel.getY(), floorRel.getZ() + dz)) || helper.getBlockState(above).is(Blocks.BASALT),
+                                "detached basalt stalactite block at relative " + pos);
+                        height++;
+                    }
+                    if (height > 0) {
+                        spikesSeen++;
+                        helper.assertTrue(height <= BASALT_SPIKE_MAX_HEIGHT, "basalt_stalactite grew " + height + " blocks, expected 1-" + BASALT_SPIKE_MAX_HEIGHT);
+                    }
+                }
+            }
+            helper.assertTrue(!helper.getBlockState(floorRel.above()).is(Blocks.BASALT), "a stalactite reached the floor side");
+        }
+
+        System.out.printf("=== basalt_stalactite ceiling probe === trials=%d spikes_seen=%d%n", BASALT_SPIKE_TRIALS, spikesSeen);
+        helper.assertTrue(spikesSeen > 0, "basalt_stalactite never placed a spike over " + BASALT_SPIKE_TRIALS + " trials");
+        helper.succeed();
+    }
+
+    /** Clears the air pocket between floor and ceiling (3x3 footprint) so each trial starts empty. */
+    private static void clearFootprint(GameTestHelper helper, BlockPos floorRel, BlockPos ceilingRel) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                for (int y = floorRel.getY() + 1; y <= ceilingRel.getY() - 1; y++) {
+                    helper.setBlock(new BlockPos(floorRel.getX() + dx, y, floorRel.getZ() + dz), Blocks.AIR);
+                }
+            }
+        }
     }
 
 }

@@ -26,6 +26,7 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockColumnConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CompositeFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
@@ -63,6 +64,9 @@ public class RelictConfiguredFeatureGenerator {
     private static final RuleTest BASE_STONE_MARS = new TagMatchTest(RelictTags.BASE_STONE_MARS);
 
     private static final int IGNEOUS_POCKET_SIZE = 64;
+
+    private static final UniformInt BASALT_SPIKE_HEIGHT = UniformInt.of(1, 3);
+    private static final UniformInt BASALT_STALAGMITE_REACH = UniformInt.of(0, 1);
 
     private static final int ICE_LENS_RIM_SIZE = 12;
     private static final int ICE_WALL_POCKET_SIZE = 4;
@@ -120,7 +124,10 @@ public class RelictConfiguredFeatureGenerator {
     }
 
     private static void basaltCavesConfiguredFeatures(BootstrapContext<ConfiguredFeature<?, ?>> context, HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures, HolderSet<Block> speleothemReplaceable) {
-        register(context, RelictConfiguredFeatures.BASALT_COLUMNS, Feature.BASALT_COLUMNS, new ColumnFeatureConfiguration(UniformInt.of(2, 3), UniformInt.of(3, 8)));
+        register(context, RelictConfiguredFeatures.BASALT_STALAGMITE, Feature.BASALT_COLUMNS, new ColumnFeatureConfiguration(BASALT_STALAGMITE_REACH, BASALT_SPIKE_HEIGHT));
+        register(context, RelictConfiguredFeatures.BASALT_STALACTITE, Feature.BLOCK_COLUMN, new BlockColumnConfiguration(
+                List.of(BlockColumnConfiguration.layer(BASALT_SPIKE_HEIGHT, BlockStateProvider.simple(Blocks.BASALT))),
+                Direction.DOWN, BlockPredicate.ONLY_IN_AIR_PREDICATE, true));
 
         register(context, RelictConfiguredFeatures.BLACKSTONE_BLOBS, Feature.ORE, new OreConfiguration(SMOOTH_BASALT, Blocks.BLACKSTONE.defaultBlockState(), 24));
 

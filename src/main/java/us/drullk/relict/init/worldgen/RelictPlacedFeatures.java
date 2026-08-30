@@ -10,7 +10,8 @@ public class RelictPlacedFeatures {
     public static final ResourceKey<PlacedFeature> SULFUR_GEODE = create("sulfur_geode");
 
     // basalt_caves
-    public static final ResourceKey<PlacedFeature> BASALT_COLUMNS = create("basalt_columns");
+    public static final ResourceKey<PlacedFeature> BASALT_STALAGMITE = create("basalt_stalagmite");
+    public static final ResourceKey<PlacedFeature> BASALT_STALACTITE = create("basalt_stalactite");
     public static final ResourceKey<PlacedFeature> BLACKSTONE_BLOBS = create("blackstone_blobs");
     public static final ResourceKey<PlacedFeature> GRAVEL_FLOOR = create("gravel_floor");
     public static final ResourceKey<PlacedFeature> MAGMA_PATCH = create("magma_patch");

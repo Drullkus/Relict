@@ -25,7 +25,8 @@
     [],
     [],
     [
-      "relict:basalt_columns",
+      "relict:basalt_stalagmite",
+      "relict:basalt_stalactite",
       "relict:blackstone_blobs",
       "relict:gravel_floor",
       "relict:megabreccia",

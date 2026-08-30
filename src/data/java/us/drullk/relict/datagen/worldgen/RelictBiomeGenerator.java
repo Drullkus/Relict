@@ -57,7 +57,8 @@ public class RelictBiomeGenerator {
 
     private static void basaltCaves(BootstrapContext<Biome> context, HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> carvers) {
         var basalt = caves(placedFeatures, carvers)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BASALT_COLUMNS))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BASALT_STALAGMITE))
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BASALT_STALACTITE))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.BLACKSTONE_BLOBS))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.GRAVEL_FLOOR))
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, placedFeatures.getOrThrow(RelictPlacedFeatures.MEGABRECCIA))

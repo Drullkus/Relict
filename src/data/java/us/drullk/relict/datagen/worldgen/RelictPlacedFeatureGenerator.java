@@ -30,10 +30,16 @@ public class RelictPlacedFeatureGenerator {
 
     private static final PlacementModifier CAVE_BAND = HeightRangePlacement.uniform(VerticalAnchor.absolute(-54), VerticalAnchor.absolute(80));
 
-    private static final PlacementModifier ON_CAVE_FLOOR = EnvironmentScanPlacement.scanningFor(
-            Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 32);
+    private static final PlacementModifier ON_BASALT_FLOOR = EnvironmentScanPlacement.scanningFor(
+            Direction.DOWN, BlockPredicate.matchesBlocks(Blocks.BASALT, Blocks.SMOOTH_BASALT), BlockPredicate.ONLY_IN_AIR_PREDICATE, 32);
+
+    private static final PlacementModifier ON_BASALT_CEILING = EnvironmentScanPlacement.scanningFor(
+            Direction.UP, BlockPredicate.matchesBlocks(Blocks.BASALT, Blocks.SMOOTH_BASALT), BlockPredicate.ONLY_IN_AIR_PREDICATE, 32);
 
     private static final UniformInt CAVE_SURFACE_ATTEMPTS = UniformInt.of(64, 128);
+
+    static final UniformInt BASALT_STALAGMITE_ATTEMPTS = UniformInt.of(8, 24);
+    static final UniformInt BASALT_STALACTITE_ATTEMPTS = UniformInt.of(8, 24);
 
     private static final PlacementModifier DEEP_LAKE_BAND = HeightRangePlacement.uniform(VerticalAnchor.absolute(-32), VerticalAnchor.absolute(0));
 
@@ -80,7 +86,8 @@ public class RelictPlacedFeatureGenerator {
     }
 
     private static void basaltCavesPlacedFeatures(BootstrapContext<PlacedFeature> context, HolderGetter<ConfiguredFeature<?, ?>> features) {
-        register(context, RelictPlacedFeatures.BASALT_COLUMNS, features.getOrThrow(RelictConfiguredFeatures.BASALT_COLUMNS), CountPlacement.of(CAVE_SURFACE_ATTEMPTS), InSquarePlacement.spread(), CAVE_BAND, ON_CAVE_FLOOR, RandomOffsetPlacement.vertical(ConstantInt.of(1)), BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.BASALT_STALAGMITE, features.getOrThrow(RelictConfiguredFeatures.BASALT_STALAGMITE), CountPlacement.of(BASALT_STALAGMITE_ATTEMPTS), InSquarePlacement.spread(), CAVE_BAND, ON_BASALT_FLOOR, RandomOffsetPlacement.vertical(ConstantInt.of(1)), BiomeFilter.biome());
+        register(context, RelictPlacedFeatures.BASALT_STALACTITE, features.getOrThrow(RelictConfiguredFeatures.BASALT_STALACTITE), CountPlacement.of(BASALT_STALACTITE_ATTEMPTS), InSquarePlacement.spread(), CAVE_BAND, ON_BASALT_CEILING, RandomOffsetPlacement.vertical(ConstantInt.of(-1)), BiomeFilter.biome());
         register(context, RelictPlacedFeatures.BLACKSTONE_BLOBS, features.getOrThrow(RelictConfiguredFeatures.BLACKSTONE_BLOBS), CountPlacement.of(UniformInt.of(6, 12)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, BiomeFilter.biome());
         register(context, RelictPlacedFeatures.GRAVEL_FLOOR, features.getOrThrow(RelictConfiguredFeatures.GRAVEL_FLOOR), CountPlacement.of(UniformInt.of(4, 8)), InSquarePlacement.spread(), PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT, EnvironmentScanPlacement.scanningFor(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.ONLY_IN_AIR_PREDICATE, 12), RandomOffsetPlacement.vertical(ConstantInt.of(-1)), BiomeFilter.biome());
         register(context, RelictPlacedFeatures.MAGMA_PATCH, features.getOrThrow(RelictConfiguredFeatures.MAGMA_PATCH), CountPlacement.of(UniformInt.of(2, 5)), InSquarePlacement.spread(), DEEP_BAND, BiomeFilter.biome());
