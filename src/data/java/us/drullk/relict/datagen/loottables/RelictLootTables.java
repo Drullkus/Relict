@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
@@ -25,6 +26,8 @@ import java.util.function.BiConsumer;
 
 public class RelictLootTables extends LootTableProvider {
 
+    public static final ResourceKey<LootTable> SERVICE_KIT = key("chests/service_kit");
+
     public static final ResourceKey<LootTable> PORTAL_RUIN = key("chests/portal_ruin");
 
     public static final ResourceKey<LootTable> OVERCAST_MOORING_DECK = key("chests/overcast_mooring/deck");
@@ -40,7 +43,8 @@ public class RelictLootTables extends LootTableProvider {
     }
 
     private static void generateChestLoot(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> generator) {
-        generator.accept(PORTAL_RUIN, kitLoot());
+        generator.accept(SERVICE_KIT, kitLoot());
+        generator.accept(PORTAL_RUIN, portalLoot());
         generator.accept(OVERCAST_MOORING_DECK, deckLoot());
         generator.accept(OVERCAST_MOORING_SHUTTLE, shuttleLoot());
         generator.accept(UNMANNED_WRECK, locatorLoot());
@@ -79,16 +83,25 @@ public class RelictLootTables extends LootTableProvider {
         return LootTable.lootTable().withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .add(LootItem.lootTableItem(RelictItems.WEATHERGLASS.get())))
-                ;/* TODO add once Cipher Chest is in worldgen
                 .withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
-                        .add(LootItem.lootTableItem(RelictItems.RUBBING.get())));*/
+                        .add(LootItem.lootTableItem(RelictItems.BURNING_GLASS.get())));
     }
 
     private static LootTable.Builder shuttleLoot() {
-        return kitLoot().withPool(LootPool.lootPool()
-                .setRolls(ConstantValue.exactly(1.0F))
-                .add(LootItem.lootTableItem(RelictItems.BURNING_GLASS.get())));
+        return LootTable.lootTable()
+                .withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .add(LootItem.lootTableItem(RelictItems.RUBBING.get())))
+                .withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .add(NestedLootTable.lootTableReference(SERVICE_KIT)));
+    }
+
+    private static LootTable.Builder portalLoot() {
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .add(NestedLootTable.lootTableReference(SERVICE_KIT)));
     }
 
     private static LootTable.Builder kitLoot() {

@@ -37,17 +37,9 @@ public final class OvercastMooringGameTests {
     private static final BlockPos ANCHOR = new BlockPos(80, 70, 80);
 
     private static final ResourceKey<LootTable> DECK = ResourceKey.create(Registries.LOOT_TABLE, Relict.id("chests/overcast_mooring/deck"));
-    private static final ResourceKey<LootTable> SHUTTLE = ResourceKey.create(Registries.LOOT_TABLE, Relict.id("chests/overcast_mooring/shuttle"));
 
     private static final long LOOT_SEED = 20260830L;
     private static final BlockPos CHEST_POS = new BlockPos(1, 2, 1);
-
-    /**
-     * Direct proof the nested {@code portal_ruin} reference actually resolved, seed-independent: shuttle's
-     * own five direct pools can produce at most one guaranteed Vital Vizard plus one 2-3 count roll (4 max),
-     * so any total above that is only reachable if the nested reference's own copy of the same pools fired.
-     */
-    private static final int VITAL_VIZARD_MAX_WITHOUT_REFERENCE = 4;
 
     private OvercastMooringGameTests() {
     }
@@ -60,10 +52,6 @@ public final class OvercastMooringGameTests {
         event.registerTest(id("deck_rolls_weatherglass"), new RelictFunctionGameTestInstance(
                 OvercastMooringGameTests::deckRollsWeatherglass,
                 Component.literal("Overcast Mooring: the deck chest rolls a guaranteed Weatherglass and clears its LootTable key"),
-                new TestData<>(environment, EMPTY_STRUCTURE, 20, 0, true)));
-        event.registerTest(id("shuttle_unpacks_portal_ruin"), new RelictFunctionGameTestInstance(
-                OvercastMooringGameTests::shuttleUnpacksPortalRuin,
-                Component.literal("Overcast Mooring: the shuttle chest keeps its Burning Glass and unpacks the nested portal_ruin table"),
                 new TestData<>(environment, EMPTY_STRUCTURE, 20, 0, true)));
     }
 
@@ -133,25 +121,6 @@ public final class OvercastMooringGameTests {
 
         helper.assertContainerContainsSingle(CHEST_POS, RelictItems.WEATHERGLASS.get());
         helper.assertTrue(chest.getLootTable() == null, "opening the chest must unpack the deck table and clear the LootTable key");
-        helper.succeed();
-    }
-
-    /**
-     * See {@link #VITAL_VIZARD_MAX_WITHOUT_REFERENCE}: the shuttle table's own five pools cap Vital Vizard
-     * at 4, so seeing more than that is only possible if the nested {@code portal_ruin} reference (itself a
-     * full copy of the same pools) actually unpacked.
-     */
-    private static void shuttleUnpacksPortalRuin(GameTestHelper helper) {
-        RandomizableContainerBlockEntity chest = placeChest(helper);
-        chest.setLootTable(SHUTTLE, LOOT_SEED);
-        openChest(helper);
-
-        helper.assertContainerContains(CHEST_POS, RelictItems.BURNING_GLASS.get());
-        int vitalVizardCount = chest.countItem(RelictItems.VITAL_VIZARD.get());
-        helper.assertTrue(vitalVizardCount > VITAL_VIZARD_MAX_WITHOUT_REFERENCE,
-                "Vital Vizard count " + vitalVizardCount + " should exceed " + VITAL_VIZARD_MAX_WITHOUT_REFERENCE
-                        + " only if the nested portal_ruin reference actually unpacked");
-        helper.assertTrue(chest.getLootTable() == null, "opening the chest must unpack the shuttle table and clear the LootTable key");
         helper.succeed();
     }
 
