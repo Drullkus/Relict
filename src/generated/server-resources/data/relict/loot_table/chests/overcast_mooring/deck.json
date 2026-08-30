@@ -9,6 +9,15 @@
         }
       ],
       "rolls": 1.0
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "relict:burning_glass"
+        }
+      ],
+      "rolls": 1.0
     }
   ],
   "random_sequence": "relict:chests/overcast_mooring/deck"
