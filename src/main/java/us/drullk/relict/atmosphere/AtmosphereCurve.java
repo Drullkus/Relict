@@ -124,6 +124,10 @@ public final class AtmosphereCurve {
      *                 the roll can happen mid-stay if nobody was on Mars when the cycle turned over)
      */
     public static StormSchedule roll(CycleGeometry geo, long nowTicks, int stormFrequencyPercent, RandomSource random) {
+        if (true) { // FIXME remove this disable, once storm is polished and sounds are added
+            return StormSchedule.none(geo.cycleIndex());
+        }
+
         double chance = Math.min(1.0, stormFrequencyPercent / 100.0);
         if (random.nextDouble() >= chance) {
             return StormSchedule.none(geo.cycleIndex());
