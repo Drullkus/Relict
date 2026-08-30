@@ -43,6 +43,7 @@ public class OrbitTransitSolver {
     private static final int TRANSIT_KEYFRAME_TICKS = 20;
     /** Coverage at or above this reads as a total eclipse rather than a partial one, in the schedule report. */
     private static final double TOTALITY_COVERAGE = 0.999;
+    private static final float ECLIPSE_LIGHT_FLOOR = 0.67F;
 
     private final int solTicks;
 
@@ -282,8 +283,10 @@ public class OrbitTransitSolver {
                 .setPeriodTicks(periodTicks)
                 .addModifierTrack(EnvironmentAttributes.SKY_LIGHT_LEVEL, FloatModifier.MULTIPLY,
                         track -> dips.forEach(track::addKeyframe))
+                .addModifierTrack(EnvironmentAttributes.SKY_LIGHT_FACTOR, FloatModifier.MULTIPLY,
+                        track -> dips.forEach((ticks, value) -> track.addKeyframe(ticks, Mth.lerp(value, ECLIPSE_LIGHT_FLOOR, 1.0f))))
                 .addModifierTrack(RelictEnvironmentAttributes.ECLIPSE_DARKEN, FloatModifier.MULTIPLY,
-                        track -> dips.forEach((ticks, value) -> track.addKeyframe(ticks, Mth.lerp(value, 0.67f, 1.0f))))
+                        track -> dips.forEach((ticks, value) -> track.addKeyframe(ticks, Mth.lerp(value, ECLIPSE_LIGHT_FLOOR, 1.0f))))
                 .build());
     }
 
