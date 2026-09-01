@@ -33,12 +33,9 @@ import net.minecraft.world.phys.AABB;
 
 /**
  * [VANILLACOPY] net.minecraft.client.renderer.blockentity.ChestRenderer (26.2.0.64), trimmed to
- * single-chest-only (no {@code MultiblockChestResources}, no {@code combine()}, no {@code ChestType} state
- * lookup -- always {@code ChestType.SINGLE}) and the material forced to {@code CHRISTMAS} unconditionally.
- * Vanilla's own renderer only shows that skin during the real December date window
- * ({@code SpecialDates.isExtendedChristmas()}), which isn't what "placeholder texture" means for this
- * order, so that check is dropped rather than copied. {@link ChestRenderer#modelTransformation} itself is
- * called directly (not copied) since it's public.
+ * single-chest form (no {@code MultiblockChestResources}, no {@code combine()}, no {@code ChestType} state
+ * lookup -- always {@code ChestType.SINGLE}) with the sprite fixed to {@code ChestMaterialType.COPPER_OXIDIZED};
+ * {@link ChestRenderer#modelTransformation} is reused directly since it's public.
  */
 public class CipherChestRenderer implements BlockEntityRenderer<CipherChestBlockEntity, CipherChestRenderState> {
 
@@ -48,10 +45,9 @@ public class CipherChestRenderer implements BlockEntityRenderer<CipherChestBlock
     private static final float BLANK_QUAD_HALF_SIZE = 0.06F;
     private static final int TEXT_COLOR = 0xFFE8DCC8;
 
-    // Sine-wave red blink tunables (order-mandated named constants). Period is short enough to read as an
-    // urgent "wrong" pulse; duration is tied 1:1 to CipherChestBlockEntity.LOCKOUT_TICKS so the blink can
-    // never outlive the lockout it's juicing. The final BLINK_TAPER_TICKS of that duration fade the sine
-    // envelope down to zero instead of cutting off abruptly at the lockout's last tick.
+    // Sine-wave red blink tunables. Duration is tied 1:1 to CipherChestBlockEntity.LOCKOUT_TICKS so the
+    // blink can never outlive the lockout it's juicing; the final BLINK_TAPER_TICKS fade the sine envelope
+    // to zero instead of cutting off abruptly at the lockout's last tick.
     private static final float BLINK_PERIOD_TICKS = 6.0F;
     private static final float BLINK_TAPER_TICKS = 20.0F;
     private static final int BLINK_COLOR = 0xFFFF2A2A;
@@ -98,7 +94,7 @@ public class CipherChestRenderer implements BlockEntityRenderer<CipherChestBlock
         poseStack.mulPose(ChestRenderer.modelTransformation(state.facing));
         float openness = 1.0F - state.open;
         openness = 1.0F - openness * openness * openness;
-        SpriteId spriteId = Sheets.chooseSprite(ChestMaterialType.CHRISTMAS, ChestType.SINGLE);
+        SpriteId spriteId = Sheets.chooseSprite(ChestMaterialType.COPPER_OXIDIZED, ChestType.SINGLE);
         submitNodeCollector.submitModel(this.model, openness, poseStack, state.lightCoords, OverlayTexture.NO_OVERLAY, -1, spriteId, this.sprites, 0, state.breakProgress);
         poseStack.popPose();
 

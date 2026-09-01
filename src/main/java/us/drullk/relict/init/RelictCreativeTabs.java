@@ -22,6 +22,10 @@ public class RelictCreativeTabs {
                 output.accept(RelictItems.RESTLESS_STRIDERS.value());
                 output.accept(RelictItems.GROUNDING_TREADS.value());
 
+                output.accept(RelictItems.SEISMIC_LOCATOR.value());
+                output.accept(RelictItems.WEATHERGLASS.value());
+                output.accept(RelictItems.BURNING_GLASS.value());
+
                 output.accept(RelictItems.LAB_BLOCK.value());
                 output.accept(RelictItems.LAB_SLAB.value());
                 output.accept(RelictItems.LAB_STAIRS.value());

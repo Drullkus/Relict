@@ -30,7 +30,7 @@ public final class CipherChestModelGenerator {
 
         itemModels.itemModelOutput.accept(RelictItems.CIPHER_CHEST.get(), ItemModelUtils.specialModel(
                 Identifier.withDefaultNamespace("item/chest"),
-                new ChestSpecialRenderer.Unbaked(ChestSpecialRenderer.CHRISTMAS.single(), ChestType.SINGLE)));
+                new ChestSpecialRenderer.Unbaked(ChestSpecialRenderer.COPPER.oxidized().single(), ChestType.SINGLE)));
 
         Identifier rubbingIconModel = Relict.id("item/rubbing"); // FIXME placeholder icon
         TextureMapping rubbingIconTexture = new TextureMapping().put(TextureSlot.LAYER0, new Material(Identifier.withDefaultNamespace("item/filled_map")));
