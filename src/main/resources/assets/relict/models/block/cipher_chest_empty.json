@@ -1,6 +1,7 @@
 {
-  "_comment": "Hand-authored: the Cipher Chest has no baked block geometry at all -- the vanilla chest model (body/lid/latch) and the engraved-grid overlay are both drawn entirely by the block entity renderer, matching the vanilla ChestBlock convention of a client-side-only model.",
   "parent": "minecraft:block/block",
-  "textures": {},
+  "textures": {
+    "particle": "minecraft:block/oxidized_copper"
+  },
   "elements": []
 }
