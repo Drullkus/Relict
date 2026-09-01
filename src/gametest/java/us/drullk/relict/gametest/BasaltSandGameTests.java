@@ -65,7 +65,7 @@ public final class BasaltSandGameTests {
     /**
      * Recipe-manager lookup rather than an actual furnace burn: driving a real furnace needs fuel, a
      * 200-tick cook, and a structure to hold it, all to re-prove what a direct recipe query answers in one
-     * tick — basalt_sand is accepted by vanilla's own {@code glass} smelting recipe (it dispatches off the
+     * tick — basalt_sand is accepted by vanilla's own {@code glass} smelting recipe (it is selected via the
      * {@code minecraft:smelts_to_glass} item tag, which the item tags provider adds basalt_sand to) and
      * that recipe assembles to glass.
      */

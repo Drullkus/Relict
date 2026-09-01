@@ -22,7 +22,7 @@ import us.drullk.relict.init.RelictBlocks;
  * {@code RandomState} this feature is never handed (only {@link WorldGenLevel}/{@link RandomSource}/config).
  * That also keeps this feature independent of {@code fretted_mesas}' RED_SAND dust-catch surface patches on
  * purpose — the two are meant to read as independently-placed "dust collects here" reads, not one lensed
- * through the other, and converting the surface patches themselves into layers is its own separate visual-QA
+ * through the other, and converting the surface patches themselves into layers is its own separate visual
  * change, not something to fold in here. The one cost: patch placement does not vary between world seeds,
  * only between the per-registration {@code coverage_salt}. Flagged as a tuning knob, not hidden.
  */

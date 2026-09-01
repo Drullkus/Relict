@@ -57,7 +57,7 @@ public class CipherChestBlockEntity extends ChestBlockEntity {
         super(RelictBlockEntities.CIPHER_CHEST.get(), pos, state);
     }
 
-    /** Called once, right after placement (producer overrides land afterward via {@code /data merge}). */
+    /** Called once, right after placement -- later state changes can still land via {@code /data merge}. */
     public void randomize(RandomSource placementRandom, boolean playerPlaced) {
         this.seed = placementRandom.nextLong();
         this.blankCount = DEFAULT_BLANK_COUNT;
@@ -99,7 +99,7 @@ public class CipherChestBlockEntity extends ChestBlockEntity {
     }
 
     /**
-     * Breakability law (producer ruling): unbreakable like bedrock while locked and not player-placed
+     * Breakability law: unbreakable like bedrock while locked and not player-placed
      * (structure-authored chests can't be dug around); breakable forever once unlocked; a player-placed
      * chest is always breakable, locked or not. See {@link CipherChestBlock#getDestroyProgress}.
      */

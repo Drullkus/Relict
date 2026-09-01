@@ -37,7 +37,7 @@ import us.drullk.relict.init.worldgen.RelictStructures;
  *
  * <p>The server console's own command source carries no level on a dev dedicated server
  * ({@code MinecraftServer.createCommandSourceStack} hands back a null level, and every console command then
- * fails before dispatch), so this builds a source that names the Mars level and runs the command through it.
+ * fails before it runs), so this builds a source that names the Mars level and runs the command through it.
  *
  * <p>Dev-only, in the reports source set, and inert unless {@code -Drelict.locateProbe=true} is set.
  */

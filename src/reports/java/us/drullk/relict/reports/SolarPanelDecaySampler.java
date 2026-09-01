@@ -62,10 +62,10 @@ public final class SolarPanelDecaySampler implements DataProvider {
                 + "A caller forcing random ticks under CLEAR therefore sees zero progression by construction, for any N.\n");
     }
 
-    // ================================================================================== (b) decay chain order
+    // ================================================================================== (b) decay chain sequence
 
     private static void reportDecayChain(StringBuilder report) {
-        report.append("\n=== B. decay chain: stages advance in order, stop at sanded ===\n\n");
+        report.append("\n=== B. decay chain: stages advance in sequence, stop at sanded ===\n\n");
 
         require(SolarPanelDecay.next(RelictBlocks.SOLAR_PANEL.get()).orElseThrow() == RelictBlocks.SOLAR_PANEL_SPRINKLED.get(),
                 "clean -> sprinkled");
@@ -77,7 +77,7 @@ public final class SolarPanelDecaySampler implements DataProvider {
                 "sanded must have no next stage (decay stops here)");
 
         require(Math.abs(SolarPanelDecay.DECAY_CHANCE - 0.15F) < 1e-6F,
-                "decay chance must be the producer-confirmed 0.15F (flagged tunable)");
+                "decay chance must be 0.15F (flagged tunable)");
 
         report.append("B) PASS — clean -> sprinkled -> dusted -> sanded, sanded is terminal, chance = ")
                 .append(SolarPanelDecay.DECAY_CHANCE).append(".\n");
@@ -110,8 +110,8 @@ public final class SolarPanelDecaySampler implements DataProvider {
         report.append("C) PASS — WORLD_SURFACE height <= panelY+1 arms the gate, any higher height (any block\n")
                 .append("   above, at any distance) disarms it, and un-covering re-arms it (pure function, no stuck state).\n")
                 .append("   Heightmap type: WORLD_SURFACE — counts every non-air block (including non-solid decorative\n")
-                .append("   ones like a torch or flower), matching the producer's plain \"any block above\" ruling more\n")
-                .append("   closely than MOTION_BLOCKING would (which ignores non-collidable blocks).\n");
+                .append("   ones like a torch or flower), so any block above roofs the panel -- more inclusive\n")
+                .append("   than MOTION_BLOCKING would be (which ignores non-collidable blocks).\n");
     }
 
     // ============================================================================================ (d) brushing

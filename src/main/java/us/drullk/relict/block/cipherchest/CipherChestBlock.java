@@ -80,7 +80,7 @@ public class CipherChestBlock extends HorizontalDirectionalBlock implements Enti
     }
 
     /**
-     * Breakability law (producer ruling): unbreakable like bedrock (zero destroy progress, same mechanism
+     * Breakability law: unbreakable like bedrock (zero destroy progress, same mechanism
      * {@code Block.INDESTRUCTIBLE}/bedrock uses -- see the vanilla default this overrides) while locked and
      * not player-placed; breakable forever once unlocked; a player-placed chest is always breakable. This
      * only gates mining progress -- creative-mode instant break and the carried pickaxe/correct-tool law

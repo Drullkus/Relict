@@ -28,14 +28,14 @@ public final class CipherChestRubbingProvider implements DataProvider {
     private static final int PIXEL_COUNT = SIZE * SIZE;
 
     // Monochrome "stone rubbing" palette: background is the plain plate, strokes are the charcoal pass.
-    // BACKGROUND is producer-hand-tuned and OFF-LIMITS to this lane -- carried over unchanged.
+    // BACKGROUND is a fixed calibrated value -- do not rederive it from color math.
     private static final byte BACKGROUND = MapColor.STONE.getPackedId(Brightness.HIGH);
     private static final byte STROKE = MapColor.STONE.getPackedId(Brightness.LOWEST);
 
     // Wide-pixel diagonal zig-zag: chunky (BRUSH x BRUSH) cells stepped along a folded diagonal ramp. The
     // band marks GAPS, not strokes -- most of a digit stays inked (legible), with only thin diagonal
-    // scratch lines cut through it for the hand-rubbed texture (frozen/producer-approved stroke treatment;
-    // not touched by this lane).
+    // scratch lines cut through it for the hand-rubbed texture. This stroke treatment is fixed -- do not
+    // retune BRUSH/ZIGZAG_PERIOD/ZIGZAG_GAP_WIDTH without re-checking the rendered rubbing.
     private static final int BRUSH = 2;
     private static final int ZIGZAG_PERIOD = 7;
     private static final int ZIGZAG_GAP_WIDTH = 2;

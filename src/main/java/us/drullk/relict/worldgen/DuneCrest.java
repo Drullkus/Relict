@@ -15,8 +15,8 @@ package us.drullk.relict.worldgen;
  *
  * <p>One copy of the thresholds, shared by the runtime surface rule ({@link DuneCrestCondition}, which
  * reads the world's own heightmap) and the report tooling's palette-map plates (which read the same
- * {@code terrain/dune_shape} density function the heightmap was built from) — so a plate the producer
- * looks at cannot silently stop matching what the game renders.
+ * {@code terrain/dune_shape} density function the heightmap was built from) — so the rendered plate
+ * cannot silently stop matching what the game renders.
  */
 public final class DuneCrest {
 

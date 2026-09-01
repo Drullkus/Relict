@@ -19,7 +19,7 @@ import java.util.List;
  * {@link us.drullk.relict.item.RubbingReloadListener} rebuilds this singleton from the live,
  * override-aware server resource manager on every datapack (re)load. See the impl report for the
  * client-availability litigation this leaves: in a two-JVM dedicated-server session, a datapack-only
- * override the producer drops on the server never reaches a client that hasn't had its own jar updated to
+ * override dropped on the server never reaches a client that hasn't had its own jar updated to
  * match, because nothing sends the palette bytes over the network -- no sync is invented here to close
  * that gap.
  */

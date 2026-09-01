@@ -11,8 +11,7 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 
 /**
  * {@code relict:rock} — the one configurable "loose rock on the surface" feature every biome's S/M/L
- * placements share (per the brief's "one feature family, not one feature per biome" law), rather than a
- * bespoke class per size per province.
+ * placements share, rather than a bespoke class per size per province.
  *
  * <p>Every voxel this places snaps to its own column's heightmap and only writes into air over solid ground
  * (see {@link #placeVoxel}) — the "sits on the heightmap, never floating" law holds column-by-column, not
@@ -52,7 +51,7 @@ public class RockFeature extends Feature<RockFeatureConfiguration> {
     /** Per-cell odds a CLAST footprint slot actually gets a block, so a 2x2 slot reads as 2-4 blocks, not always 4. */
     private static final float CLAST_CELL_FILL_CHANCE = 0.85F;
 
-    /** 2x2, one block tall: the brief's "2-4 blocks" clast. */
+    /** 2x2, one block tall: the 2-4 block clast footprint. */
     private static final int[][] CLAST_OFFSETS = {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {1, 1, 0}};
 
     /** A rounded plus-shape core (two tall) with four corners (one tall) — reads as a squat 3x3x2 boulder without being a cube. */

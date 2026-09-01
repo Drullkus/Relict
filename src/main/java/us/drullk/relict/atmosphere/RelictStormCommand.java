@@ -25,13 +25,13 @@ import us.drullk.relict.init.worldgen.RelictDimension;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * {@code /relictstorm}: producer testing + media day tool. Also stands in for an F3 debug line — NeoForge
- * 26.2.0.57 has no mod-facing hook into the new {@code DebugScreenEntry} F3 overlay, so {@code status} is
- * the debug readout instead.
+ * {@code /relictstorm}: manual storm-phase testing and screenshot tool. Also stands in for an F3 debug
+ * line — NeoForge 26.2.0.57 has no mod-facing hook into the new {@code DebugScreenEntry} F3 overlay, so
+ * {@code status} is the debug readout instead.
  * <p>
  * Every mutation rewrites {@link RelictAtmosphereData}'s {@link StormSchedule} and broadcasts immediately
- * (rather than waiting for the heartbeat), because {@code /relictstorm roll} is the producer's screenshot
- * tool.
+ * (rather than waiting for the heartbeat), because {@code /relictstorm roll} is meant for on-demand
+ * screenshots.
  */
 public class RelictStormCommand {
 

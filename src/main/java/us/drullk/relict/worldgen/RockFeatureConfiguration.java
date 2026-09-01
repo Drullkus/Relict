@@ -12,8 +12,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 
 /**
  * Per-placement tuning for {@link RockFeature}: one configurable rock family shared by every
- * biome's clasts, boulders and lone blocks rather than a feature per biome per size (per the brief's
- * "Shared implementation shape" law). Values live in datapack JSON, registered from
+ * biome's clasts, boulders and lone blocks rather than a feature per biome per size. Values live in
+ * datapack JSON, registered from
  * {@code RockFeatureGenerator} the same way {@link DustLayerFeatureConfiguration} is.
  *
  * <p>{@code province} exists for the same reason {@link DustLayerFeatureConfiguration#province()} does: a
@@ -45,7 +45,7 @@ public record RockFeatureConfiguration(
             PlacementRule.CODEC.fieldOf("placement_rule").forGetter(RockFeatureConfiguration::placementRule)
     ).apply(instance, RockFeatureConfiguration::new));
 
-    /** S/M/L per the brief: a single block, a small 2-4 block clast, or a rare rounded boulder. */
+    /** S/M/L: a single block, a small 2-4 block clast, or a rare rounded boulder. */
     public enum RockShape implements StringRepresentable {
         SINGLE("single"),
         CLAST("clast"),

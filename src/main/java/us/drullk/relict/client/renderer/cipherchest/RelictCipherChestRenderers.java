@@ -21,7 +21,7 @@ import us.drullk.relict.init.RelictBlocks;
 /**
  * Registers the Cipher Chest's block-entity renderer and its locked-state hover-outline override.
  * <p>
- * <b>Hover mechanism (order-litigated, producer's named candidate accepted):</b> NeoForge's
+ * <b>Hover mechanism:</b> NeoForge's
  * {@link ExtractBlockOutlineRenderStateEvent}, fired per-frame with the exact {@link BlockHitResult} the
  * crosshair is currently resolving. This is the smallest mechanism that can work at all: the alternative of
  * overriding {@code Block#getShape} cannot vary the outline by sub-block crosshair position, because the

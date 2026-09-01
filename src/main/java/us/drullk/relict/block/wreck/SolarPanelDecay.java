@@ -45,14 +45,14 @@ public final class SolarPanelDecay {
     private SolarPanelDecay() {
     }
 
-    /** Chance per qualifying random tick that a panel advances one stage. Producer-confirmed 2026-08-23; still flagged for later tuning. */
+    /** Chance per qualifying random tick that a panel advances one stage. Flagged for later tuning. */
     public static final float DECAY_CHANCE = 0.15F;
 
     /**
      * Which heightmap answers "is this panel at the top of its column": WORLD_SURFACE counts every non-air
-     * block, decorative or not, matching the producer's plain "any block above the panel" ruling. The
+     * block, decorative or not, so any block above the panel roofs it. The
      * narrower MOTION_BLOCKING type would let a non-collidable block (a torch, a flower) sit above the
-     * panel without roofing it, which is looser than the ruling asks for.
+     * panel without roofing it.
      */
     private static final Heightmap.Types SURFACE_HEIGHTMAP = Heightmap.Types.WORLD_SURFACE;
 

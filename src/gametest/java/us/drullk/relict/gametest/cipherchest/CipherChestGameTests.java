@@ -383,7 +383,7 @@ public final class CipherChestGameTests {
     /**
      * {@link GameTestHelper#makeMockServerPlayer} leaves {@code ServerPlayer.connection} null, which is
      * fine for most tests but crashes {@code ServerPlayer#openMenu} (it sends a packet over that
-     * connection) -- exactly the call this order needs exercised to prove defect #2 dead. Only
+     * connection) -- exactly the call this test must exercise to prove that crash doesn't happen. Only
      * {@code makeMockServerPlayerInLevel} wires a real (loopback) connection via
      * {@code PlayerList#placeNewPlayer}, so any test that needs the chest menu to actually open uses it
      * instead. It is {@code @Deprecated(forRemoval = true)} in the decompiled 26.2.0.64 sources with no

@@ -45,7 +45,7 @@ public final class WreckModels {
     private static final ModelTemplate SOLAR_PANEL_TEMPLATE = new ModelTemplate(Optional.of(Relict.id("block/template_solar_panel")), Optional.empty(), TextureSlot.TOP, TextureSlot.SIDE);
     private static final ModelTemplate LAB_MAST_TEMPLATE = new ModelTemplate(Optional.of(Relict.id("block/template_lab_mast")), Optional.empty(), TextureSlot.FRONT, TextureSlot.BACK, TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE);
 
-    // Named to match the vanilla stairs/slab family generator's own dispatch table (BlockModelGenerators),
+    // Named to match the naming convention used by vanilla's own stairs/slab family generator (BlockModelGenerators),
     // which this class re-implements by hand: that class's family()/BlockFamilyProvider is not accessible
     // outside its package, and Lab Block already has its own standalone (non-family) registration below.
     private static final VariantMutator UV_LOCK = VariantMutator.UV_LOCK.withValue(true);

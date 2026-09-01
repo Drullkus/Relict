@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Eyes-on coverage plates for {@code relict:dust_layer}'s worldgen baseline, in the same top-down
- * synthetic-palette style the rest of the reports module already uses for terrain QA: one plate per
+ * synthetic-palette style the rest of the reports module already uses for terrain verification: one plate per
  * province, colored by the exact roll {@link us.drullk.relict.worldgen.DustLayerFeature}
  * makes (crest gate, coverage-cell hash, depth), read straight off {@link DustLayerFeatureGenerator}'s
  * registered configs so a plate can never drift from what the feature actually places. Height for the dune

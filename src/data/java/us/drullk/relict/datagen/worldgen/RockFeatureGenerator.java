@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * {@code relict:rock}'s worldgen baseline: one configured/placed pair per size per placed province,
- * covering the producer's locked picks for loose surface rock. Split out of {@link
+ * for loose surface rock. Split out of {@link
  * RelictConfiguredFeatureGenerator}/{@link RelictPlacedFeatureGenerator} the same way {@link
  * DustLayerFeatureGenerator} is, for the same reason: both call in with one line each.
  *

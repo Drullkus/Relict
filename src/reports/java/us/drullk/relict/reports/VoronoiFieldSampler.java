@@ -455,7 +455,7 @@ public final class VoronoiFieldSampler implements DataProvider {
 
     /**
      * The 0.14c dune checklist D1-D5, as measured by {@code prototypes/tools/metrics_14c.py}, restated over
-     * the ported field. D6-D10 are visual lines and stay the producer's in-game pass.
+     * the ported field. D6-D10 are visual checks and stay a manual in-game pass, not measured here.
      */
     private static void duneMorphology(StringBuilder report, HolderLookup.Provider registries,
                                        PositionalRandomFactory random, List<String> failures) {
@@ -932,7 +932,7 @@ public final class VoronoiFieldSampler implements DataProvider {
         }
     }
 
-    /** Teleport spots for the producer's in-game pass: the cell each surface province sits deepest inside. */
+    /** Teleport spots for a manual in-game pass: the cell each surface province sits deepest inside. */
     private static void surfaceTeleports(StringBuilder report, VoronoiSource source, DensityFunction surfaceY) {
         report.append(String.format("%n(r) surface teleport spots (cell centres, this seed)%n"));
 
@@ -1414,7 +1414,7 @@ public final class VoronoiFieldSampler implements DataProvider {
                     continue;
                 }
 
-                // Off-ridge only, so this measures the plain the producer walks between ridges rather than a
+                // Off-ridge only, so this measures the plain between ridges rather than a
                 // ridge flank. Split by distance to the border, which is where the blend law dilutes relief.
                 if (midCell) {
                     lowestRelief = Math.min(lowestRelief, sample(relief, x, z));
@@ -1751,7 +1751,7 @@ public final class VoronoiFieldSampler implements DataProvider {
      * The 0.7 bug as a permanent check, both directions. Runs against the real registered level stem
      * (0.16b), so it exercises the actual {@code VoronoiBiomeSource} and a real, seeded {@code
      * Climate.Sampler} taken from {@code RandomState.sampler()} — the legal, instantiated route 0.16 §3
-     * establishes. Also doubles as the headless proof the 0.16 order asked for: that surface columns
+     * establishes. Also doubles as the headless proof that surface columns
      * resolve surface biomes and cave-band columns resolve underground biomes.
      */
     private static void surfaceBiomeInvariant(StringBuilder report, HolderLookup.Provider registries,
@@ -2544,7 +2544,7 @@ public final class VoronoiFieldSampler implements DataProvider {
     }
 
     /**
-     * Crater spots for the producer's in-game pass, one per province and one per corner of the age and size
+     * Crater spots for a manual in-game pass, one per province and one per corner of the age and size
      * space, because the field's whole claim is that those two axes read differently on the ground.
      */
     private static void craterTeleports(StringBuilder report, VoronoiSource source, CraterFieldFunction craters,

@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Dispatches a parsed request to its verb's planner and wraps the resulting step list as a {@link Job}. */
+/** Routes a parsed request to its verb's planner and wraps the resulting step list as a {@link Job}. */
 final class Verbs {
 
     private Verbs() {
