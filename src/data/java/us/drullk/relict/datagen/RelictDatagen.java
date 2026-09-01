@@ -22,6 +22,7 @@ import us.drullk.relict.datagen.tags.RelictDimensionTypeTags;
 import us.drullk.relict.datagen.tags.RelictItemTags;
 import us.drullk.relict.datagen.tags.RelictStructureTags;
 import us.drullk.relict.datagen.tags.RelictTimelineTags;
+import us.drullk.relict.datagen.tool.SeismicLocatorFrames;
 import us.drullk.relict.datagen.worldgen.*;
 import us.drullk.relict.init.custom.RelictCustomRegistries;
 
@@ -91,6 +92,7 @@ public class RelictDatagen {
 
         event.addProvider(new RelictCelestialSprites(output));
         event.addProvider(new RelictEquipmentAssets(output));
+        event.addProvider(new SeismicLocatorFrames(output));
         event.addProvider(new RelictModels(output));
         event.addProvider(new RelictLanguageProvider(output));
     }

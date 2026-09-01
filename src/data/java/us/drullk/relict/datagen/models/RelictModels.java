@@ -38,7 +38,7 @@ public class RelictModels extends ModelProvider {
         registerMarsPortal(blockModels);
 
         ServiceArmorModels.register(itemModels);
-        itemModels.generateFlatItem(RelictItems.SEISMIC_LOCATOR.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateStandardCompassItem(RelictItems.SEISMIC_LOCATOR.get());
         itemModels.generateFlatItem(RelictItems.BURNING_GLASS.get(), ModelTemplates.FLAT_ITEM);
         WeatherglassModels.register(itemModels);
 

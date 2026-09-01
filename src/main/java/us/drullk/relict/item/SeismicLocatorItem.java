@@ -62,4 +62,9 @@ public class SeismicLocatorItem extends CompassItem {
         return stack.getComponents().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
     }
 
+    // Do not foil when coordinates are loaded
+    public boolean isFoil(ItemStack itemStack) {
+        return itemStack.isEnchanted();
+    }
+
 }
