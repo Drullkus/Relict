@@ -1,0 +1,6 @@
+{
+  "parent": "relict:block/template_mars_portal_ew",
+  "textures": {
+    "all": "relict:block/mars_portal"
+  }
+}
