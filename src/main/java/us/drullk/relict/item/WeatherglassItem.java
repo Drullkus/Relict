@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.saveddata.WeatherData;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jspecify.annotations.Nullable;
 import us.drullk.relict.RelictTags;
 import us.drullk.relict.atmosphere.AtmosphereCurve;
@@ -53,11 +54,15 @@ public class WeatherglassItem extends Item {
 
         MinecraftServer server = serverLevel.getServer();
         if (serverLevel.dimensionTypeRegistration().is(RelictTags.HAS_MARS_ATMOSPHERE)) {
-            readMarsAtmosphere(server, player);
+            if (!FMLLoader.getCurrent().isProduction()) {
+                readMarsAtmosphere(server, player);
+            }
         } else if (serverLevel.canHaveWeather()) {
             readVanillaWeather(server, player, stack);
         } else {
-            player.sendSystemMessage(Component.literal("FIXME no weather here"));
+            if (!FMLLoader.getCurrent().isProduction()) {
+                player.sendSystemMessage(Component.literal("FIXME no weather here"));
+            }
         }
 
         return InteractionResult.SUCCESS;
@@ -116,12 +121,14 @@ public class WeatherglassItem extends Item {
                 : new WeatherglassReading(WeatherglassReading.Kind.CLEAR, now, now);
         stack.set(RelictDataComponents.WEATHERGLASS_READING.get(), reading);
 
-        if (!advancing) {
-            player.sendSystemMessage(Component.literal("FIXME weather is not advancing right now"));
-            return;
-        }
+        if (!FMLLoader.getCurrent().isProduction()) {
+            if (!advancing) {
+                player.sendSystemMessage(Component.literal("FIXME weather is not advancing right now"));
+                return;
+            }
 
-        player.sendSystemMessage(Component.literal(describe(reading, now)));
+            player.sendSystemMessage(Component.literal(describe(reading, now)));
+        }
     }
 
     /**
