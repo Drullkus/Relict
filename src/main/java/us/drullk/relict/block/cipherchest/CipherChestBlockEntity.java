@@ -69,7 +69,7 @@ public class CipherChestBlockEntity extends ChestBlockEntity {
     }
 
     private void rederiveBlanks() {
-        this.blankCells = CipherChestSquare.pickBlankCells(RandomSource.create(this.seed), this.blankCount);
+        this.blankCells = CipherChestSquare.pickBlankCells(RandomSource.create(this.seed).forkPositional().at(this.worldPosition), this.blankCount);
         this.dialValues = startingDials(this.blankCells, RandomSource.create(this.seed ^ 0x5DEECE66DL));
     }
 
