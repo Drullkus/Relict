@@ -32,10 +32,10 @@ public final class CipherChestModelGenerator {
                 Identifier.withDefaultNamespace("item/chest"),
                 new ChestSpecialRenderer.Unbaked(ChestSpecialRenderer.COPPER.oxidized().single(), ChestType.SINGLE)));
 
-        Identifier rubbingIconModel = Relict.id("item/rubbing"); // FIXME placeholder icon
-        TextureMapping rubbingIconTexture = new TextureMapping().put(TextureSlot.LAYER0, new Material(Identifier.withDefaultNamespace("item/filled_map")));
-        ModelTemplates.FLAT_ITEM.create(rubbingIconModel, rubbingIconTexture, itemModels.modelOutput);
-        itemModels.itemModelOutput.accept(RelictItems.RUBBING.get(), ItemModelUtils.plainModel(rubbingIconModel));
+        Identifier rubbingIcon = Relict.id("item/rubbing");
+        TextureMapping rubbingIconTexture = new TextureMapping().put(TextureSlot.LAYER0, new Material(rubbingIcon));
+        ModelTemplates.FLAT_ITEM.create(rubbingIcon, rubbingIconTexture, itemModels.modelOutput);
+        itemModels.itemModelOutput.accept(RelictItems.RUBBING.get(), ItemModelUtils.plainModel(rubbingIcon));
     }
 
     private static MultiVariant variant(Identifier modelId) {
