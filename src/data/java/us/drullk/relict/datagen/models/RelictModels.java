@@ -2,18 +2,21 @@ package us.drullk.relict.datagen.models;
 
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
-import net.minecraft.client.data.models.MultiVariant;
 import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.ItemModelUtils;
+import net.minecraft.client.data.models.model.ModelLocationUtils;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.random.WeightedList;
+import net.minecraft.world.level.block.Blocks;
 import us.drullk.relict.Relict;
+import us.drullk.relict.block.RelictPortalBlock;
 import us.drullk.relict.datagen.cipherchest.CipherChestModelGenerator;
 import us.drullk.relict.init.RelictBlocks;
 import us.drullk.relict.init.RelictItems;
@@ -50,12 +53,13 @@ public class RelictModels extends ModelProvider {
         CipherChestModelGenerator.bootstrap(blockModels, itemModels);
     }
 
-    // FIXME replace nether_portal placeholder for custom
+    // FIXME replace nether_portal placeholder texture for custom
     private static void registerMarsPortal(BlockModelGenerators blockModels) {
-        Identifier portalModel = ModelTemplates.CUBE_ALL.create(RelictBlocks.MARS_PORTAL.get(),
-                TextureMapping.cube(new Material(Identifier.withDefaultNamespace("block/nether_portal"))), blockModels.modelOutput);
-        blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(RelictBlocks.MARS_PORTAL.get(),
-                new MultiVariant(WeightedList.of(new Variant(portalModel)))));
+        blockModels.blockStateOutput.accept(
+                MultiVariantGenerator.dispatch(RelictBlocks.MARS_PORTAL.get())
+                        .with(PropertyDispatch.initial(RelictPortalBlock.AXIS)
+                                .select(Direction.Axis.X, BlockModelGenerators.plainVariant(ModelLocationUtils.getModelLocation(Blocks.NETHER_PORTAL, "_ns")))
+                                .select(Direction.Axis.Z, BlockModelGenerators.plainVariant(ModelLocationUtils.getModelLocation(Blocks.NETHER_PORTAL, "_ew")))));
     }
 
     private static void registerBasaltSand(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {

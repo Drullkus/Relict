@@ -43,6 +43,7 @@ public final class RelictGameTests {
         BurningGlassGameTests.register(event, environment);
         OvercastMooringGameTests.register(event, environment);
         CreativeTabGameTests.register(event, environment);
+        MarsPortalGameTests.register(event, environment);
     }
 
 }

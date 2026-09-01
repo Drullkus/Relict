@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
-      "model": "relict:block/mars_portal"
+    "axis=x": {
+      "model": "minecraft:block/nether_portal_ns"
+    },
+    "axis=z": {
+      "model": "minecraft:block/nether_portal_ew"
     }
   }
 }

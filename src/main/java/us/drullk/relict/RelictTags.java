@@ -34,6 +34,8 @@ public class RelictTags {
 
     public static final TagKey<Block> BASE_STONE_MARS = TagKey.create(Registries.BLOCK, Relict.id("base_stone_mars"));
 
+    public static final TagKey<Block> MARS_PORTAL_FRAME = TagKey.create(Registries.BLOCK, Relict.id("mars_portal_frame"));
+
     public static final TagKey<Block> SANDS_BASALT = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "sands/basalt"));
 
 }

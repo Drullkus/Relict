@@ -23,6 +23,9 @@ public class RelictBlockTags extends BlockTagsProvider {
         this.tag(RelictTags.SPELEOTHEM_REPLACEABLE).add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key());
         this.tag(RelictTags.DRIPSTONE_REPLACEABLE).add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key(), Blocks.CALCITE.builtInRegistryHolder().key());
         this.tag(RelictTags.BASE_STONE_MARS).add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key());
+        this.tag(RelictTags.MARS_PORTAL_FRAME)
+                .add(Blocks.POLISHED_SULFUR.builtInRegistryHolder().key())
+                .add(Blocks.SMOOTH_BASALT.builtInRegistryHolder().key());
 
         this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
                 .add(RelictBlocks.CIPHER_CHEST.getKey())

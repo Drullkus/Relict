@@ -2,9 +2,10 @@ package us.drullk.relict.block;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -13,9 +14,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.Relative;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,6 +28,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -48,6 +54,8 @@ public class RelictPortalBlock extends Block implements Portal {
 
     private static final int SEARCH_RADIUS = 128;
 
+    private static final DustParticleOptions OCHRE_DUST = new DustParticleOptions(0xCC7722, 1.0F);
+
     public RelictPortalBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(AXIS, Axis.X));
@@ -70,6 +78,30 @@ public class RelictPortalBlock extends Block implements Portal {
         }
     }
 
+    // [VANILLACOPY] NetherPortalBlock#updateShape, retargeted at RelictPortalShape
+    @Override
+    protected BlockState updateShape(
+            BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
+            Direction directionToNeighbour, BlockPos neighbourPos, BlockState neighbourState, RandomSource random
+    ) {
+        Axis updateAxis = directionToNeighbour.getAxis();
+        Axis axis = state.getValue(AXIS);
+        boolean wrongAxis = axis != updateAxis && updateAxis.isHorizontal();
+        return !wrongAxis && !neighbourState.is(this) && !RelictPortalShape.isComplete(level, pos, axis)
+                ? Blocks.AIR.defaultBlockState()
+                : super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
+    }
+
+    // [VANILLACOPY]
+    @Override
+    public int getPortalTransitionTime(ServerLevel level, Entity entity) {
+        return entity instanceof Player player
+                ? Math.max(0, level.getGameRules().get(player.getAbilities().invulnerable
+                        ? GameRules.PLAYERS_NETHER_PORTAL_CREATIVE_DELAY
+                        : GameRules.PLAYERS_NETHER_PORTAL_DEFAULT_DELAY))
+                : 0;
+    }
+
     @Nullable
     @Override
     public TeleportTransition getPortalDestination(ServerLevel currentLevel, Entity entity, BlockPos portalEntryPos) {
@@ -86,22 +118,25 @@ public class RelictPortalBlock extends Block implements Portal {
         BlockPos approximateExitPos = targetLevel.getWorldBorder()
                 .clampToBounds(entity.getX() * teleportationScale, entity.getY(), entity.getZ() * teleportationScale);
 
-        BlockPos exitPos = network.findNearest(targetDimension, approximateExitPos, SEARCH_RADIUS)
+        Axis sourceAxis = currentLevel.getBlockState(portalEntryPos).getOptionalValue(AXIS).orElse(Axis.X);
+
+        BlockPos exitPos = network.findNearest(targetDimension, approximateExitPos, SEARCH_RADIUS,
+                        candidate -> targetLevel.getBlockState(candidate.pos()).is(this))
                 .map(GlobalPos::pos)
                 .orElseGet(() -> {
-                    BlockPos created = RelictPortalForcer.createLandingPortal(targetLevel, approximateExitPos);
+                    BlockPos created = RelictPortalForcer.createLandingPortal(targetLevel, approximateExitPos, sourceAxis);
                     network.remember(GlobalPos.of(targetDimension, created));
                     return created;
                 });
 
         return new TeleportTransition(
                 targetLevel,
-                Vec3.atBottomCenterOf(exitPos.above()),
+                Vec3.atBottomCenterOf(exitPos),
                 Vec3.ZERO,
                 0.0F,
                 0.0F,
                 Relative.union(Relative.DELTA, Relative.ROTATION),
-                TeleportTransition.PLAY_PORTAL_SOUND
+                TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET)
         );
     }
 
@@ -133,7 +168,7 @@ public class RelictPortalBlock extends Block implements Portal {
                 za = random.nextFloat() * 2.0F * flip;
             }
 
-            level.addParticle(ParticleTypes.PORTAL, x, y, z, xa, ya, za);
+            level.addParticle(OCHRE_DUST, x, y, z, xa, ya, za);
         }
     }
 
